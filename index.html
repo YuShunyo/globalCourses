@@ -53,6 +53,14 @@ tr:hover td { background: #fafaf8; }
 .step-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
 .step-desc { font-size: 13px; color: #555; line-height: 1.6; }
 .example-tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+.media-entry { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid #e5e3dc; border-radius: 10px; padding: 12px 16px; margin-bottom: 1.5rem; text-decoration: none; color: inherit; transition: border-color 0.18s, box-shadow 0.18s, background 0.18s; }
+.media-entry:hover { border-color: #7F77DD; box-shadow: 0 2px 12px rgba(127,119,221,0.10); background: #fafaf8; }
+.media-entry-left { display: flex; align-items: center; gap: 12px; }
+.media-entry-icon { width: 36px; height: 36px; min-width: 36px; border-radius: 8px; background: #EEEDFE; color: #3C3489; display: flex; align-items: center; justify-content: center; }
+.media-entry-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.media-entry-sub { font-size: 12px; color: #888; margin-top: 2px; }
+.media-entry-arrow { color: #7F77DD; opacity: 0.7; transition: transform 0.18s, opacity 0.18s; }
+.media-entry:hover .media-entry-arrow { transform: translateX(3px); opacity: 1; }
 @media print {
   body { background: white; padding: 0; }
   .section { break-inside: avoid; }
@@ -68,6 +76,20 @@ tr:hover td { background: #fafaf8; }
 
 <h1>全球主流大学专业与核心课程</h1>
 <p class="subtitle">温故而知新·实时新闻验证·了解世界运行的逻辑</p>
+<a class="media-entry" href="https://global-majors-core-courses.yychunyang.workers.dev/media_directory">
+  <div class="media-entry-left">
+    <div class="media-entry-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </div>
+    <div>
+      <div class="media-entry-title">主流媒体导航</div>
+      <div class="media-entry-sub">全球权威媒体 · 实时新闻验证</div>
+    </div>
+  </div>
+  <div class="media-entry-arrow">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </div>
+</a>
 <div class="usage-box">
   <div>
     <p>适合用途：</p>
