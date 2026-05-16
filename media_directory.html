@@ -4,190 +4,97 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>英文媒体导航</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #F5F3EE;
-    --surface: #FDFCF9;
-    --border: #DDD9D0;
-    --border-hover: #B8B2A7;
-    --text-primary: #1A1815;
-    --text-secondary: #6B6560;
-    --text-muted: #9E9890;
-    --accent: #2D4A3E;
-    --tag-综合-bg: #E8E4F5; --tag-综合-fg: #3C2F6E;
-    --tag-政治-bg: #F5E8E1; --tag-政治-fg: #6E3020;
-    --tag-通讯社-bg: #F5EDD8; --tag-通讯社-fg: #6E4A10;
-    --tag-深度-bg: #F0E8F0; --tag-深度-fg: #5A2E5A;
-    --tag-财经-bg: #DFF0EA; --tag-财经-fg: #1A5C42;
-    --tag-金融-bg: #E0EDF8; --tag-金融-fg: #1A3D6E;
-    --tag-亚洲-bg: #E8F2DF; --tag-亚洲-fg: #2D5018;
-    --tag-科技-bg: #EAEAE8; --tag-科技-fg: #3A3A38;
-    --tag-学术-bg: #E0EDF8; --tag-学术-fg: #1A3D6E;
-    --tag-国际-bg: #F5E8E1; --tag-国际-fg: #6E3020;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: 'DM Mono', 'Noto Serif SC', monospace;
-    min-height: 100vh;
-    padding: 48px 24px 80px;
-  }
-
-  header {
-    max-width: 900px;
-    margin: 0 auto 48px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 24px;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  header h1 {
-    font-family: 'Noto Serif SC', serif;
-    font-size: 22px;
-    font-weight: 500;
-    letter-spacing: .02em;
-    color: var(--text-primary);
-  }
-
-  header p {
-    font-size: 12px;
-    color: var(--text-muted);
-    letter-spacing: .04em;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    padding: 2rem 1rem;
   }
 
   .container { max-width: 900px; margin: 0 auto; }
 
-  .section { margin-bottom: 40px; }
+  h1 { font-size: 24px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #777; margin-bottom: 1.5rem; }
 
-  .section-label {
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-    padding-left: 2px;
+  .section { margin-bottom: 2rem; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e5e3dc; }
+
+  .section-title {
+    font-size: 15px; font-weight: 600; color: #1a1a1a;
+    padding: 10px 16px; background: #f9f8f5;
+    border-left: 4px solid; border-bottom: 1px solid #e5e3dc;
   }
+  .s-general { border-color: #7F77DD; }
+  .s-finance { border-color: #1D9E75; }
+  .s-tech    { border-color: #378ADD; }
 
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
   }
 
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
     text-decoration: none;
-    transition: border-color .15s, transform .12s;
-    cursor: pointer;
+    border-right: 1px solid #f0ede6;
+    border-bottom: 1px solid #f0ede6;
+    transition: background .15s;
+    color: #1a1a1a;
   }
 
-  .card:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-1px);
-  }
+  .card:hover { background: #fafaf8; }
 
   .tag {
     display: inline-block;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: .04em;
-    padding: 2px 7px;
-    border-radius: 3px;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
     margin-bottom: 4px;
+    font-weight: 500;
     width: fit-content;
   }
 
-  .tag-综合  { background: var(--tag-综合-bg);  color: var(--tag-综合-fg);  }
-  .tag-政治  { background: var(--tag-政治-bg);  color: var(--tag-政治-fg);  }
-  .tag-通讯社{ background: var(--tag-通讯社-bg); color: var(--tag-通讯社-fg); }
-  .tag-深度  { background: var(--tag-深度-bg);  color: var(--tag-深度-fg);  }
-  .tag-财经  { background: var(--tag-财经-bg);  color: var(--tag-财经-fg);  }
-  .tag-金融  { background: var(--tag-金融-bg);  color: var(--tag-金融-fg);  }
-  .tag-亚洲  { background: var(--tag-亚洲-bg);  color: var(--tag-亚洲-fg);  }
-  .tag-科技  { background: var(--tag-科技-bg);  color: var(--tag-科技-fg);  }
-  .tag-学术  { background: var(--tag-学术-bg);  color: var(--tag-学术-fg);  }
-  .tag-国际  { background: var(--tag-国际-bg);  color: var(--tag-国际-fg);  }
+  .tag-综合   { background: #EEEDFE; color: #3C3489; }
+  .tag-政治   { background: #FBEAF0; color: #72243E; }
+  .tag-通讯社 { background: #FAEEDA; color: #633806; }
+  .tag-深度   { background: #F1EFE8; color: #444441; }
+  .tag-财经   { background: #E1F5EE; color: #085041; }
+  .tag-金融   { background: #E6F1FB; color: #0C447C; }
+  .tag-亚洲   { background: #EAF3DE; color: #27500A; }
+  .tag-科技   { background: #F1EFE8; color: #444441; }
+  .tag-学术   { background: #E6F1FB; color: #0C447C; }
+  .tag-国际   { background: #FBEAF0; color: #72243E; }
 
-  .card-name {
-    font-family: 'Noto Serif SC', serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-primary);
-    line-height: 1.3;
+  .card-name { font-size: 14px; font-weight: 600; color: #1a1a1a; line-height: 1.4; }
+  .card-en   { font-size: 11px; color: #888; }
+  .card-domain { font-size: 12px; color: #555; line-height: 1.5; flex: 1; margin-top: 1px; }
+  .card-url  { font-size: 11px; color: #7F77DD; margin-top: 8px; }
+
+  footer { font-size: 13px; color: #777; text-align: center; margin-top: 1.5rem; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .section { break-inside: avoid; }
   }
-
-  .card-en {
-    font-size: 11px;
-    color: var(--text-secondary);
-    letter-spacing: .01em;
-  }
-
-  .card-domain {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-    flex: 1;
-  }
-
-  .card-url {
-    font-size: 11px;
-    color: var(--accent);
-    margin-top: 8px;
-    letter-spacing: .02em;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .card-url::after {
-    content: '↗';
-    font-size: 10px;
-    opacity: .7;
-  }
-
-  footer {
-    max-width: 900px;
-    margin: 56px auto 0;
-    border-top: 1px solid var(--border);
-    padding-top: 20px;
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: .03em;
-  }
-
-  @media (max-width: 480px) {
-    body { padding: 32px 16px 60px; }
+  @media (max-width: 600px) {
     .grid { grid-template-columns: 1fr 1fr; }
+    .card { padding: 12px; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>英文媒体导航</h1>
-  <p>15 家 · 综合 / 财经 / 科技 / 学术</p>
-</header>
-
 <div class="container">
+<h1>英文媒体导航</h1>
+<p class="subtitle">15 家 · 综合 / 财经 / 科技 / 学术</p>
 
   <div class="section">
-    <div class="section-label">综合 · 政治 · 国际</div>
+    <div class="section-title s-general">综合 · 政治 · 国际</div>
     <div class="grid">
 
       <a class="card" href="https://www.nytimes.com" target="_blank">
@@ -242,7 +149,7 @@
   </div>
 
   <div class="section">
-    <div class="section-label">财经 · 金融</div>
+    <div class="section-title s-finance">财经 · 金融</div>
     <div class="grid">
 
       <a class="card" href="https://www.wsj.com" target="_blank">
@@ -289,7 +196,7 @@
   </div>
 
   <div class="section">
-    <div class="section-label">科技 · 学术</div>
+    <div class="section-title s-tech">科技 · 学术</div>
     <div class="grid">
 
       <a class="card" href="https://techcrunch.com" target="_blank">
@@ -327,11 +234,8 @@
     </div>
   </div>
 
+<footer>共 15 家媒体 · 点击卡片直接访问官网</footer>
+
 </div>
-
-<footer>
-  共 15 家媒体 · 点击卡片直接访问官网
-</footer>
-
 </body>
 </html>
