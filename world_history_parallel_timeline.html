@@ -5,12 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>世界历史重要时间轴</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
       background: #ffffff;
@@ -18,872 +13,702 @@
       line-height: 1.8;
       padding: 30px 16px 80px;
     }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 42px;
-      margin-bottom: 12px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #6b7280;
-      margin-bottom: 60px;
-      font-size: 18px;
-    }
-
-    .timeline {
-      position: relative;
-      padding-left: 60px;
-    }
-
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { text-align: center; font-size: 42px; margin-bottom: 12px; }
+    .subtitle { text-align: center; color: #6b7280; margin-bottom: 60px; font-size: 18px; }
+    .timeline { position: relative; padding-left: 60px; }
     .timeline::before {
-      content: "";
-      position: absolute;
-      left: 22px;
-      top: 0;
-      width: 3px;
-      height: 100%;
-      background: #cbd5e1;
+      content: ""; position: absolute; left: 22px; top: 0;
+      width: 3px; height: 100%; background: #cbd5e1;
     }
-
     .event {
-      position: relative;
-      margin-bottom: 42px;
-      background: #f8fafc;
-      border: 1px solid #dbeafe;
-      border-radius: 14px;
-      padding: 24px;
+      position: relative; margin-bottom: 42px;
+      background: #f8fafc; border: 1px solid #dbeafe;
+      border-radius: 14px; padding: 24px;
     }
-
     .event::before {
-      content: "";
-      position: absolute;
-      left: -46px;
-      top: 34px;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #2563eb;
+      content: ""; position: absolute; left: -46px; top: 34px;
+      width: 14px; height: 14px; border-radius: 50%; background: #2563eb;
     }
-
-    .year {
-      font-size: 30px;
-      font-weight: bold;
-      color: #1d4ed8;
-      margin-bottom: 18px;
-    }
-
+    .year { font-size: 30px; font-weight: bold; color: #1d4ed8; margin-bottom: 18px; }
     .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px; margin-bottom: 18px;
     }
-
-    .card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 14px;
-    }
-
-    .region {
-      font-weight: bold;
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-
-    .desc {
-      font-size: 14px;
-      color: #374151;
-    }
-
+    .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; }
+    .region { font-weight: bold; margin-bottom: 8px; font-size: 16px; }
+    .desc { font-size: 14px; color: #374151; }
     .impact {
-      background: #eff6ff;
-      border-left: 4px solid #2563eb;
-      padding: 12px;
-      border-radius: 6px;
-      color: #1e3a8a;
-      font-size: 14px;
+      background: #eff6ff; border-left: 4px solid #2563eb;
+      padding: 12px; border-radius: 6px; color: #1e3a8a; font-size: 14px;
     }
-
     .era {
-      margin-top: 70px;
-      margin-bottom: 24px;
-      font-size: 24px;
-      color: #111827;
-      font-weight: bold;
+      margin-top: 70px; margin-bottom: 24px;
+      font-size: 24px; color: #111827; font-weight: bold;
     }
-
-    footer {
-      text-align: center;
-      margin-top: 80px;
-      color: #6b7280;
-      font-size: 14px;
-    }
-
+    footer { text-align: center; margin-top: 80px; color: #6b7280; font-size: 14px; }
     @media (max-width: 768px) {
-      .timeline {
-        padding-left: 40px;
-      }
-
-      .timeline::before {
-        left: 12px;
-      }
-
-      .event::before {
-        left: -34px;
-      }
-
-      h1 {
-        font-size: 30px;
-      }
+      .timeline { padding-left: 40px; }
+      .timeline::before { left: 12px; }
+      .event::before { left: -34px; }
+      h1 { font-size: 30px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>世界历史重要时间轴</h1>
-    <div class="subtitle">从农业革命到AI时代 · 世界文明同步演化图</div>
+<div class="container">
+  <h1>世界历史重要时间轴</h1>
+  <div class="subtitle">从农业革命到AI时代 · 世界文明同步演化图</div>
 
-    <div class="timeline">
+  <div class="timeline">
 
-      <div class="era">古代文明</div>
+    <div class="era">古代文明</div>
 
-      <div class="event">
-        <div class="year">前10000</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">全球</div>
-            <div class="desc">农业革命开始，人类逐渐定居。</div>
-          </div>
-          <div class="card">
-            <div class="region">社会</div>
-            <div class="desc">出现村庄、粮食储存与人口增长。</div>
-          </div>
-        </div>
-        <div class="impact">文明、国家与城市发展的基础出现。</div>
+    <div class="event">
+      <div class="year">前10000</div>
+      <div class="grid">
+        <div class="card"><div class="region">全球</div><div class="desc">农业革命开始，人类逐渐定居。</div></div>
+        <div class="card"><div class="region">社会</div><div class="desc">出现村庄、粮食储存与人口增长。</div></div>
       </div>
-
-      <div class="event">
-        <div class="year">前3000</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">埃及</div>
-            <div class="desc">古埃及文明形成。</div>
-          </div>
-          <div class="card">
-            <div class="region">两河流域</div>
-            <div class="desc">苏美尔城邦与文字出现。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">黄河文明形成。</div>
-          </div>
-        </div>
-        <div class="impact">文字、王权与税收体系出现。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">前753</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">罗马</div>
-            <div class="desc">传统上的罗马建城时间。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">春秋时期开始。</div>
-          </div>
-          <div class="card">
-            <div class="region">希腊</div>
-            <div class="desc">城邦文明发展。</div>
-          </div>
-        </div>
-        <div class="impact">地中海文明逐渐崛起。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">前551</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">孔子出生，儒家思想形成。</div>
-          </div>
-          <div class="card">
-            <div class="region">希腊</div>
-            <div class="desc">哲学传统发展。</div>
-          </div>
-        </div>
-        <div class="impact">东西方思想传统开始形成。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">前509</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">罗马</div>
-            <div class="desc">罗马共和国建立。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">东周列国争霸。</div>
-          </div>
-        </div>
-        <div class="impact">共和制度传统的重要源头。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">前221</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">秦始皇统一六国。</div>
-          </div>
-          <div class="card">
-            <div class="region">罗马</div>
-            <div class="desc">罗马共和国扩张。</div>
-          </div>
-        </div>
-        <div class="impact">大型中央集权帝国出现。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">前27</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">罗马</div>
-            <div class="desc">罗马帝国建立。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">西汉时期。</div>
-          </div>
-        </div>
-        <div class="impact">古典帝国时代形成。</div>
-      </div>
-
-      <div class="era">中世纪与宗教时代</div>
-
-      <div class="event">
-        <div class="year">476</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">西罗马帝国灭亡。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">南北朝时期。</div>
-          </div>
-        </div>
-        <div class="impact">欧洲进入中世纪。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">610</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">阿拉伯</div>
-            <div class="desc">伊斯兰教兴起。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">隋唐交替时期。</div>
-          </div>
-        </div>
-        <div class="impact">伊斯兰文明快速扩张。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">960</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">宋朝建立。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">封建社会发展。</div>
-          </div>
-        </div>
-        <div class="impact">商业、科技与城市经济发展。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1054</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">东西教会大分裂。</div>
-          </div>
-          <div class="card">
-            <div class="region">拜占庭</div>
-            <div class="desc">东正教影响扩大。</div>
-          </div>
-        </div>
-        <div class="impact">欧洲宗教长期分化。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1096</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">十字军东征开始。</div>
-          </div>
-          <div class="card">
-            <div class="region">中东</div>
-            <div class="desc">与欧洲长期冲突。</div>
-          </div>
-        </div>
-        <div class="impact">东西方交流与贸易增加。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1206</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">蒙古</div>
-            <div class="desc">成吉思汗建立蒙古帝国。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">南宋时期。</div>
-          </div>
-        </div>
-        <div class="impact">欧亚大陆首次大规模连接。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1215</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">英国</div>
-            <div class="desc">《大宪章》签署。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">王权与贵族权力博弈。</div>
-          </div>
-        </div>
-        <div class="impact">近代宪政传统的重要源头。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1279</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">元朝统一全国。</div>
-          </div>
-          <div class="card">
-            <div class="region">蒙古帝国</div>
-            <div class="desc">横跨欧亚大陆。</div>
-          </div>
-        </div>
-        <div class="impact">欧亚贸易达到高峰。</div>
-      </div>
-
-      <div class="era">大航海与近代国家</div>
-
-      <div class="event">
-        <div class="year">1453</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">东罗马</div>
-            <div class="desc">君士坦丁堡陷落。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">文艺复兴扩展。</div>
-          </div>
-        </div>
-        <div class="impact">欧洲开始寻找新航路。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1492</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">西班牙</div>
-            <div class="desc">哥伦布到达美洲。</div>
-          </div>
-          <div class="card">
-            <div class="region">美洲</div>
-            <div class="desc">印加与阿兹特克文明存在。</div>
-          </div>
-        </div>
-        <div class="impact">全球化与殖民时代开始。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1517</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">宗教改革开始。</div>
-          </div>
-          <div class="card">
-            <div class="region">奥斯曼</div>
-            <div class="desc">进入强盛时期。</div>
-          </div>
-        </div>
-        <div class="impact">现代民族国家开始形成。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1588</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">英国</div>
-            <div class="desc">击败西班牙无敌舰队。</div>
-          </div>
-          <div class="card">
-            <div class="region">西班牙</div>
-            <div class="desc">海上霸权衰落。</div>
-          </div>
-        </div>
-        <div class="impact">英国海权时代逐渐开启。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1648</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">威斯特伐利亚体系形成。</div>
-          </div>
-          <div class="card">
-            <div class="region">法国</div>
-            <div class="desc">民族国家力量增强。</div>
-          </div>
-        </div>
-        <div class="impact">现代主权国家体系形成。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1688</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">英国</div>
-            <div class="desc">光荣革命。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">康熙时期。</div>
-          </div>
-        </div>
-        <div class="impact">现代宪政制度的重要起点。</div>
-      </div>
-
-      <div class="era">工业革命与民族国家</div>
-
-      <div class="event">
-        <div class="year">1760-1840</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">英国</div>
-            <div class="desc">第一次工业革命。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">蒸汽机与铁路发展。</div>
-          </div>
-        </div>
-        <div class="impact">机器生产取代手工业。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1776</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">美国独立。</div>
-          </div>
-          <div class="card">
-            <div class="region">英国</div>
-            <div class="desc">工业化扩张。</div>
-          </div>
-        </div>
-        <div class="impact">现代共和国制度的重要样板。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1789</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">法国</div>
-            <div class="desc">法国大革命爆发。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">民族主义与共和思想扩散。</div>
-          </div>
-        </div>
-        <div class="impact">现代政治与公民概念出现。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1848</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">欧洲革命潮。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">清朝危机加深。</div>
-          </div>
-        </div>
-        <div class="impact">民族国家与现代政治运动扩张。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1861</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">南北战争爆发。</div>
-          </div>
-          <div class="card">
-            <div class="region">俄国</div>
-            <div class="desc">农奴制改革。</div>
-          </div>
-        </div>
-        <div class="impact">工业化国家重塑国家结构。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1868</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">日本</div>
-            <div class="desc">明治维新开始。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">洋务运动时期。</div>
-          </div>
-        </div>
-        <div class="impact">东亚开始全面面对工业文明冲击。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1870-1914</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">电力、钢铁与石油时代。</div>
-          </div>
-          <div class="card">
-            <div class="region">德国</div>
-            <div class="desc">工业化快速崛起。</div>
-          </div>
-        </div>
-        <div class="impact">第二次工业革命形成现代工业体系。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1871</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">德国</div>
-            <div class="desc">德意志帝国建立。</div>
-          </div>
-          <div class="card">
-            <div class="region">法国</div>
-            <div class="desc">普法战争失败。</div>
-          </div>
-        </div>
-        <div class="impact">德国成为欧洲新强国。</div>
-      </div>
-
-      <div class="era">世界大战与冷战</div>
-
-      <div class="event">
-        <div class="year">1911</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">辛亥革命。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">列强竞争加剧。</div>
-          </div>
-        </div>
-        <div class="impact">东亚旧帝国体系结束。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1914</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">第一次世界大战爆发。</div>
-          </div>
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">工业强国崛起。</div>
-          </div>
-        </div>
-        <div class="impact">旧欧洲帝国体系崩塌。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1917</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">俄国</div>
-            <div class="desc">俄国革命。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">大战持续。</div>
-          </div>
-        </div>
-        <div class="impact">社会主义国家出现。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1922</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">苏联</div>
-            <div class="desc">苏联正式成立。</div>
-          </div>
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">经济快速增长。</div>
-          </div>
-        </div>
-        <div class="impact">社会主义阵营核心国家形成。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1929</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">经济大萧条爆发。</div>
-          </div>
-          <div class="card">
-            <div class="region">德国</div>
-            <div class="desc">政治极端化。</div>
-          </div>
-        </div>
-        <div class="impact">全球经济体系受到冲击。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1939</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">第二次世界大战爆发。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">抗日战争时期。</div>
-          </div>
-        </div>
-        <div class="impact">现代国际秩序即将重建。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1945</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">成为超级大国。</div>
-          </div>
-          <div class="card">
-            <div class="region">苏联</div>
-            <div class="desc">成为超级大国。</div>
-          </div>
-        </div>
-        <div class="impact">冷战与现代国际秩序开始。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1949</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">中华人民共和国成立。</div>
-          </div>
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">冷战体系形成。</div>
-          </div>
-        </div>
-        <div class="impact">冷战格局进一步明确。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1969</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">阿波罗11号登月。</div>
-          </div>
-          <div class="card">
-            <div class="region">苏联</div>
-            <div class="desc">太空竞争持续。</div>
-          </div>
-        </div>
-        <div class="impact">冷战科技竞争达到高峰。</div>
-      </div>
-
-      <div class="era">全球化与数字时代</div>
-
-      <div class="event">
-        <div class="year">1978</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">改革开放开始。</div>
-          </div>
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">科技与金融扩张。</div>
-          </div>
-        </div>
-        <div class="impact">全球化时代加速。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1989</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">德国</div>
-            <div class="desc">柏林墙倒塌。</div>
-          </div>
-          <div class="card">
-            <div class="region">东欧</div>
-            <div class="desc">社会主义阵营动荡。</div>
-          </div>
-        </div>
-        <div class="impact">冷战即将结束。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1991</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">苏联</div>
-            <div class="desc">苏联解体。</div>
-          </div>
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">进入单极时代。</div>
-          </div>
-        </div>
-        <div class="impact">冷战结束。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">1995</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">互联网商业化加速。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">互联网产业起步。</div>
-          </div>
-        </div>
-        <div class="impact">信息时代全面到来。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">2001</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">911事件。</div>
-          </div>
-          <div class="card">
-            <div class="region">中国</div>
-            <div class="desc">加入WTO。</div>
-          </div>
-        </div>
-        <div class="impact">全球供应链时代形成。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">2007</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">智能手机时代开启。</div>
-          </div>
-          <div class="card">
-            <div class="region">全球</div>
-            <div class="desc">移动互联网扩张。</div>
-          </div>
-        </div>
-        <div class="impact">移动互联网改变全球社会结构。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">2008</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">美国</div>
-            <div class="desc">金融危机爆发。</div>
-          </div>
-          <div class="card">
-            <div class="region">欧洲</div>
-            <div class="desc">债务危机扩散。</div>
-          </div>
-        </div>
-        <div class="impact">全球重新思考金融体系。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">2020</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">全球</div>
-            <div class="desc">COVID-19疫情扩散。</div>
-          </div>
-          <div class="card">
-            <div class="region">科技行业</div>
-            <div class="desc">远程办公与数字化加速。</div>
-          </div>
-        </div>
-        <div class="impact">全球供应链与治理体系受到冲击。</div>
-      </div>
-
-      <div class="event">
-        <div class="year">2022-至今</div>
-        <div class="grid">
-          <div class="card">
-            <div class="region">全球</div>
-            <div class="desc">生成式AI快速发展。</div>
-          </div>
-          <div class="card">
-            <div class="region">美国与中国</div>
-            <div class="desc">AI与算力竞争升级。</div>
-          </div>
-        </div>
-        <div class="impact">世界进入AI与智能化新时代。</div>
-      </div>
-
+      <div class="impact">文明、国家与城市发展的基础出现。</div>
     </div>
 
-    <footer>
-      世界历史重要时间轴 · 世界文明同步演化参考图
-    </footer>
+    <div class="event">
+      <div class="year">前3000</div>
+      <div class="grid">
+        <div class="card"><div class="region">埃及</div><div class="desc">古埃及早王朝形成，法老王权确立。</div></div>
+        <div class="card"><div class="region">两河流域</div><div class="desc">苏美尔城邦繁荣，楔形文字出现。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">龙山文化发展，黄河流域文明初成。</div></div>
+        <div class="card"><div class="region">印度河流域</div><div class="desc">哈拉帕文明兴起，城市规划出现。</div></div>
+      </div>
+      <div class="impact">文字、王权与税收体系出现，人类迈入文明时代。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前1750</div>
+      <div class="grid">
+        <div class="card"><div class="region">两河流域</div><div class="desc">汉谟拉比颁布《汉谟拉比法典》，人类最早成文法典之一。</div></div>
+        <div class="card"><div class="region">埃及</div><div class="desc">中王国时期，文明持续繁荣。</div></div>
+      </div>
+      <div class="impact">系统化法律体系出现，法治文明的原点。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前770</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">周平王东迁，春秋时期开始，诸侯争霸。</div></div>
+        <div class="card"><div class="region">希腊</div><div class="desc">城邦文明持续发展。</div></div>
+        <div class="card"><div class="region">罗马</div><div class="desc">传统建城时间约前753年。</div></div>
+      </div>
+      <div class="impact">东西方文明各自进入竞争与思想活跃期。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前551</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">孔子出生，儒家思想逐渐形成；诸子百家争鸣。</div></div>
+        <div class="card"><div class="region">希腊</div><div class="desc">苏格拉底前哲学传统发展，泰勒斯等人开创理性思考。</div></div>
+        <div class="card"><div class="region">印度</div><div class="desc">释迦牟尼约于同期创立佛教。</div></div>
+      </div>
+      <div class="impact">轴心时代：东西方思想传统同步形成，影响此后两千年。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前509</div>
+      <div class="grid">
+        <div class="card"><div class="region">罗马</div><div class="desc">驱逐国王，罗马共和国建立，元老院与执政官制度确立。</div></div>
+        <div class="card"><div class="region">希腊</div><div class="desc">雅典民主政治改革，克里斯提尼推行陶片放逐法。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">春秋列国持续争霸。</div></div>
+      </div>
+      <div class="impact">共和制与民主制同步出现，西方政治文明的核心源头。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前500</div>
+      <div class="grid">
+        <div class="card"><div class="region">波斯帝国</div><div class="desc">大流士一世时期，帝国横跨中东、中亚、埃及，为当时世界最大帝国。</div></div>
+        <div class="card"><div class="region">希腊</div><div class="desc">希波战争爆发（前490年马拉松之战，前480年温泉关之战）。</div></div>
+      </div>
+      <div class="impact">东西方文明第一次大规模正面冲突，奠定希腊独立发展的基础。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前334</div>
+      <div class="grid">
+        <div class="card"><div class="region">马其顿/希腊</div><div class="desc">亚历山大大帝东征，横扫波斯、埃及，远抵印度河流域。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">战国时期，秦国商鞅变法后持续强大。</div></div>
+        <div class="card"><div class="region">印度</div><div class="desc">孔雀王朝前身，摩揭陀国崛起。</div></div>
+      </div>
+      <div class="impact">希腊化世界形成，东西方文明第一次大规模交融，开辟丝绸之路前身。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前268</div>
+      <div class="grid">
+        <div class="card"><div class="region">印度</div><div class="desc">阿育王统一印度次大陆，建立孔雀王朝鼎盛期，大力推广佛教。</div></div>
+        <div class="card"><div class="region">地中海</div><div class="desc">罗马与迦太基布匿战争时期。</div></div>
+      </div>
+      <div class="impact">佛教开始向东亚、东南亚传播，影响数十亿人的精神世界至今。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前221</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">秦始皇统一六国，建立中央集权制度，统一文字、度量衡。</div></div>
+        <div class="card"><div class="region">罗马</div><div class="desc">罗马共和国持续扩张，布匿战争中击败迦太基。</div></div>
+      </div>
+      <div class="impact">东西方同期出现大型中央集权帝国，奠定各自的文明格局。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">前27</div>
+      <div class="grid">
+        <div class="card"><div class="region">罗马</div><div class="desc">屋大维获"奥古斯都"称号，罗马帝国正式建立。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">西汉鼎盛时期，汉武帝开拓丝绸之路。</div></div>
+      </div>
+      <div class="impact">古典帝国时代顶峰，东西方丝路贸易正式连通。</div>
+    </div>
+
+    <div class="era">帝国衰落与中世纪</div>
+
+    <div class="event">
+      <div class="year">375–410</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">日耳曼民族大迁徙高峰，西哥特人、汪达尔人等冲入罗马境内。</div></div>
+        <div class="card"><div class="region">罗马</div><div class="desc">410年西哥特人攻陷并洗劫罗马城，"永恒之城"800年来首次沦陷。</div></div>
+      </div>
+      <div class="impact">心理冲击震撼整个西方世界，西罗马灭亡进程无可逆转。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">395</div>
+      <div class="grid">
+        <div class="card"><div class="region">罗马帝国</div><div class="desc">狄奥多西一世死后，罗马帝国正式分裂为东西两部分。</div></div>
+        <div class="card"><div class="region">欧洲北部</div><div class="desc">日耳曼各部族在匈人压迫下开始大规模南迁西移。</div></div>
+      </div>
+      <div class="impact">帝国分裂埋下西罗马灭亡的伏笔，欧洲政治版图重塑开始。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">476</div>
+      <div class="grid">
+        <div class="card"><div class="region">西罗马</div><div class="desc">日耳曼雇佣兵首领奥多亚塞废黜末代皇帝，西罗马帝国正式灭亡。</div></div>
+        <div class="card"><div class="region">东罗马（拜占庭）</div><div class="desc">东罗马帝国在君士坦丁堡延续，继承罗马法统。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">南北朝时期，北方为鲜卑等民族政权，南方汉族王朝并立。</div></div>
+      </div>
+      <div class="impact">欧洲正式进入中世纪，日耳曼诸王国在西欧版图上逐渐成形。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">610</div>
+      <div class="grid">
+        <div class="card"><div class="region">阿拉伯</div><div class="desc">穆罕默德在麦加开始传播伊斯兰教，622年迁徙麦地那，伊斯兰历元年。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">隋朝统一后二世而亡，618年唐朝建立。</div></div>
+      </div>
+      <div class="impact">伊斯兰文明迅速崛起，百年内扩张至中东、北非、伊比利亚半岛。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">618</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">唐朝建立，长安成为当时世界最大都市，开放吸纳各国文化。</div></div>
+        <div class="card"><div class="region">日本</div><div class="desc">大化改新（645年）以唐制为蓝本，全面改革。</div></div>
+        <div class="card"><div class="region">朝鲜/东南亚</div><div class="desc">深受唐文化辐射，汉字文化圈基本形成。</div></div>
+      </div>
+      <div class="impact">唐朝是东亚文化圈的核心塑造者，影响日本、朝鲜、越南文明走向至今。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">800</div>
+      <div class="grid">
+        <div class="card"><div class="region">法兰克王国</div><div class="desc">查理曼大帝由教皇加冕为"罗马人的皇帝"，法兰克王国达到鼎盛。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">日耳曼-基督教文明融合完成，西欧封建秩序逐步确立。</div></div>
+        <div class="card"><div class="region">阿拉伯</div><div class="desc">阿拔斯王朝黄金时代，巴格达为世界学术中心。</div></div>
+      </div>
+      <div class="impact">奠定法国、德国、意大利的政治版图雏形，现代西欧的文明源头。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">960</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">宋朝建立，商业经济高度发展，印刷术、火药、指南针成熟应用。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">封建制度巩固，庄园经济为主。</div></div>
+      </div>
+      <div class="impact">宋代科技水平领先全球，三大发明后经阿拉伯世界西传，深刻改变人类历史。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">962</div>
+      <div class="grid">
+        <div class="card"><div class="region">德意志</div><div class="desc">奥托一世由教皇加冕，神圣罗马帝国正式建立，延续至1806年。</div></div>
+        <div class="card"><div class="region">拜占庭</div><div class="desc">马其顿王朝鼎盛期，东正教向斯拉夫民族传播。</div></div>
+      </div>
+      <div class="impact">德意志民族政治认同的核心载体，欧洲"统一"与"分裂"张力的根源。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1054</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">罗马天主教与东方正教会正式分裂，史称"东西教会大分裂"。</div></div>
+        <div class="card"><div class="region">拜占庭</div><div class="desc">东正教影响向东欧、俄罗斯扩展。</div></div>
+      </div>
+      <div class="impact">欧洲宗教长期分化，影响此后东西欧文化发展路径的分歧。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1066</div>
+      <div class="grid">
+        <div class="card"><div class="region">英国</div><div class="desc">诺曼底公爵威廉征服英格兰，带来法语、封建制度与中央集权传统。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">封建王权逐步强化，教皇与皇帝权力之争持续。</div></div>
+      </div>
+      <div class="impact">直接塑造英语与英国政治文化，是理解《大宪章》出现的历史前提。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1096</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">第一次十字军东征开始，教皇乌尔班二世号召夺回圣地。</div></div>
+        <div class="card"><div class="region">中东</div><div class="desc">塞尔柱突厥人控制耶路撒冷，与欧洲进入长期冲突。</div></div>
+      </div>
+      <div class="impact">促进东西方贸易与知识交流，阿拉伯科学、哲学经此传回欧洲。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1206</div>
+      <div class="grid">
+        <div class="card"><div class="region">蒙古</div><div class="desc">铁木真统一蒙古各部，称"成吉思汗"，建立蒙古帝国并开始对外扩张。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">南宋与金朝对峙，蒙古成为北方新威胁。</div></div>
+      </div>
+      <div class="impact">人类历史上最大陆地帝国的起点，欧亚大陆首次被强制连接。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1215</div>
+      <div class="grid">
+        <div class="card"><div class="region">英国</div><div class="desc">贵族迫使约翰王签署《大宪章》，限制王权，确立法律高于君主的原则。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">王权与贵族权力博弈加剧。</div></div>
+      </div>
+      <div class="impact">近代宪政传统的重要源头，影响英美法律体系至今。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1279</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">忽必烈灭南宋，元朝统一全国，大都（北京）成为帝国中心。</div></div>
+        <div class="card"><div class="region">欧亚</div><div class="desc">蒙古帝国横跨欧亚，马可·波罗等西方人经陆路到达中国。</div></div>
+      </div>
+      <div class="impact">丝绸之路贸易达到历史高峰，东西方物质与知识交流空前繁盛。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1347</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">黑死病（鼠疫）从中亚经贸易路线传入欧洲，1347–1351年间席卷全欧。</div></div>
+        <div class="card"><div class="region">中东/中亚</div><div class="desc">疫病同步重创伊斯兰世界人口。</div></div>
+      </div>
+      <div class="impact">欧洲约1/3人口死亡，摧毁中世纪封建与教会秩序，间接催生文艺复兴与宗教改革。</div>
+    </div>
+
+    <div class="era">大航海与近代国家</div>
+
+    <div class="event">
+      <div class="year">1405</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">郑和率船队七下西洋（1405–1433），到达东南亚、印度、波斯湾乃至东非。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">葡萄牙开始沿非洲西海岸探索航路。</div></div>
+      </div>
+      <div class="impact">中国主动对外扩展的历史顶峰；之后明朝急剧内收，与欧洲大航海形成鲜明对照，是理解中西"大分流"的关键节点。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1453</div>
+      <div class="grid">
+        <div class="card"><div class="region">东罗马（拜占庭）</div><div class="desc">奥斯曼帝国攻陷君士坦丁堡，东罗马帝国终结，延续千年的罗马法统断绝。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">大批拜占庭学者携古典文献西逃，推动文艺复兴进一步扩展。</div></div>
+      </div>
+      <div class="impact">中世纪欧洲秩序瓦解，欧洲加速寻找绕过奥斯曼的新航路，间接触发大航海时代。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1492</div>
+      <div class="grid">
+        <div class="card"><div class="region">西班牙</div><div class="desc">哥伦布抵达美洲加勒比海，欧洲与美洲正式接触。</div></div>
+        <div class="card"><div class="region">美洲</div><div class="desc">印加帝国与阿兹特克文明正处于鼎盛，即将面临冲击。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">明朝中期，闭关海禁政策延续。</div></div>
+      </div>
+      <div class="impact">全球化与殖民时代正式开始，"哥伦布大交换"重塑全球物种、疾病与人口分布。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1517</div>
+      <div class="grid">
+        <div class="card"><div class="region">德意志</div><div class="desc">马丁·路德发表《九十五条论纲》，宗教改革开始，挑战罗马教廷权威。</div></div>
+        <div class="card"><div class="region">奥斯曼</div><div class="desc">苏莱曼大帝时期，帝国进入极盛，征服埃及、匈牙利。</div></div>
+      </div>
+      <div class="impact">打破欧洲天主教一统格局，推动民族语言圣经翻译，加速现代民族国家形成。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1588</div>
+      <div class="grid">
+        <div class="card"><div class="region">英国</div><div class="desc">英国海军击败西班牙无敌舰队，海上霸权格局开始转移。</div></div>
+        <div class="card"><div class="region">西班牙</div><div class="desc">海洋霸权由盛转衰。</div></div>
+      </div>
+      <div class="impact">英国海权时代逐渐开启，为后来的殖民扩张与工业革命奠定基础。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1648</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">三十年战争结束，威斯特伐利亚和约签署，确立主权国家体系原则。</div></div>
+        <div class="card"><div class="region">法国</div><div class="desc">法国崛起为欧洲主导大国。</div></div>
+      </div>
+      <div class="impact">现代国际关系的奠基石，"主权平等"原则沿用至今。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1687</div>
+      <div class="grid">
+        <div class="card"><div class="region">英国</div><div class="desc">牛顿发表《自然哲学数学原理》，建立经典力学体系。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">科学革命达到顶峰，理性主义与启蒙思潮兴起。</div></div>
+      </div>
+      <div class="impact">开启"用数学理解自然"的现代科学范式，为工业革命提供理论基础。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1688</div>
+      <div class="grid">
+        <div class="card"><div class="region">英国</div><div class="desc">光荣革命，议会驱逐詹姆斯二世，确立议会主权原则，颁布《权利法案》。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">康熙皇帝统治鼎盛期，清朝疆域持续扩张。</div></div>
+      </div>
+      <div class="impact">确立"议会高于王权"，现代宪政民主制度的重要起点。</div>
+    </div>
+
+    <div class="era">工业革命与民族国家</div>
+
+    <div class="event">
+      <div class="year">1760–1840</div>
+      <div class="grid">
+        <div class="card"><div class="region">英国</div><div class="desc">第一次工业革命，蒸汽机、纺纱机、铁路相继出现，机器生产取代手工业。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">工业化技术逐步向法国、比利时、德意志扩散。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">清朝乾隆盛世渐趋保守，闭关锁国政策延续。</div></div>
+      </div>
+      <div class="impact">人类生产方式根本性变革，工业文明对农业文明的压倒性优势形成。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1776</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">《独立宣言》发表，美利坚合众国宣布独立，确立"人人生而平等"原则。</div></div>
+        <div class="card"><div class="region">英国</div><div class="desc">亚当·斯密同年出版《国富论》，奠定现代经济学基础。</div></div>
+      </div>
+      <div class="impact">现代共和国制度的重要样板，启蒙思想付诸实践的第一个大国。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1789</div>
+      <div class="grid">
+        <div class="card"><div class="region">法国</div><div class="desc">法国大革命爆发，攻占巴士底狱，颁布《人权与公民权利宣言》。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">民族主义、自由主义与共和思想向全欧洲扩散。</div></div>
+      </div>
+      <div class="impact">彻底动摇欧洲封建王权合法性，"自由、平等、博爱"成为现代政治的核心价值。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1815</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">拿破仑战争结束，维也纳会议重建欧洲秩序，确立"大国协调"原则。</div></div>
+        <div class="card"><div class="region">英国</div><div class="desc">确立欧洲霸主地位，大英帝国全球扩张加速。</div></div>
+      </div>
+      <div class="impact">19世纪欧洲相对稳定局面的基础，现代多边外交与国际关系学的起点。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1848</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">革命浪潮席卷法国、奥地利、普鲁士、意大利等地，民族主义运动高涨。</div></div>
+        <div class="card"><div class="region">全球</div><div class="desc">马克思、恩格斯发表《共产党宣言》，社会主义思想开始传播。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">鸦片战争后清朝危机加深，太平天国运动即将爆发。</div></div>
+      </div>
+      <div class="impact">民族国家浪潮与劳工运动双线并进，现代政治意识形态格局形成。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1853</div>
+      <div class="grid">
+        <div class="card"><div class="region">日本</div><div class="desc">美国海军准将佩里率"黑船"强行叩关，迫使日本签订开港条约，结束锁国。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">太平天国运动爆发，清朝内外交困。</div></div>
+      </div>
+      <div class="impact">直接催生日本明治维新，东亚对工业文明冲击的反应由此分化。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1861</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">南北战争爆发，林肯政府坚持联邦统一，1865年废除奴隶制。</div></div>
+        <div class="card"><div class="region">俄国</div><div class="desc">亚历山大二世颁布法令废除农奴制，推动现代化改革。</div></div>
+        <div class="card"><div class="region">意大利</div><div class="desc">意大利统一完成，民族国家建立。</div></div>
+      </div>
+      <div class="impact">工业化国家重塑内部结构，为美国崛起为世界强国清除障碍。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1868</div>
+      <div class="grid">
+        <div class="card"><div class="region">日本</div><div class="desc">明治维新开始，废藩置县，全面学习西方制度、科技与军事。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">洋务运动兴起，"师夷长技以制夷"，但未触动政治体制。</div></div>
+      </div>
+      <div class="impact">日本以制度变革成功转型，中国以技术引进失败；东亚命运由此分叉。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1870–1914</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">第二次工业革命，电力、钢铁、石油、化工、铁路大规模发展。</div></div>
+        <div class="card"><div class="region">德国</div><div class="desc">工业化迅速赶超英国，成为欧洲最大工业国。</div></div>
+      </div>
+      <div class="impact">现代工业体系与跨国公司雏形形成，大国竞争烈度急剧上升。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1871</div>
+      <div class="grid">
+        <div class="card"><div class="region">德国</div><div class="desc">普法战争胜利后，俾斯麦主导德意志帝国统一，在凡尔赛宫宣布建国。</div></div>
+        <div class="card"><div class="region">法国</div><div class="desc">普法战争失败，割让阿尔萨斯-洛林，民族复仇情绪埋下一战伏笔。</div></div>
+      </div>
+      <div class="impact">欧洲权力格局根本性重组，德国崛起直接导致一战前联盟体系的形成。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1904–1905</div>
+      <div class="grid">
+        <div class="card"><div class="region">日本</div><div class="desc">日俄战争中日本海陆两路击败沙俄，成为第一个战胜欧洲列强的亚洲国家。</div></div>
+        <div class="card"><div class="region">全球殖民地</div><div class="desc">亚非拉民族主义运动受到极大鼓舞，殖民体系出现裂缝。</div></div>
+      </div>
+      <div class="impact">打破"欧洲不可战胜"的神话，是全球民族独立运动的重要转折点；中国革命情绪由此加速。</div>
+    </div>
+
+    <div class="era">世界大战与冷战</div>
+
+    <div class="event">
+      <div class="year">1911</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">辛亥革命推翻清朝，中华民国成立，结束两千年帝制。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">巴尔干危机频发，列强结盟竞争加剧，战争阴云密布。</div></div>
+      </div>
+      <div class="impact">亚洲最古老帝国体系终结，东亚现代化进程进入动荡转型期。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1914</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">萨拉热窝刺杀事件引爆第一次世界大战，英法俄对德奥意同盟全面开战。</div></div>
+        <div class="card"><div class="region">美国</div><div class="desc">初期保持中立，成为协约国最大军火与资金供应国。</div></div>
+      </div>
+      <div class="impact">旧欧洲帝国体系崩塌，奥匈、奥斯曼、沙俄、德意志四大帝国相继瓦解。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1917</div>
+      <div class="grid">
+        <div class="card"><div class="region">俄国</div><div class="desc">二月革命推翻沙皇，十月革命布尔什维克夺权，世界第一个社会主义国家诞生。</div></div>
+        <div class="card"><div class="region">美国</div><div class="desc">正式参战，决定性扭转一战战局。</div></div>
+      </div>
+      <div class="impact">社会主义意识形态进入大国政治，资本主义与共产主义对抗格局开始成形。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1922</div>
+      <div class="grid">
+        <div class="card"><div class="region">苏联</div><div class="desc">苏维埃社会主义共和国联盟正式成立，斯大林逐渐掌权。</div></div>
+        <div class="card"><div class="region">意大利</div><div class="desc">墨索里尼领导法西斯党上台，欧洲极权主义扩展。</div></div>
+        <div class="card"><div class="region">美国</div><div class="desc">"咆哮的二十年代"，经济高速增长。</div></div>
+      </div>
+      <div class="impact">社会主义阵营核心国家形成，与法西斯主义并行崛起，世界意识形态三极分化。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1929</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">华尔街股市崩盘，大萧条爆发，失业率最高达25%。</div></div>
+        <div class="card"><div class="region">德国</div><div class="desc">经济崩溃与社会动荡为纳粹党崛起提供土壤。</div></div>
+        <div class="card"><div class="region">全球</div><div class="desc">国际贸易萎缩，各国转向贸易保护主义。</div></div>
+      </div>
+      <div class="impact">全球经济体系受到空前冲击，直接推动法西斯主义上台与二战的发生。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1937</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">七七事变，日本全面侵华，中国全面抗战爆发。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">纳粹德国加速扩张，西班牙内战中法西斯力量获胜。</div></div>
+      </div>
+      <div class="impact">亚洲战场先于欧洲全面开辟，二战实际上自此已经开始。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1939</div>
+      <div class="grid">
+        <div class="card"><div class="region">欧洲</div><div class="desc">德国闪击波兰，英法对德宣战，第二次世界大战在欧洲全面爆发。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">抗日战争进入相持阶段。</div></div>
+      </div>
+      <div class="impact">人类历史上规模最大的战争，重塑战后全球政治经济秩序。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1944</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">布雷顿森林会议确立美元与黄金挂钩，IMF与世界银行同期筹建。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">诺曼底登陆，盟军开辟西线战场，德国两面受敌。</div></div>
+      </div>
+      <div class="impact">战后全球经济秩序的制度基础，美元霸权由此确立，影响至今。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1945</div>
+      <div class="grid">
+        <div class="card"><div class="region">全球</div><div class="desc">二战结束，联合国成立；美国在日本投下原子弹，核时代来临。</div></div>
+        <div class="card"><div class="region">美国/苏联</div><div class="desc">两国成为超级大国，雅尔塔体系划定势力范围。</div></div>
+      </div>
+      <div class="impact">现代国际秩序重建，冷战格局与核威慑时代正式开始。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1947–1948</div>
+      <div class="grid">
+        <div class="card"><div class="region">印度/巴基斯坦</div><div class="desc">英国撤出，印巴分治，数百万人流离失所，两国随即爆发第一次战争。</div></div>
+        <div class="card"><div class="region">中东</div><div class="desc">1948年以色列建国，第一次中东战争爆发，巴勒斯坦问题形成。</div></div>
+      </div>
+      <div class="impact">两大持续至今的地缘冲突根源同时形成，影响南亚与中东至今。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1949</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">中华人民共和国成立，国共内战结束，中国共产党执政。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">北约成立，西德建国，冷战阵营划分基本完成。</div></div>
+      </div>
+      <div class="impact">冷战格局最终定型，世界进入两极对抗的稳定阶段。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1962</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国/苏联</div><div class="desc">古巴导弹危机，13天内人类距离核战争最近，最终通过外交谈判化解。</div></div>
+        <div class="card"><div class="region">亚非拉</div><div class="desc">非殖民化运动高潮，数十个新兴国家相继独立。</div></div>
+      </div>
+      <div class="impact">推动美苏热线建立与军控谈判，冷战由对抗转向有限克制，成为冷战最重要转折点。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1969</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">阿波罗11号登月成功，人类首次踏上地球以外的星球。</div></div>
+        <div class="card"><div class="region">苏联</div><div class="desc">太空竞争中落后，转向载人空间站研究。</div></div>
+      </div>
+      <div class="impact">冷战科技竞争达到顶峰，同年ARPANET建立，互联网前身诞生。</div>
+    </div>
+
+    <div class="era">全球化与数字时代</div>
+
+    <div class="event">
+      <div class="year">1978</div>
+      <div class="grid">
+        <div class="card"><div class="region">中国</div><div class="desc">邓小平主导改革开放，市场化经济改革启动，引进外资与技术。</div></div>
+        <div class="card"><div class="region">美国</div><div class="desc">里根时代前夕，金融自由化与新自由主义政策兴起。</div></div>
+      </div>
+      <div class="impact">中国进入四十年高速增长轨道，全球化进程加速，改变世界经济重心。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1989</div>
+      <div class="grid">
+        <div class="card"><div class="region">德国</div><div class="desc">柏林墙倒塌，东西德合并进程开始，1990年正式统一。</div></div>
+        <div class="card"><div class="region">东欧</div><div class="desc">波兰、匈牙利、捷克斯洛伐克等国社会主义政权相继垮台。</div></div>
+      </div>
+      <div class="impact">冷战瓦解进程正式开始，欧洲版图与政治生态深刻重组。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1991</div>
+      <div class="grid">
+        <div class="card"><div class="region">苏联</div><div class="desc">苏联正式解体，分裂为15个独立国家，俄罗斯联邦继承主体地位。</div></div>
+        <div class="card"><div class="region">美国</div><div class="desc">冷战胜利，进入单极霸权时代，"历史终结论"盛行。</div></div>
+      </div>
+      <div class="impact">冷战正式结束，美国主导的全球化秩序开始全面构建。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">1995</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">互联网商业化加速，网景浏览器上市，亚马逊、eBay相继成立。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">互联网正式接入，新浪、搜狐等门户网站起步。</div></div>
+        <div class="card"><div class="region">全球</div><div class="desc">WTO谈判加速，全球贸易体系日趋完善。</div></div>
+      </div>
+      <div class="impact">信息时代全面到来，数字经济开始重塑产业与社会结构。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">2001</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">9·11恐怖袭击，美国发动反恐战争，阿富汗战争开始。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">正式加入世贸组织（WTO），融入全球供应链体系。</div></div>
+      </div>
+      <div class="impact">全球安全议题被反恐主导，中国借WTO入世成为"世界工厂"，全球供应链时代成形。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">2003</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">绕过联合国发动伊拉克战争，推翻萨达姆政权，但战后陷入长期动荡。</div></div>
+        <div class="card"><div class="region">中东</div><div class="desc">伊拉克战争引发地区权力真空，为后来ISIS崛起埋下伏笔。</div></div>
+      </div>
+      <div class="impact">美国单极时代的顶点与转折，动摇了美国的全球公信力，多极化趋势加速。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">2007–2008</div>
+      <div class="grid">
+        <div class="card"><div class="region">美国</div><div class="desc">2007年iPhone发布，移动互联网时代开启；2008年次贷危机引发全球金融海啸。</div></div>
+        <div class="card"><div class="region">欧洲</div><div class="desc">欧债危机扩散，欧元区体系受到根本性考验。</div></div>
+        <div class="card"><div class="region">中国</div><div class="desc">北京奥运会举办，中国GDP跃居全球第二进程加速。</div></div>
+      </div>
+      <div class="impact">移动互联网改变全球社会结构；金融危机推动全球重新反思新自由主义经济体系。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">2016–2017</div>
+      <div class="grid">
+        <div class="card"><div class="region">英国</div><div class="desc">英国公投脱欧（Brexit），欧洲一体化遭遇重大挫折。</div></div>
+        <div class="card"><div class="region">美国</div><div class="desc">特朗普当选总统，"美国优先"政策冲击全球多边体系。</div></div>
+      </div>
+      <div class="impact">逆全球化浪潮正式到来，全球化共识瓦解，民粹主义与民族主义重新抬头。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">2020</div>
+      <div class="grid">
+        <div class="card"><div class="region">全球</div><div class="desc">COVID-19疫情大流行，全球超过600万人死亡，各国封锁边境。</div></div>
+        <div class="card"><div class="region">科技行业</div><div class="desc">远程办公、电商、数字医疗与在线教育加速普及。</div></div>
+      </div>
+      <div class="impact">全球供应链与治理体系受到空前冲击，加速中美脱钩与区域化趋势。</div>
+    </div>
+
+    <div class="event">
+      <div class="year">2022–至今</div>
+      <div class="grid">
+        <div class="card"><div class="region">全球</div><div class="desc">ChatGPT发布引爆生成式AI热潮，大语言模型技术快速迭代。</div></div>
+        <div class="card"><div class="region">美国与中国</div><div class="desc">AI芯片与算力竞争升级，美国对华半导体出口管制持续加码。</div></div>
+        <div class="card"><div class="region">欧洲/全球</div><div class="desc">俄乌战争重塑欧洲安全格局，多极化与阵营化趋势加速。</div></div>
+      </div>
+      <div class="impact">人类进入AI与智能化新时代，技术竞争与地缘政治深度交织，全球秩序面临根本性重组。</div>
+    </div>
+
   </div>
+
+  <footer>
+    世界历史重要时间轴 · 世界文明同步演化参考图
+  </footer>
+</div>
 </body>
 </html>
