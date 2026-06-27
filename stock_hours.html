@@ -66,12 +66,14 @@
 
     .tz-row, .market-row {
       display: flex;
-      height: 30px;
+      min-height: 30px;
+      height: auto;
       border-bottom: 1px solid #eceef2;
       position: relative;
       width: 100%;
+      align-items: stretch;
     }
-    .market-row { height: 38px; border-bottom: 1px solid #f0f2f5; }
+    .market-row { min-height: 38px; border-bottom: 1px solid #f0f2f5; }
     .tz-row:last-of-type { border-bottom: 1px solid #d5d8de; }
     .market-row:last-child { border-bottom: none; }
 
@@ -86,8 +88,10 @@
       border-right: 1px solid #e6e8ec;
       display: flex;
       align-items: center;
-      padding: 0 10px;
+      padding: 4px 10px;
       flex-shrink: 0;
+      word-break: break-word;
+      white-space: normal;
     }
     .tz-label {
       font-size: 10.5px;
@@ -99,7 +103,6 @@
     .market-label {
       flex-direction: column;
       justify-content: center;
-      overflow: hidden;
       background: #ffffff;
     }
     .market-name {
@@ -120,10 +123,12 @@
     .tz-ticks, .market-track {
       flex: 0 0 auto;
       position: relative;
-      height: 100%;
+      height: auto;
+      min-height: inherit;
+      align-self: stretch;
       min-width: 0;
     }
-    .market-track { height: 38px; }
+    .market-track { min-height: 38px; }
 
     .tick {
       position: absolute;
@@ -338,9 +343,9 @@
       body { padding: 10px; }
       .container { padding: 10px 8px 8px 8px; border-radius: 12px; }
       .timeline-wrapper { padding-top: 22px; }
-      .tz-row { height: 26px; }
-      .market-row { height: 34px; }
-      .market-track { height: 34px; }
+      .tz-row { min-height: 26px; }
+      .market-row { min-height: 34px; }
+      .market-track { min-height: 34px; }
       .bar { height: 22px; }
     }
     /* 手机 */
@@ -348,9 +353,9 @@
       body { padding: 8px; }
       .container { padding: 8px 6px 6px 6px; border-radius: 10px; }
       .timeline-wrapper { padding-top: 20px; }
-      .tz-row { height: 24px; }
-      .market-row { height: 32px; }
-      .market-track { height: 32px; }
+      .tz-row { min-height: 24px; }
+      .market-row { min-height: 32px; }
+      .market-track { min-height: 32px; }
       .bar { height: 20px; font-size: 8px; padding: 0 3px; }
       .legend-row { gap: 3px 8px; padding: 6px 8px; }
       .leg-item { font-size: 9.5px; }
