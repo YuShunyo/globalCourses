@@ -13,17 +13,17 @@
       background: #f0f2f5;
       color: #1e1e1e;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 24px;
+      padding: 16px;
     }
     .container {
-      max-width: 1520px;
+      max-width: 1200px;
       width: 100%;
       background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.02);
-      padding: 20px 16px 16px 16px;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+      padding: 16px 12px 12px 12px;
       overflow: visible;
       position: relative;
     }
@@ -31,22 +31,24 @@
       position: relative;
       overflow-x: auto;
       overflow-y: visible;
-      padding-top: 28px;
+      padding-top: 24px;
       padding-bottom: 4px;
-      border-radius: 12px;
+      border-radius: 8px;
+      /* 让 sticky label 在滚动容器内生效 */
+      -webkit-overflow-scrolling: touch;
     }
     .timeline-wrapper::-webkit-scrollbar {
-      height: 8px;
+      height: 6px;
       background: #f0f2f5;
-      border-radius: 4px;
+      border-radius: 3px;
     }
     .timeline-wrapper::-webkit-scrollbar-track {
       background: #f0f2f5;
-      border-radius: 4px;
+      border-radius: 3px;
     }
     .timeline-wrapper::-webkit-scrollbar-thumb {
       background: #d0d3d8;
-      border-radius: 4px;
+      border-radius: 3px;
     }
     .timeline-wrapper::-webkit-scrollbar-thumb:hover {
       background: #b0b4bc;
@@ -54,9 +56,9 @@
     .timeline {
       display: flex;
       flex-direction: column;
-      min-width: calc(150px + 48 * 44px);
+      /* JS 会动态写入 min-width */
       width: fit-content;
-      margin: 0 auto;
+      margin: 0;
       padding-left: 0;
       position: relative;
       overflow: visible;
@@ -64,19 +66,19 @@
 
     .tz-row, .market-row {
       display: flex;
-      height: 34px;
+      height: 30px;
       border-bottom: 1px solid #eceef2;
       position: relative;
       width: 100%;
     }
-    .market-row { height: 40px; border-bottom: 1px solid #f0f2f5; }
+    .market-row { height: 38px; border-bottom: 1px solid #f0f2f5; }
     .tz-row:last-of-type { border-bottom: 1px solid #d5d8de; }
     .market-row:last-child { border-bottom: none; }
 
     .tz-label, .market-label {
-      flex: 0 0 150px;
-      width: 150px;
-      min-width: 150px;
+      flex: 0 0 var(--label-w, 130px);
+      width: var(--label-w, 130px);
+      min-width: var(--label-w, 130px);
       position: sticky;
       left: 0;
       z-index: 12;
@@ -84,14 +86,14 @@
       border-right: 1px solid #e6e8ec;
       display: flex;
       align-items: center;
-      padding: 0 14px;
+      padding: 0 10px;
       flex-shrink: 0;
     }
     .tz-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
       color: #4a4d5a;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.3px;
       background: #ffffff;
     }
     .market-label {
@@ -101,18 +103,18 @@
       background: #ffffff;
     }
     .market-name {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       color: #2d2f3a;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
       line-height: 1.3;
     }
     .market-tz {
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 400;
       color: #9a9eae;
       line-height: 1.2;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.1px;
     }
 
     .tz-ticks, .market-track {
@@ -121,7 +123,7 @@
       height: 100%;
       min-width: 0;
     }
-    .market-track { height: 40px; }
+    .market-track { height: 38px; }
 
     .tick {
       position: absolute;
@@ -130,12 +132,12 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      font-size: 11.5px;
+      font-size: 10.5px;
       font-weight: 600;
       color: #4a4d5a;
       font-variant-numeric: tabular-nums;
       font-family: "SF Mono", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-      width: 20px;
+      width: 18px;
       transform: translateX(-50%);
       text-align: center;
       letter-spacing: 0;
@@ -158,28 +160,28 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      height: 28px;
-      border-radius: 5px;
+      height: 26px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       overflow: hidden;
       white-space: nowrap;
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 600;
       z-index: 2;
-      padding: 0 7px;
-      letter-spacing: 0.15px;
+      padding: 0 5px;
+      letter-spacing: 0.1px;
       transition: opacity 0.15s;
     }
     .bar.open   { background: #c8e6c9; border: 1px solid #388e3c; color: #1b5e20; }
     .bar.before { background: #e3eef9; border: 1px solid #4a8fc1; color: #1a4f7a; }
     .bar.after  { background: #faf0e0; border: 1px solid #b57c2e; color: #7a551f; }
     .bar.night  { background: #f0e8f0; border: 1px solid #8a5a8a; color: #5a3a5a; }
-    .bar.break  { background: transparent; border: 1.5px dashed #c0c4ce; color: #9a9eae; font-size: 9px; font-weight: 500; }
+    .bar.break  { background: transparent; border: 1.5px dashed #c0c4ce; color: #9a9eae; font-size: 8.5px; font-weight: 500; }
 
-    .bar-text-left { flex: 0 0 auto; padding-right: 4px; }
-    .bar-text-right { flex: 0 0 auto; padding-left: 4px; }
+    .bar-text-left { flex: 0 0 auto; padding-right: 3px; }
+    .bar-text-right { flex: 0 0 auto; padding-left: 3px; }
     .bar-text-empty { visibility: hidden; }
 
     .hover-line {
@@ -191,7 +193,7 @@
       z-index: 20;
       opacity: 0;
       transition: opacity 0.15s;
-      box-shadow: 0 0 12px rgba(20,40,80,0.12);
+      box-shadow: 0 0 10px rgba(20,40,80,0.12);
       height: 100%;
       border-radius: 1px;
     }
@@ -206,8 +208,8 @@
       color: #ffffff;
       font-size: 10px;
       font-weight: 600;
-      padding: 2px 12px;
-      border-radius: 12px;
+      padding: 2px 10px;
+      border-radius: 10px;
       letter-spacing: 0.3px;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
@@ -220,10 +222,10 @@
       transform: translate(-50%, -50%);
       background: #1f2a4a;
       color: #ffffff;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 8px;
+      padding: 2px 7px;
+      border-radius: 7px;
       letter-spacing: 0.3px;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
@@ -246,7 +248,7 @@
       height: 100%;
       border-left: 2px dashed #e53935;
       transition: left 60s linear;
-      box-shadow: 0 0 16px rgba(229, 57, 53, 0.15);
+      box-shadow: 0 0 12px rgba(229, 57, 53, 0.15);
     }
     .now-line .now-label {
       position: absolute;
@@ -255,10 +257,10 @@
       transform: translateX(-50%);
       background: #e53935;
       color: #ffffff;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 600;
-      padding: 2px 12px;
-      border-radius: 12px;
+      padding: 2px 10px;
+      border-radius: 10px;
       letter-spacing: 0.3px;
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
@@ -272,23 +274,16 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 4px 18px;
-      margin-top: 16px;
-      padding: 10px 16px;
+      gap: 4px 14px;
+      margin-top: 12px;
+      padding: 8px 12px;
       background: #f7f8fa;
       border: 1px solid #e6e8ec;
-      border-radius: 12px;
-      max-width: 1520px;
+      border-radius: 10px;
       width: 100%;
-      margin-left: auto;
-      margin-right: auto;
-      position: sticky;
-      bottom: 0;
-      z-index: 30;
-      background: #f7f8fa;
     }
-    .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: #4a4d5a; }
-    .leg-swatch { width: 24px; height: 13px; border-radius: 3px; flex-shrink: 0; }
+    .leg-item { display: flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 500; color: #4a4d5a; }
+    .leg-swatch { width: 20px; height: 12px; border-radius: 3px; flex-shrink: 0; }
     .leg-swatch.before { background: #e3eef9; border: 1px solid #4a8fc1; }
     .leg-swatch.open   { background: #c8e6c9; border: 1px solid #388e3c; }
     .leg-swatch.after  { background: #faf0e0; border: 1px solid #b57c2e; }
@@ -299,8 +294,8 @@
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 11px;
+      gap: 7px;
+      font-size: 10.5px;
       color: #4a4d5a;
       font-weight: 500;
     }
@@ -308,27 +303,27 @@
       font-weight: 500;
       color: #6a6e7e;
       background: #eef0f4;
-      padding: 3px 14px;
-      border-radius: 14px;
-      font-size: 11px;
-      letter-spacing: 0.3px;
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 10.5px;
+      letter-spacing: 0.2px;
     }
     .season-toggle .season-label {
       font-weight: 400;
       color: #9a9eae;
-      font-size: 10px;
+      font-size: 9.5px;
     }
     .season-toggle button {
       background: #e6e8ec;
       border: none;
-      border-radius: 20px;
-      padding: 4px 18px;
-      font-size: 11px;
+      border-radius: 16px;
+      padding: 3px 14px;
+      font-size: 10.5px;
       font-weight: 600;
       color: #3d4050;
       cursor: pointer;
       transition: background 0.2s, color 0.2s, transform 0.15s;
-      height: 28px;
+      height: 26px;
     }
     .season-toggle button:hover { background: #d0d3d8; transform: scale(1.02); }
     .season-toggle button:active { transform: scale(0.96); }
@@ -338,34 +333,33 @@
     }
     .season-toggle button.winter:hover { background: #1f3a60; }
 
+    /* 平板 */
     @media (max-width: 768px) {
-      body { padding: 12px; }
-      .container { padding: 12px 8px 8px 8px; border-radius: 14px; }
-      .timeline-wrapper { padding-top: 40px; margin-top: -40px; }
-      .tz-label, .market-label { flex: 0 0 120px; width: 120px; min-width: 120px; padding: 0 10px; }
-      .tz-label { font-size: 10px; }
-      .market-name { font-size: 10px; }
-      .market-tz { font-size: 8.5px; }
-      .tick { font-size: 10px; width: 18px; }
-      .legend-row { gap: 4px 12px; padding: 8px 12px; }
-      .season-toggle .date-display { font-size: 10px; padding: 2px 10px; }
-      .bar { font-size: 8px; padding: 0 4px; height: 24px; }
-      .timeline { min-width: calc(120px + 48 * 38px); }
-      .now-line .now-label { font-size: 9px; padding: 1px 10px; top: -16px; }
+      body { padding: 10px; }
+      .container { padding: 10px 8px 8px 8px; border-radius: 12px; }
+      .timeline-wrapper { padding-top: 22px; }
+      .tz-row { height: 26px; }
+      .market-row { height: 34px; }
+      .market-track { height: 34px; }
+      .bar { height: 22px; }
     }
+    /* 手机 */
     @media (max-width: 480px) {
-      .tz-label, .market-label { flex: 0 0 100px; width: 100px; min-width: 100px; padding: 0 8px; }
-      .tz-label { font-size: 9px; }
-      .market-name { font-size: 9px; }
-      .market-tz { font-size: 7.5px; }
-      .tick { font-size: 9px; width: 16px; }
-      .legend-row { gap: 3px 8px; padding: 6px 10px; flex-wrap: wrap; }
-      .leg-item { font-size: 9px; }
-      .leg-swatch { width: 18px; height: 10px; }
-      .season-toggle { margin-left: 0; width: 100%; justify-content: flex-end; }
-      .season-toggle .date-display { font-size: 9px; padding: 2px 8px; }
-      .season-toggle button { font-size: 10px; padding: 3px 12px; height: 24px; }
-      .now-line .now-label { font-size: 8px; padding: 1px 8px; top: -14px; }
+      body { padding: 8px; }
+      .container { padding: 8px 6px 6px 6px; border-radius: 10px; }
+      .timeline-wrapper { padding-top: 20px; }
+      .tz-row { height: 24px; }
+      .market-row { height: 32px; }
+      .market-track { height: 32px; }
+      .bar { height: 20px; font-size: 8px; padding: 0 3px; }
+      .legend-row { gap: 3px 8px; padding: 6px 8px; }
+      .leg-item { font-size: 9.5px; }
+      .leg-swatch { width: 16px; height: 10px; }
+      .season-toggle { margin-left: 0; width: 100%; justify-content: flex-end; margin-top: 2px; }
+      .season-toggle .date-display { font-size: 9.5px; padding: 2px 8px; }
+      .season-toggle button { font-size: 9.5px; padding: 2px 10px; height: 22px; }
+      .now-line .now-label { font-size: 8.5px; padding: 1px 8px; top: -16px; }
+      .tick { font-size: 9px; }
     }
   </style>
 </head>
@@ -392,10 +386,32 @@
 
 <script>
   (function(){
-    const HR = 44;
     const TOTAL = 48;
     const START = 4;
-    const LABEL_WIDTH = 150;
+
+    // 根据屏幕宽度动态计算 HR 和 LABEL_WIDTH
+    function getLayout() {
+      const vw = window.innerWidth;
+      if (vw <= 480) {
+        return { HR: 28, LABEL_WIDTH: 88 };
+      } else if (vw <= 768) {
+        return { HR: 32, LABEL_WIDTH: 104 };
+      } else if (vw <= 1024) {
+        return { HR: 36, LABEL_WIDTH: 120 };
+      } else {
+        return { HR: 40, LABEL_WIDTH: 130 };
+      }
+    }
+
+    let layout = getLayout();
+    let HR = layout.HR;
+    let LABEL_WIDTH = layout.LABEL_WIDTH;
+
+    // 把 LABEL_WIDTH 写入 CSS 变量，供 sticky label 使用
+    function applyCSSVars() {
+      document.documentElement.style.setProperty('--label-w', LABEL_WIDTH + 'px');
+    }
+    applyCSSVars();
 
     function isDaylightSavingTime() {
       const now = new Date();
@@ -575,6 +591,12 @@
     }
 
     function render(season) {
+      // 重新计算布局（响应屏幕尺寸变化）
+      layout = getLayout();
+      HR = layout.HR;
+      LABEL_WIDTH = layout.LABEL_WIDTH;
+      applyCSSVars();
+
       const isWinterMode = season === 'winter';
       const data = isWinterMode ? getWinterData(baseMarkets) : baseMarkets.map(m => ({ ...m }));
 
@@ -586,6 +608,7 @@
 
       const tl = document.getElementById('timeline');
       tl.innerHTML = '';
+      tl.style.minWidth = (LABEL_WIDTH + TOTAL * HR) + 'px';
 
       const tzConfigs = [
         { label: '东京/首尔 (UTC+9)', offset: 1 },
@@ -737,8 +760,8 @@
         // 已固定时，鼠标移动不改变任何状态
         if (pinnedX !== null) return;
 
-        const wrapperRect = wrapper.getBoundingClientRect();
-        const x = e.clientX - wrapperRect.left + wrapper.scrollLeft;
+        const tlRect = tl.getBoundingClientRect();
+        const x = e.clientX - tlRect.left;
 
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
@@ -768,8 +791,8 @@
       }
 
       tl.addEventListener('click', (e) => {
-        const wrapperRect = wrapper.getBoundingClientRect();
-        const x = e.clientX - wrapperRect.left + wrapper.scrollLeft;
+        const tlRect = tl.getBoundingClientRect();
+        const x = e.clientX - tlRect.left;
 
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
@@ -911,6 +934,17 @@
     });
 
     render(isWinter ? 'winter' : 'summer');
+
+    // 窗口尺寸变化时重新渲染（节流 200ms）
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const oldTl = document.getElementById('timeline');
+        if (oldTl._cleanup) oldTl._cleanup();
+        render(isWinter ? 'winter' : 'summer');
+      }, 200);
+    });
   })();
 </script>
 </body>
