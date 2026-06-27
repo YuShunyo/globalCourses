@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全球主要股市交易时间</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1e1e1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1520px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.02);
+      padding: 20px 16px 16px 16px;
+      overflow: visible;
+      position: relative;
+    }
+    .timeline-wrapper {
+      position: relative;
+      overflow-x: auto;
+      overflow-y: visible;
+      padding-top: 28px;
+      padding-bottom: 4px;
+      border-radius: 12px;
+    }
+    .timeline-wrapper::-webkit-scrollbar {
+      height: 8px;
+      background: #f0f2f5;
+      border-radius: 4px;
+    }
+    .timeline-wrapper::-webkit-scrollbar-track {
+      background: #f0f2f5;
+      border-radius: 4px;
+    }
+    .timeline-wrapper::-webkit-scrollbar-thumb {
+      background: #d0d3d8;
+      border-radius: 4px;
+    }
+    .timeline-wrapper::-webkit-scrollbar-thumb:hover {
+      background: #b0b4bc;
+    }
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      min-width: calc(150px + 48 * 44px);
+      width: fit-content;
+      margin: 0 auto;
+      padding-left: 0;
+      position: relative;
+      overflow: visible;
+    }
+
+    .tz-row, .market-row {
+      display: flex;
+      height: 34px;
+      border-bottom: 1px solid #eceef2;
+      position: relative;
+      width: 100%;
+    }
+    .market-row { height: 40px; border-bottom: 1px solid #f0f2f5; }
+    .tz-row:last-of-type { border-bottom: 1px solid #d5d8de; }
+    .market-row:last-child { border-bottom: none; }
+
+    .tz-label, .market-label {
+      flex: 0 0 150px;
+      width: 150px;
+      min-width: 150px;
+      position: sticky;
+      left: 0;
+      z-index: 12;
+      background: #ffffff;
+      border-right: 1px solid #e6e8ec;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      flex-shrink: 0;
+    }
+    .tz-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4a4d5a;
+      letter-spacing: 0.4px;
+      background: #ffffff;
+    }
+    .market-label {
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .market-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #2d2f3a;
+      letter-spacing: 0.3px;
+      line-height: 1.3;
+    }
+    .market-tz {
+      font-size: 9.5px;
+      font-weight: 400;
+      color: #9a9eae;
+      line-height: 1.2;
+      letter-spacing: 0.2px;
+    }
+
+    .tz-ticks, .market-track {
+      flex: 0 0 auto;
+      position: relative;
+      height: 100%;
+      min-width: 0;
+    }
+    .market-track { height: 40px; }
+
+    .tick {
+      position: absolute;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #4a4d5a;
+      font-variant-numeric: tabular-nums;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+      width: 20px;
+      transform: translateX(-50%);
+      text-align: center;
+      letter-spacing: 0;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    .grid-dash {
+      position: absolute;
+      top: 0;
+      width: 0.5px;
+      height: 100%;
+      background: rgba(180, 188, 200, 0.15);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .grid-dash.major { background: rgba(160, 168, 184, 0.25); }
+
+    .bar {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 28px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 9.5px;
+      font-weight: 600;
+      z-index: 2;
+      padding: 0 7px;
+      letter-spacing: 0.15px;
+      transition: opacity 0.15s;
+    }
+    .bar.open   { background: #c8e6c9; border: 1px solid #388e3c; color: #1b5e20; }
+    .bar.before { background: #e3eef9; border: 1px solid #4a8fc1; color: #1a4f7a; }
+    .bar.after  { background: #faf0e0; border: 1px solid #b57c2e; color: #7a551f; }
+    .bar.night  { background: #f0e8f0; border: 1px solid #8a5a8a; color: #5a3a5a; }
+    .bar.break  { background: transparent; border: 1.5px dashed #c0c4ce; color: #9a9eae; font-size: 9px; font-weight: 500; }
+
+    .bar-text-left { flex: 0 0 auto; padding-right: 4px; }
+    .bar-text-right { flex: 0 0 auto; padding-left: 4px; }
+    .bar-text-empty { visibility: hidden; }
+
+    .hover-line {
+      position: absolute;
+      top: 0;
+      width: 2px;
+      background: #1f2a4a;
+      pointer-events: none;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.15s;
+      box-shadow: 0 0 12px rgba(20,40,80,0.12);
+      height: 100%;
+      border-radius: 1px;
+    }
+    .hover-line.active { opacity: 1; }
+
+    .hover-line .hover-label {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2a4a;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 12px;
+      border-radius: 12px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      font-family: "SF Mono", "Menlo", "Consolas", monospace;
+      box-shadow: 0 2px 8px rgba(20, 40, 80, 0.25);
+    }
+    .market-track-hover-time {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: #1f2a4a;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      font-family: "SF Mono", "Menlo", "Consolas", monospace;
+      box-shadow: 0 2px 6px rgba(20, 40, 80, 0.2);
+      pointer-events: none;
+      z-index: 25;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    /* 当前时间指示线 */
+    .now-line {
+      position: absolute;
+      top: 0;
+      width: 2px;
+      background: transparent;
+      pointer-events: none;
+      z-index: 19;
+      height: 100%;
+      border-left: 2px dashed #e53935;
+      transition: left 60s linear;
+      box-shadow: 0 0 16px rgba(229, 57, 53, 0.15);
+    }
+    .now-line .now-label {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #e53935;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 12px;
+      border-radius: 12px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      font-family: "SF Mono", "Menlo", "Consolas", monospace;
+      box-shadow: 0 2px 8px rgba(229, 57, 53, 0.3);
+      /* transform 由 JS 动态控制，避免被左侧 label 列遮挡 */
+      transition: none;
+    }
+
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 18px;
+      margin-top: 16px;
+      padding: 10px 16px;
+      background: #f7f8fa;
+      border: 1px solid #e6e8ec;
+      border-radius: 12px;
+      max-width: 1520px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      position: sticky;
+      bottom: 0;
+      z-index: 30;
+      background: #f7f8fa;
+    }
+    .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: #4a4d5a; }
+    .leg-swatch { width: 24px; height: 13px; border-radius: 3px; flex-shrink: 0; }
+    .leg-swatch.before { background: #e3eef9; border: 1px solid #4a8fc1; }
+    .leg-swatch.open   { background: #c8e6c9; border: 1px solid #388e3c; }
+    .leg-swatch.after  { background: #faf0e0; border: 1px solid #b57c2e; }
+    .leg-swatch.night  { background: #f0e8f0; border: 1px solid #8a5a8a; }
+    .leg-swatch.break  { background: transparent; border: 1.5px dashed #c0c4ce; }
+
+    .season-toggle {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #4a4d5a;
+      font-weight: 500;
+    }
+    .season-toggle .date-display {
+      font-weight: 500;
+      color: #6a6e7e;
+      background: #eef0f4;
+      padding: 3px 14px;
+      border-radius: 14px;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+    }
+    .season-toggle .season-label {
+      font-weight: 400;
+      color: #9a9eae;
+      font-size: 10px;
+    }
+    .season-toggle button {
+      background: #e6e8ec;
+      border: none;
+      border-radius: 20px;
+      padding: 4px 18px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #3d4050;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+      height: 28px;
+    }
+    .season-toggle button:hover { background: #d0d3d8; transform: scale(1.02); }
+    .season-toggle button:active { transform: scale(0.96); }
+    .season-toggle button.winter {
+      background: #2b4a7a;
+      color: #ffffff;
+    }
+    .season-toggle button.winter:hover { background: #1f3a60; }
+
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .container { padding: 12px 8px 8px 8px; border-radius: 14px; }
+      .timeline-wrapper { padding-top: 40px; margin-top: -40px; }
+      .tz-label, .market-label { flex: 0 0 120px; width: 120px; min-width: 120px; padding: 0 10px; }
+      .tz-label { font-size: 10px; }
+      .market-name { font-size: 10px; }
+      .market-tz { font-size: 8.5px; }
+      .tick { font-size: 10px; width: 18px; }
+      .legend-row { gap: 4px 12px; padding: 8px 12px; }
+      .season-toggle .date-display { font-size: 10px; padding: 2px 10px; }
+      .bar { font-size: 8px; padding: 0 4px; height: 24px; }
+      .timeline { min-width: calc(120px + 48 * 38px); }
+      .now-line .now-label { font-size: 9px; padding: 1px 10px; top: -16px; }
+    }
+    @media (max-width: 480px) {
+      .tz-label, .market-label { flex: 0 0 100px; width: 100px; min-width: 100px; padding: 0 8px; }
+      .tz-label { font-size: 9px; }
+      .market-name { font-size: 9px; }
+      .market-tz { font-size: 7.5px; }
+      .tick { font-size: 9px; width: 16px; }
+      .legend-row { gap: 3px 8px; padding: 6px 10px; flex-wrap: wrap; }
+      .leg-item { font-size: 9px; }
+      .leg-swatch { width: 18px; height: 10px; }
+      .season-toggle { margin-left: 0; width: 100%; justify-content: flex-end; }
+      .season-toggle .date-display { font-size: 9px; padding: 2px 8px; }
+      .season-toggle button { font-size: 10px; padding: 3px 12px; height: 24px; }
+      .now-line .now-label { font-size: 8px; padding: 1px 8px; top: -14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="timeline-wrapper">
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="legend-row">
+    <div class="leg-item"><div class="leg-swatch before"></div>盘前</div>
+    <div class="leg-item"><div class="leg-swatch open"></div>盘中</div>
+    <div class="leg-item"><div class="leg-swatch after"></div>盘后</div>
+    <div class="leg-item"><div class="leg-swatch night"></div>夜盘</div>
+    <div class="leg-item"><div class="leg-swatch break"></div>午休</div>
+    <div class="season-toggle">
+      <span class="date-display" id="dateDisplay">2026/06/26</span>
+      <button id="seasonBtn" class="">夏</button>
+      <span class="season-label" id="seasonLabel">令时</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const HR = 44;
+    const TOTAL = 48;
+    const START = 4;
+    const LABEL_WIDTH = 150;
+
+    function isDaylightSavingTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const march = new Date(year, 2, 1);
+      const marchSecondSunday = new Date(year, 2, 1 + (8 - march.getDay()) % 7 + 7);
+      const november = new Date(year, 10, 1);
+      const novemberFirstSunday = new Date(year, 10, 1 + (7 - november.getDay()) % 7);
+      const current = new Date();
+      return current >= marchSecondSunday && current < novemberFirstSunday;
+    }
+
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}/${m}/${d}`;
+    }
+
+    function formatTime(date) {
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      const s = String(date.getSeconds()).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    const baseMarkets = [
+      {
+        name: '东京 TSE', tz: 'UTC+9', utcOffset: 9,
+        bars: [
+          { start: 8, end: 10.5, type: 'open', label: '09:00–11:30' },
+          { start: 10.5, end: 11.5, type: 'break', label: '' },
+          { start: 11.5, end: 14.5, type: 'open', label: '12:30–15:30' },
+          { start: 32, end: 34.5, type: 'open', label: '09:00–11:30' },
+          { start: 34.5, end: 35.5, type: 'break', label: '' },
+          { start: 35.5, end: 38.5, type: 'open', label: '12:30–15:30' },
+        ]
+      },
+      {
+        name: '韩国 KRX', tz: 'UTC+9', utcOffset: 9,
+        bars: [
+          { start: 8, end: 14.5, type: 'open', label: '09:00–15:30' },
+          { start: 32, end: 38.5, type: 'open', label: '09:00–15:30' },
+        ]
+      },
+      {
+        name: '台湾 TWSE', tz: 'UTC+8', utcOffset: 8,
+        bars: [
+          { start: 9, end: 13.5, type: 'open', label: '09:00–13:30' },
+          { start: 33, end: 37.5, type: 'open', label: '09:00–13:30' },
+        ]
+      },
+      {
+        name: '新加坡 SGX', tz: 'UTC+8', utcOffset: 8,
+        bars: [
+          { start: 9, end: 12, type: 'open', label: '09:00–12:00' },
+          { start: 12, end: 13, type: 'break', label: '' },
+          { start: 13, end: 17, type: 'open', label: '13:00–17:00' },
+          { start: 33, end: 36, type: 'open', label: '09:00–12:00' },
+          { start: 36, end: 37, type: 'break', label: '' },
+          { start: 37, end: 41, type: 'open', label: '13:00–17:00' },
+        ]
+      },
+      {
+        name: '上海/深圳', tz: 'UTC+8', utcOffset: 8,
+        bars: [
+          { start: 9.5, end: 11.5, type: 'open', label: '09:30–11:30' },
+          { start: 11.5, end: 13, type: 'break', label: '' },
+          { start: 13, end: 15, type: 'open', label: '13:00–15:00' },
+          { start: 33.5, end: 35.5, type: 'open', label: '09:30–11:30' },
+          { start: 35.5, end: 37, type: 'break', label: '' },
+          { start: 37, end: 39, type: 'open', label: '13:00–15:00' },
+        ]
+      },
+      {
+        name: '香港 HKEX', tz: 'UTC+8', utcOffset: 8,
+        bars: [
+          { start: 9.5, end: 12, type: 'open', label: '09:30–12:00' },
+          { start: 12, end: 13, type: 'break', label: '' },
+          { start: 13, end: 16, type: 'open', label: '13:00–16:00' },
+          { start: 33.5, end: 36, type: 'open', label: '09:30–12:00' },
+          { start: 36, end: 37, type: 'break', label: '' },
+          { start: 37, end: 40, type: 'open', label: '13:00–16:00' },
+        ]
+      },
+      {
+        name: '法兰克福 XETRA', tz: 'UTC+2（夏）', utcOffset: 2,
+        bars: [
+          { start: 15, end: 23.5, type: 'open', label: '09:00–17:30' },
+          { start: 39, end: 47.5, type: 'open', label: '09:00–17:30' },
+        ],
+        isEU: true
+      },
+      {
+        name: '巴黎 Euronext', tz: 'UTC+2（夏）', utcOffset: 2,
+        bars: [
+          { start: 15, end: 23.5, type: 'open', label: '09:00–17:30' },
+          { start: 39, end: 47.5, type: 'open', label: '09:00–17:30' },
+        ],
+        isEU: true
+      },
+      {
+        name: '伦敦 LSE', tz: 'UTC+1（夏）', utcOffset: 1,
+        bars: [
+          { start: 15, end: 23.5, type: 'open', label: '08:00–16:30' },
+          { start: 39, end: 47.5, type: 'open', label: '08:00–16:30' },
+        ],
+        isEU: true
+      },
+      {
+        name: '纽约 NYSE', tz: 'UTC−4（夏）', utcOffset: -4,
+        bars: [
+          { start: 16, end: 21.5, type: 'before', label: '04:00–09:30' },
+          { start: 21.5, end: 28, type: 'open', label: '09:30–16:00' },
+          { start: 28, end: 32, type: 'after', label: '16:00–20:00' },
+          { start: 32, end: 40, type: 'night', label: '20:00–04:00' },
+        ],
+        isUS: true
+      }
+    ];
+
+    const winterLabels = {
+      '法兰克福 XETRA': 'UTC+1（冬）',
+      '巴黎 Euronext': 'UTC+1（冬）',
+      '伦敦 LSE': 'UTC+0（冬）',
+      '纽约 NYSE': 'UTC−5（冬）'
+    };
+    const summerLabels = {
+      '法兰克福 XETRA': 'UTC+2（夏）',
+      '巴黎 Euronext': 'UTC+2（夏）',
+      '伦敦 LSE': 'UTC+1（夏）',
+      '纽约 NYSE': 'UTC−4（夏）'
+    };
+
+    let isWinter = !isDaylightSavingTime();
+
+    function splitLabel(label) {
+      if (!label) return { left: '', right: '' };
+      const parts = label.split('–');
+      if (parts.length === 2) return { left: parts[0].trim(), right: parts[1].trim() };
+      const parts2 = label.split('-');
+      if (parts2.length === 2) return { left: parts2[0].trim(), right: parts2[1].trim() };
+      return { left: label, right: '' };
+    }
+
+    function getWinterData(markets) {
+      return markets.map(mkt => {
+        if (mkt.isEU || mkt.isUS) {
+          return {
+            ...mkt,
+            utcOffset: mkt.utcOffset - 1,
+            bars: mkt.bars.map(bar => ({
+              ...bar,
+              start: bar.start + 1,
+              end: bar.end + 1
+            }))
+          };
+        }
+        return { ...mkt };
+      });
+    }
+
+    // 计算当前北京时间在时间轴上的偏移（相对于 START，范围 0~24）
+    function getNowPosition() {
+      const now = new Date();
+      const utcH = now.getUTCHours();
+      const utcM = now.getUTCMinutes();
+      const utcS = now.getUTCSeconds();
+      // 北京时间 = UTC+8
+      let bjH = (utcH + 8) % 24;
+      const totalMinutes = (bjH - START) * 60 + utcM + utcS / 60;
+      if (totalMinutes >= 0 && totalMinutes < 24 * 60) {
+        return totalMinutes / 60;
+      } else {
+        return 24 + totalMinutes / 60;
+      }
+    }
+
+    function render(season) {
+      const isWinterMode = season === 'winter';
+      const data = isWinterMode ? getWinterData(baseMarkets) : baseMarkets.map(m => ({ ...m }));
+
+      data.forEach(mkt => {
+        if (mkt.isEU || mkt.isUS) {
+          mkt.tz = isWinterMode ? winterLabels[mkt.name] : summerLabels[mkt.name];
+        }
+      });
+
+      const tl = document.getElementById('timeline');
+      tl.innerHTML = '';
+
+      const tzConfigs = [
+        { label: '东京/首尔 (UTC+9)', offset: 1 },
+        { label: '北京时间 (UTC+8)', offset: 0 },
+        { label: isWinterMode ? '纽约 EST (UTC−5)' : '纽约 EDT (UTC−4)', offset: isWinterMode ? -13 : -12 }
+      ];
+
+      tzConfigs.forEach(tz => {
+        const row = document.createElement('div');
+        row.className = 'tz-row';
+
+        const label = document.createElement('div');
+        label.className = 'tz-label';
+        label.textContent = tz.label;
+        row.appendChild(label);
+
+        const ticks = document.createElement('div');
+        ticks.className = 'tz-ticks';
+        // 固定宽度 = TOTAL * HR，所有元素用 left = i * HR，tick 用 translateX(-50%) 居中
+        ticks.style.width = (TOTAL * HR) + 'px';
+
+        for (let i = 0; i <= TOTAL; i++) {
+          const bjH = (START + i) % 24;
+          let localH = (bjH + tz.offset) % 24;
+          if (localH < 0) localH += 24;
+
+          const tick = document.createElement('div');
+          tick.className = 'tick';
+          tick.style.left = (i * HR) + 'px';
+          tick.textContent = Math.floor(localH).toString().padStart(2, '0');
+          // 第一个 tick 靠左对齐，最后一个靠右对齐，避免被遮挡或溢出
+          if (i === 0) tick.style.transform = 'translateX(0)';
+          else if (i === TOTAL) tick.style.transform = 'translateX(-100%)';
+          ticks.appendChild(tick);
+
+          const dash = document.createElement('div');
+          dash.className = 'grid-dash' + (i % 2 === 0 ? ' major' : '');
+          dash.style.left = (i * HR) + 'px';
+          ticks.appendChild(dash);
+        }
+
+        row.appendChild(ticks);
+        tl.appendChild(row);
+      });
+
+      data.forEach(mkt => {
+        const row = document.createElement('div');
+        row.className = 'market-row';
+
+        const label = document.createElement('div');
+        label.className = 'market-label';
+        label.innerHTML = `<div class="market-name">${mkt.name}</div><div class="market-tz">${mkt.tz}</div>`;
+        row.appendChild(label);
+
+        const track = document.createElement('div');
+        track.className = 'market-track';
+        track.style.width = (TOTAL * HR) + 'px';
+        track.dataset.utcOffset = mkt.utcOffset;
+
+        // 悬停时显示的本地时间标签
+        const trackHoverTime = document.createElement('div');
+        trackHoverTime.className = 'market-track-hover-time';
+        track.appendChild(trackHoverTime);
+
+        for (let i = 0; i <= TOTAL; i++) {
+          const dash = document.createElement('div');
+          dash.className = 'grid-dash' + (i % 2 === 0 ? ' major' : '');
+          dash.style.left = (i * HR) + 'px';
+          track.appendChild(dash);
+        }
+
+        mkt.bars.forEach(bar => {
+          const colStart = bar.start - START;
+          const colEnd = bar.end - START;
+          const left = Math.max(0, colStart) * HR;
+          const right = Math.min(TOTAL, colEnd) * HR;
+          const width = right - left;
+          if (width <= 0) return;
+
+          const el = document.createElement('div');
+          el.className = 'bar ' + bar.type;
+          el.style.left = left + 'px';
+          el.style.width = width + 'px';
+
+          const { left: leftText, right: rightText } = splitLabel(bar.label || '');
+          const showText = width >= 50 && (leftText || rightText);
+
+          const spanLeft = document.createElement('span');
+          spanLeft.className = 'bar-text-left' + (showText && leftText ? '' : ' bar-text-empty');
+          spanLeft.textContent = showText ? leftText : '';
+
+          const spanRight = document.createElement('span');
+          spanRight.className = 'bar-text-right' + (showText && rightText ? '' : ' bar-text-empty');
+          spanRight.textContent = showText ? rightText : '';
+
+          el.appendChild(spanLeft);
+          el.appendChild(spanRight);
+          track.appendChild(el);
+        });
+
+        row.appendChild(track);
+        tl.appendChild(row);
+      });
+
+      // ---- 统一坐标函数 ----
+      // track 容器的 left 相对于 timeline 元素 = LABEL_WIDTH（sticky label 宽度）
+      // track 内 left = (t - START) * HR
+      // 所以相对于 timeline：px = LABEL_WIDTH + (t - START) * HR
+      function timeToX(t) {
+        return LABEL_WIDTH + (t - START) * HR;
+      }
+      function xToTime(px) {
+        return START + (px - LABEL_WIDTH) / HR;
+      }
+
+      // ---- 鼠标悬停线 ----
+      const hoverLine = document.createElement('div');
+      hoverLine.className = 'hover-line';
+      tl.appendChild(hoverLine);
+
+      const wrapper = tl.closest('.timeline-wrapper');
+
+      // 固定状态：是否已点击锁定（每次 render 重置）
+      let pinnedX = null;
+
+      function applyPosition(px, showLabels) {
+        const trackLocalX = px - LABEL_WIDTH;
+        const bjTime = xToTime(px);
+
+        hoverLine.style.left = px + 'px';
+        hoverLine.classList.add('active');
+
+        tl.querySelectorAll('.market-track').forEach(trackEl => {
+          const offset = parseFloat(trackEl.dataset.utcOffset);
+          if (isNaN(offset)) return;
+          const localH = (bjTime + (offset - 8) + 48) % 24;
+          const lhh = Math.floor(localH).toString().padStart(2, '0');
+          const lmm = Math.floor((localH % 1) * 60).toString().padStart(2, '0');
+          const timeEl = trackEl.querySelector('.market-track-hover-time');
+          if (timeEl) {
+            timeEl.style.left = trackLocalX + 'px';
+            timeEl.textContent = `${lhh}:${lmm}`;
+            timeEl.style.opacity = showLabels ? '1' : '0';
+          }
+        });
+      }
+
+      tl.addEventListener('mousemove', (e) => {
+        // 已固定时，鼠标移动不改变任何状态
+        if (pinnedX !== null) return;
+
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const x = e.clientX - wrapperRect.left + wrapper.scrollLeft;
+
+        const trackStart = LABEL_WIDTH;
+        const trackEnd = LABEL_WIDTH + TOTAL * HR;
+
+        if (x < trackStart || x > trackEnd) {
+          hoverLine.classList.remove('active');
+          return;
+        }
+
+        const px = Math.min(trackEnd, Math.max(trackStart, x));
+        // 悬停：只显示竖线，不显示时间标签
+        applyPosition(px, false);
+      });
+
+      tl.addEventListener('mouseleave', () => {
+        // 已固定时，鼠标离开不隐藏
+        if (pinnedX !== null) return;
+        hoverLine.classList.remove('active');
+        tl.querySelectorAll('.market-track-hover-time').forEach(el => { el.style.opacity = '0'; });
+      });
+
+      function cancelPin() {
+        pinnedX = null;
+        hoverLine.classList.remove('active');
+        hoverLine.classList.remove('pinned');
+        tl.querySelectorAll('.market-track-hover-time').forEach(el => { el.style.opacity = '0'; });
+      }
+
+      tl.addEventListener('click', (e) => {
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const x = e.clientX - wrapperRect.left + wrapper.scrollLeft;
+
+        const trackStart = LABEL_WIDTH;
+        const trackEnd = LABEL_WIDTH + TOTAL * HR;
+
+        if (x < trackStart || x > trackEnd) {
+          // 点击了 label 区域，取消固定
+          cancelPin();
+          return;
+        }
+
+        const px = Math.min(trackEnd, Math.max(trackStart, x));
+
+        // 若已在同一位置点击则取消固定，否则固定到新位置
+        if (pinnedX !== null && Math.abs(px - pinnedX) < 2) {
+          cancelPin();
+        } else {
+          pinnedX = px;
+          hoverLine.classList.add('pinned');
+          applyPosition(px, true);
+        }
+
+        // 阻止冒泡，避免触发 document 的取消逻辑
+        e.stopPropagation();
+      });
+
+      // 点击时间轴外部任意区域也取消锁定
+      function onDocClick() {
+        if (pinnedX !== null) cancelPin();
+      }
+      document.addEventListener('click', onDocClick);
+
+      // ---- 当前时间指示线（两条，间隔24小时）----
+      function makeNowLine(showLabel) {
+        const line = document.createElement('div');
+        line.className = 'now-line';
+        if (showLabel) {
+          const lbl = document.createElement('span');
+          lbl.className = 'now-label';
+          lbl.textContent = '--:--:--';
+          line.appendChild(lbl);
+        }
+        tl.appendChild(line);
+        return line;
+      }
+
+      const nowLine1 = makeNowLine(true);
+      const nowLine2 = makeNowLine(true);
+
+      // 标签宽度约 70px，安全边距留 4px
+      const LABEL_HALF = 38;
+
+      function adjustNowLabel(line, lineLeft) {
+        const lbl = line.querySelector('.now-label');
+        if (!lbl) return;
+        // lineLeft 是红线相对于 timeline 元素的 left 值（px）
+        // 标签 left:50% 即挂在红线中心（lineLeft + 1px）
+        // 左侧可用空间：lineLeft - LABEL_WIDTH（sticky列宽）
+        const leftSpace = lineLeft - LABEL_WIDTH;
+        const trackWidth = TOTAL * HR;
+        const rightSpace = trackWidth - (lineLeft - LABEL_WIDTH);
+
+        if (leftSpace < LABEL_HALF + 4) {
+          // 靠近左边：标签向右偏，左边缘对齐红线
+          lbl.style.transform = 'translateX(-4px)';
+        } else if (rightSpace < LABEL_HALF + 4) {
+          // 靠近右边：标签向左偏，右边缘对齐红线
+          lbl.style.transform = 'translateX(calc(-100% + 4px))';
+        } else {
+          // 中间：居中
+          lbl.style.transform = 'translateX(-50%)';
+        }
+      }
+
+      function updateNowLine() {
+        const pos = getNowPosition(); // 0~24，相对于 START 的小时偏移
+
+        // 第一条：在前24小时区段（pos: 0~24）
+        const pos1 = Math.min(24, Math.max(0, pos));
+        const left1 = timeToX(START + pos1);
+        nowLine1.style.left = left1 + 'px';
+        nowLine1.style.display = '';
+        adjustNowLabel(nowLine1, left1);
+
+        // 第二条：在后24小时区段（pos+24: 24~48）
+        const pos2 = pos + 24;
+        const left2 = timeToX(START + pos2);
+        nowLine2.style.left = left2 + 'px';
+        nowLine2.style.display = (pos2 <= TOTAL) ? '' : 'none';
+        adjustNowLabel(nowLine2, left2);
+
+        const timeStr = formatTime(new Date());
+        [nowLine1, nowLine2].forEach(line => {
+          const lbl = line.querySelector('.now-label');
+          if (lbl) lbl.textContent = timeStr;
+        });
+      }
+
+      // 立即更新
+      setTimeout(updateNowLine, 50);
+
+      // 每秒更新时间标签
+      const timeInterval = setInterval(() => {
+        const timeStr = formatTime(new Date());
+        [nowLine1, nowLine2].forEach(line => {
+          const lbl = line.querySelector('.now-label');
+          if (lbl) lbl.textContent = timeStr;
+        });
+      }, 1000);
+
+      // 每30秒更新位置
+      const posInterval = setInterval(updateNowLine, 30000);
+
+      // 保存清理函数
+      tl._cleanup = function() {
+        clearInterval(timeInterval);
+        clearInterval(posInterval);
+        document.removeEventListener('click', onDocClick);
+      };
+    }
+
+    const dateDisplay = document.getElementById('dateDisplay');
+    dateDisplay.textContent = formatDate(new Date());
+
+    const btn = document.getElementById('seasonBtn');
+    const seasonLabel = document.getElementById('seasonLabel');
+    
+    btn.textContent = isWinter ? '冬' : '夏';
+    if (isWinter) btn.classList.add('winter');
+    seasonLabel.textContent = '令时';
+    
+    btn.addEventListener('click', () => {
+      isWinter = !isWinter;
+      btn.textContent = isWinter ? '冬' : '夏';
+      btn.classList.toggle('winter', isWinter);
+      // 清理旧的定时器
+      const oldTl = document.getElementById('timeline');
+      if (oldTl._cleanup) oldTl._cleanup();
+      render(isWinter ? 'winter' : 'summer');
+    });
+
+    render(isWinter ? 'winter' : 'summer');
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>世界语言谱系 | 纯文本树状结构</title>
+    <style>
+        /* 极简重置：完全保留原始内容样式，无图形、无额外装饰、无背景块、无圆角 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #ffffff;
+            color: #111111;
+            font-family: 'SF Mono', 'Menlo', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.5;
+            padding: 2rem 1.5rem;
+        }
+        /* 主容器：最大宽度保证阅读舒适，但保留原始缩进风格 */
+        .world-lang-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: transparent;
+        }
+        /* 完全保留原始文本内容展示，无任何列表标记、图形项目符号 */
+        .lang-tree-text {
+            white-space: normal;
+            word-break: break-word;
+        }
+        /* 每一行保持间距，但跟原始给出的层级视觉一致（用空格、短线、竖线字符模拟树形） */
+        .lang-line {
+            display: block;
+            margin: 0.18rem 0;
+            font-family: inherit;
+            white-space: pre-wrap;
+            letter-spacing: normal;
+        }
+        /* 让层级更贴近原文：不添加多余边距或背景，只保留字符本身 */
+        .root-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin: 0 0 0.85rem 0;
+            letter-spacing: -0.2px;
+            font-family: inherit;
+            border: none;
+        }
+        hr {
+            display: none;
+        }
+        /* 针对移动设备确保字符对齐基本不变 */
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .lang-line {
+                font-size: 0.92rem;
+                line-height: 1.45;
+            }
+        }
+        /* 完全没有任何 hover、阴影、边框装饰图形 */
+        a, a:link, a:visited {
+            text-decoration: none;
+            color: inherit;
+        }
+        /* 保留您原样输出的硬编码格式，不额外添加任何修饰 */
+        .preserve-format {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="world-lang-container">
+    <!-- 严格按照用户给出的原始文本结构展示：世界语言 + 树形符号，不做任何图形化渲染，只保留内容 -->
+    <div class="lang-tree-text">
+        <div class="root-title">世界语言</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 印欧语系</div>
+        <div class="lang-line">│  ├─ 日耳曼语族</div>
+        <div class="lang-line">│  │  ├─ 西日耳曼语支：英语、德语、荷兰语</div>
+        <div class="lang-line">│  │  └─ 北日耳曼语支：瑞典语、丹麦语、挪威语</div>
+        <div class="lang-line">│  ├─ 罗曼语族</div>
+        <div class="lang-line">│  │  ├─ 西罗曼语支：西班牙语、葡萄牙语、法语、意大利语</div>
+        <div class="lang-line">│  │  └─ 东罗曼语支：罗马尼亚语</div>
+        <div class="lang-line">│  ├─ 斯拉夫语族</div>
+        <div class="lang-line">│  │  ├─ 东斯拉夫语支：俄语、乌克兰语</div>
+        <div class="lang-line">│  │  ├─ 西斯拉夫语支：波兰语、捷克语</div>
+        <div class="lang-line">│  │  └─ 南斯拉夫语支：塞尔维亚语/克罗地亚语、保加利亚语</div>
+        <div class="lang-line">│  ├─ 印度-伊朗语族</div>
+        <div class="lang-line">│  │  ├─ 印度-雅利安语支：印地语/乌尔都语、孟加拉语、旁遮普语</div>
+        <div class="lang-line">│  │  └─ 伊朗语支：波斯语</div>
+        <div class="lang-line">│  └─ 希腊语族：希腊语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 乌拉尔语系</div>
+        <div class="lang-line">│  └─ 芬兰-乌戈尔语族</div>
+        <div class="lang-line">│     ├─ 芬兰语支：芬兰语、爱沙尼亚语</div>
+        <div class="lang-line">│     └─ 乌戈尔语支：匈牙利语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 亚非语系</div>
+        <div class="lang-line">│  └─ 闪米特语族</div>
+        <div class="lang-line">│     └─ 中闪米特语支：阿拉伯语、希伯来语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 突厥语系</div>
+        <div class="lang-line">│  └─ 普通突厥语族</div>
+        <div class="lang-line">│     ├─ 乌古斯语支：土耳其语、阿塞拜疆语</div>
+        <div class="lang-line">│     ├─ 钦察语支：哈萨克语</div>
+        <div class="lang-line">│     └─ 葛逻禄语支：乌兹别克语、维吾尔语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 汉藏语系</div>
+        <div class="lang-line">│  ├─ 汉语族</div>
+        <div class="lang-line">│  │  ├─ 官话</div>
+        <div class="lang-line">│  │  ├─ 粤语</div>
+        <div class="lang-line">│  │  ├─ 吴语</div>
+        <div class="lang-line">│  │  ├─ 闽语</div>
+        <div class="lang-line">│  │  └─ 客家话</div>
+        <div class="lang-line">│  └─ 藏缅语族</div>
+        <div class="lang-line">│     ├─ 藏语</div>
+        <div class="lang-line">│     └─ 缅甸语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 侗台语系（壮侗语系）</div>
+        <div class="lang-line">│  └─ 台语支：泰语、老挝语、壮语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 南亚语系</div>
+        <div class="lang-line">│  └─ 孟高棉语族</div>
+        <div class="lang-line">│     ├─ 越南语</div>
+        <div class="lang-line">│     └─ 高棉语（柬埔寨语）</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 南岛语系</div>
+        <div class="lang-line">│  └─ 马来-波利尼西亚语族</div>
+        <div class="lang-line">│     ├─ 马来语支：马来语、印度尼西亚语</div>
+        <div class="lang-line">│     └─ 菲律宾语支：菲律宾语（他加禄语）</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 蒙古语系：蒙古语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 日本语系：日语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 朝鲜语系：朝鲜语/韩语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 达罗毗荼语系</div>
+        <div class="lang-line">│  └─ 南达罗毗荼语族</div>
+        <div class="lang-line">│     ├─ 泰米尔语</div>
+        <div class="lang-line">│     └─ 泰卢固语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">├─ 尼日尔-刚果语系</div>
+        <div class="lang-line">│  └─ 大西洋-刚果语族</div>
+        <div class="lang-line">│     ├─ 沃尔特-刚果语支：约鲁巴语、伊博语</div>
+        <div class="lang-line">│     └─ 班图语支：斯瓦希里语、祖鲁语</div>
+        <div class="lang-line">│</div>
+        <div class="lang-line">└─ 孤立语言：巴斯克语</div>
+    </div>
+</div>
+<!-- 保证只保留您给出的内容，无额外图形、图表、canvas、svg、背景图片或装饰性元素 -->
+</body>
+</html>
