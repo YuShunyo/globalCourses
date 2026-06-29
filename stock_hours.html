@@ -526,12 +526,12 @@
 <script>
   (function() {
     const CURRENCIES = [
-      { code: 'USD', name: '美元', full: 'US Dollar',      flag: '🇺🇸', symbol: '$' },
-      { code: 'JPY', name: '日元', full: 'Japanese Yen',   flag: '🇯🇵', symbol: '¥' },
-      { code: 'KRW', name: '韩元', full: 'Korean Won',     flag: '🇰🇷', symbol: '₩' },
-      { code: 'CNY', name: '人民币', full: 'Chinese Yuan', flag: '🇨🇳', symbol: '¥' },
-      { code: 'EUR', name: '欧元', full: 'Euro',           flag: '🇪🇺', symbol: '€' },
-      { code: 'GBP', name: '英镑', full: 'British Pound',  flag: '🇬🇧', symbol: '£' },
+      { code: 'USD', name: '美元', full: 'US Dollar',      flag: '🇺🇸', symbol: '$',  decimals: 2 },
+      { code: 'JPY', name: '日元', full: 'Japanese Yen',   flag: '🇯🇵', symbol: '¥',  decimals: 0 },
+      { code: 'KRW', name: '韩元', full: 'Korean Won',     flag: '🇰🇷', symbol: '₩',  decimals: 0 },
+      { code: 'CNY', name: '人民币', full: 'Chinese Yuan', flag: '🇨🇳', symbol: '¥',  decimals: 2 },
+      { code: 'EUR', name: '欧元', full: 'Euro',           flag: '🇪🇺', symbol: '€',  decimals: 2 },
+      { code: 'GBP', name: '英镑', full: 'British Pound',  flag: '🇬🇧', symbol: '£',  decimals: 2 },
     ];
 
     let rates = {};
@@ -554,6 +554,17 @@
       const [intPart, decPart] = fixed.split('.');
       const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       return decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
+    }
+
+    // 按币种精度格式化输入框显示值（JPY/KRW 取整，其他2位）
+    function formatForCurrency(val, code) {
+      if (val === null || val === undefined || isNaN(val)) return '';
+      const cur = CURRENCIES.find(c => c.code === code);
+      const decimals = cur ? cur.decimals : 2;
+      const fixed = val.toFixed(decimals);
+      const [intPart, decPart] = fixed.split('.');
+      const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return decPart !== undefined && decimals > 0 ? `${intFormatted}.${decPart}` : intFormatted;
     }
 
     // badge 始终显示 6 位小数，统一格式 1 XXX = x.xxxxxx YYY
@@ -603,7 +614,7 @@
         if (!rates[c.code]) { el.value = ''; numericValues[c.code] = null; return; }
         const converted = usdValue * rates[c.code];
         numericValues[c.code] = converted;
-        el.value = formatWithCommas(converted);
+        el.value = formatForCurrency(converted, c.code);
       });
     }
 
@@ -790,7 +801,7 @@
 
           if (num !== null && isFinite(num)) {
             numericValues[cur.code] = num;
-            input.value = formatWithCommas(num);
+            input.value = formatForCurrency(num, cur.code);
             propagate(cur.code, num);
           } else {
             input.value = '';
