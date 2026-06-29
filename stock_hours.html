@@ -424,7 +424,7 @@
   }
   .fx-row:last-child { border-bottom: none; }
   .fx-row:hover { background: #f7f8fb; border-radius: 8px; }
-  .fx-row.active-row { background: #c8e6c9; border-radius: 8px; border: 1px solid #388e3c; margin: -1px -1px; }
+  .fx-row.active-row { background: #c8e6c9; border-radius: 8px; box-shadow: inset 0 0 0 1px #388e3c; }
 
   /* 上行：flag + 名称 + 输入框 */
   .fx-top-line {
@@ -645,8 +645,22 @@
 
         const input = row.querySelector('.fx-input');
 
-        // 选中行：切换主货币 + 高亮 + 清空
+        // 选中行（带默认值）：切换主货币 + 高亮 + 填入 100 并传播
         function activateRow() {
+          activeCode = cur.code;
+          clearAll();
+          fxBaseLabel.textContent = `基准：${cur.code}`;
+          updateBadges();
+          document.querySelectorAll('.fx-row').forEach(r => r.classList.remove('active-row'));
+          row.classList.add('active-row');
+          // 填入 100 并传播，不 focus（不弹键盘）
+          numericValues[cur.code] = 100;
+          input.value = '100';
+          propagate(cur.code, 100);
+        }
+
+        // 仅切换高亮和基准货币，不填默认值（点输入框时用）
+        function activateRowSilent() {
           activeCode = cur.code;
           clearAll();
           fxBaseLabel.textContent = `基准：${cur.code}`;
@@ -655,16 +669,30 @@
           row.classList.add('active-row');
         }
 
-        // 点击整行触发选中（区分点击和滑动，移动超过 6px 不触发）
+        // 点输入框：静默选中（清空 + 高亮，不填 100）
+        input.addEventListener('focus', () => {
+          activateRowSilent();
+        });
+
+        // 点击整行非输入框区域：选中并填入默认值 100
         let rowPointerStartX = 0, rowPointerStartY = 0;
         row.addEventListener('pointerdown', (e) => {
           rowPointerStartX = e.clientX;
           rowPointerStartY = e.clientY;
         });
         row.addEventListener('pointerup', (e) => {
+          if (e.target === input) return; // 输入框自己处理
           const dx = Math.abs(e.clientX - rowPointerStartX);
           const dy = Math.abs(e.clientY - rowPointerStartY);
-          if (dx < 6 && dy < 6) activateRow();
+          if (dx < 6 && dy < 6) {
+            if (row.classList.contains('active-row')) {
+              // 再次点击已选中行：取消选中并清空
+              row.classList.remove('active-row');
+              clearAll();
+            } else {
+              activateRow();
+            }
+          }
         });
 
         // input：输入中只格式化整数千分位，保留小数输入中间态
