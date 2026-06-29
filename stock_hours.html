@@ -13,9 +13,10 @@
       background: #f0f2f5;
       color: #1e1e1e;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       padding: 16px;
+      gap: 16px;
     }
     .container {
       max-width: 1200px;
@@ -389,7 +390,407 @@
       <span class="season-label" id="seasonLabel">令时</span>
     </div>
   </div>
+
+</div><!-- /main .container close before fx -->
+
+<!-- 汇率换算独立容器 -->
+<div class="container" id="fx-container">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:6px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:13px; font-weight:700; color:#2d2f3a; letter-spacing:0.2px;">汇率换算</span>
+      <span id="fx-base-label" style="font-size:10px; color:#9a9eae; font-weight:400;">基准：USD</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <span id="fx-update-time" style="font-size:9.5px; color:#b0b4bc;"></span>
+      <button id="fx-refresh-btn" title="刷新汇率" style="background:#f0f2f5; border:1px solid #e0e2e8; border-radius:8px; padding:3px 10px; font-size:10px; color:#4a4d5a; cursor:pointer; display:flex; align-items:center; gap:4px; transition:background 0.15s;">
+        <span id="fx-refresh-icon" style="display:inline-block; transition:transform 0.6s;">↻</span> 刷新
+      </button>
+    </div>
+  </div>
+  <div id="fx-rows" style="display:flex; flex-direction:column; gap:0;"></div>
+  <div id="fx-error" style="display:none; font-size:10.5px; color:#e53935; padding:6px 0; text-align:center;"></div>
 </div>
+
+<style>
+  .fx-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f0f2f5;
+    padding: 7px 6px;
+    gap: 0;
+    transition: background 0.12s;
+    overflow: hidden;
+  }
+  .fx-row:last-child { border-bottom: none; }
+  .fx-row:hover { background: #f7f8fb; border-radius: 8px; }
+  .fx-row.active-row { background: #eef5ff; border-radius: 8px; }
+
+  .fx-flag {
+    font-size: 20px;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  /* 左列固定宽度，badge 再长也不撑开，输入框左边缘始终对齐 */
+  .fx-left-col {
+    flex: 0 0 200px;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .fx-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+  }
+  .fx-name { font-size: 11px; font-weight: 700; color: #2d2f3a; letter-spacing: 0.3px; }
+  .fx-full { font-size: 9px; color: #9a9eae; font-weight: 400; }
+  .fx-rate-badge {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 8.5px;
+    color: #6a9fd8;
+    background: #e8f1fb;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-weight: 500;
+    white-space: nowrap;
+    line-height: 1.5;
+  }
+  .fx-input-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-left: 12px;
+  }
+  /* 使用 text 类型输入框，手动处理逗号格式化 */
+  .fx-input {
+    width: 100%;
+    border: 1.5px solid #e0e2e8;
+    border-radius: 8px;
+    padding: 6px 10px 6px 28px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1e1e;
+    background: #ffffff;
+    outline: none;
+    font-variant-numeric: tabular-nums;
+    font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+    text-align: right;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .fx-input:focus {
+    border-color: #4a8fc1;
+    box-shadow: 0 0 0 3px rgba(74,143,193,0.12);
+  }
+  .fx-symbol {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: #9a9eae;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    z-index: 1;
+  }
+
+  @media (max-width: 600px) {
+    .fx-left-col { flex: 0 0 160px; width: 160px; }
+  }
+  @media (max-width: 480px) {
+    .fx-left-col { flex: 0 0 140px; width: 140px; }
+    .fx-name { font-size: 10px; }
+    .fx-rate-badge { font-size: 8px; }
+    .fx-input { font-size: 12px; padding: 5px 8px 5px 22px; }
+    .fx-input-wrap { margin-left: 6px; }
+  }
+</style>
+
+<script>
+  (function() {
+    const CURRENCIES = [
+      { code: 'USD', name: '美元', full: 'US Dollar',      flag: '🇺🇸', symbol: '$' },
+      { code: 'JPY', name: '日元', full: 'Japanese Yen',   flag: '🇯🇵', symbol: '¥' },
+      { code: 'KRW', name: '韩元', full: 'Korean Won',     flag: '🇰🇷', symbol: '₩' },
+      { code: 'CNY', name: '人民币', full: 'Chinese Yuan', flag: '🇨🇳', symbol: '¥' },
+      { code: 'EUR', name: '欧元', full: 'Euro',           flag: '🇪🇺', symbol: '€' },
+      { code: 'GBP', name: '英镑', full: 'British Pound',  flag: '🇬🇧', symbol: '£' },
+    ];
+
+    let rates = {};
+    let activeCode = 'USD';
+    // 存储每个货币的纯数值（未格式化）
+    let numericValues = {}; // code -> number | null
+
+    const fxError   = document.getElementById('fx-error');
+    const fxUpdateTime = document.getElementById('fx-update-time');
+    const fxBaseLabel  = document.getElementById('fx-base-label');
+
+    // ── 数字格式化（带千分位逗号）────────────────────────────────
+    // 统一 6 位小数（输入框和 badge 一致）
+    function formatWithCommas(val) {
+      if (val === null || val === undefined || isNaN(val)) return '';
+      const fixed = val.toFixed(6);
+      const [intPart, decPart] = fixed.split('.');
+      const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return `${intFormatted}.${decPart}`;
+    }
+
+    // badge 始终显示 6 位小数，统一格式 1 XXX = x.xxxxxx YYY
+    function formatBadge(val) {
+      if (val === null || val === undefined || isNaN(val)) return '—';
+      const fixed = val.toFixed(6);
+      const [intPart, decPart] = fixed.split('.');
+      const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return `${intFormatted}.${decPart}`;
+    }
+
+    // 去掉逗号还原纯数字字符串
+    function stripCommas(str) {
+      return str.replace(/,/g, '');
+    }
+
+    // ── badge 文字（基准货币切换后刷新）──────────────────────────
+    function updateBadges() {
+      CURRENCIES.forEach(cur => {
+        const badge = document.getElementById('fx-badge-' + cur.code);
+        if (!badge) return;
+        if (!rates[cur.code] || !rates[activeCode]) { badge.textContent = '—'; return; }
+        // 1 activeCode = ? cur.code
+        const rate = rates[cur.code] / rates[activeCode];
+        badge.textContent = `1 ${activeCode} = ${formatBadge(rate)} ${cur.code}`;
+      });
+    }
+
+    // ── 更新时间格式 yyyy/mm/dd hh:mm ────────────────────────────
+    function formatUpdateTime(d) {
+      const y  = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const dy = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `更新于 ${y}/${mo}/${dy} ${hh}:${mm}`;
+    }
+
+    // ── 将 activeCode 的当前数值传播到其他行 ─────────────────────
+    function propagate(fromCode, fromValue) {
+      if (!rates[fromCode]) return;
+      const usdValue = fromValue / rates[fromCode];
+      CURRENCIES.forEach(c => {
+        if (c.code === fromCode) return;
+        const el = document.getElementById('fx-input-' + c.code);
+        if (!el) return;
+        if (!rates[c.code]) { el.value = ''; numericValues[c.code] = null; return; }
+        const converted = usdValue * rates[c.code];
+        numericValues[c.code] = converted;
+        el.value = formatWithCommas(converted);
+      });
+    }
+
+    function clearAll() {
+      CURRENCIES.forEach(c => {
+        numericValues[c.code] = null;
+        const el = document.getElementById('fx-input-' + c.code);
+        if (el) el.value = '';
+      });
+    }
+
+    // ── 构建行 ────────────────────────────────────────────────────
+    function buildRows() {
+      const fxRows = document.getElementById('fx-rows');
+      fxRows.innerHTML = '';
+      CURRENCIES.forEach(cur => {
+        const row = document.createElement('div');
+        row.className = 'fx-row';
+        row.id = 'fx-row-' + cur.code;
+
+        row.innerHTML = `
+          <div class="fx-left-col">
+            <div class="fx-flag">${cur.flag}</div>
+            <div class="fx-info">
+              <div class="fx-name">${cur.code} ${cur.name}</div>
+              <div class="fx-full">${cur.full}</div>
+              <div class="fx-rate-badge" id="fx-badge-${cur.code}">加载中…</div>
+            </div>
+          </div>
+          <div class="fx-input-wrap">
+            <span class="fx-symbol">${cur.symbol}</span>
+            <input class="fx-input" id="fx-input-${cur.code}" type="text"
+              inputmode="decimal" placeholder="0" autocomplete="off" />
+          </div>
+        `;
+        fxRows.appendChild(row);
+
+        const input = row.querySelector('.fx-input');
+
+        // focus：切换主货币 → 清空所有输入框 → 更新 badge & 标签
+        input.addEventListener('focus', () => {
+          if (activeCode !== cur.code) {
+            activeCode = cur.code;
+            clearAll();
+            fxBaseLabel.textContent = `基准：${cur.code}`;
+            updateBadges();
+          }
+          document.querySelectorAll('.fx-row').forEach(r => r.classList.remove('active-row'));
+          row.classList.add('active-row');
+        });
+
+        // input：输入中只格式化整数千分位，保留小数输入中间态
+        // 判断是否含算式字符（含 + - * / ( ) 空格）
+        function isExpression(s) {
+          return /[+*\/()]/.test(s) || /\d\s*-/.test(s);
+        }
+
+        // 安全求值：只允许数字和 + - * / ( ) . 空格
+        function safeEval(expr) {
+          const sanitized = expr.replace(/[^\d+\-*/().\s]/g, '');
+          try {
+            // eslint-disable-next-line no-new-func
+            const result = Function('"use strict"; return (' + sanitized + ')')();
+            if (typeof result === 'number' && isFinite(result)) return result;
+          } catch(e) {}
+          return null;
+        }
+
+        input.addEventListener('input', () => {
+          const raw = stripCommas(input.value);
+
+          // 空输入：清空所有
+          if (raw.trim() === '') {
+            numericValues[cur.code] = null;
+            input.style.color = '';
+            CURRENCIES.forEach(c => {
+              if (c.code === cur.code) return;
+              const el = document.getElementById('fx-input-' + c.code);
+              if (el) { el.value = ''; numericValues[c.code] = null; }
+            });
+            return;
+          }
+
+          if (isExpression(raw)) {
+            // 算式：实时求值传播，输入框保留原始文字让用户继续编辑
+            const result = safeEval(raw);
+            if (result !== null && isFinite(result)) {
+              input.style.color = '#4a8fc1'; // 蓝色提示"算式模式"
+              numericValues[cur.code] = result;
+              propagate(cur.code, result);
+            } else {
+              // 算式还未完成（如 "100+"），不传播但也不报错
+              input.style.color = '#4a8fc1';
+            }
+            return;
+          }
+
+          // 纯数字路径：实时千分位格式化
+          input.style.color = '';
+          const cleaned = raw.replace(/[^\d.\-]/g, '');
+          if (cleaned === '' || cleaned === '-' || cleaned === '.' || cleaned === '-.') {
+            numericValues[cur.code] = null;
+            return;
+          }
+
+          const num = parseFloat(cleaned);
+          if (isNaN(num)) return;
+          numericValues[cur.code] = num;
+
+          // 整数部分加千分位，小数部分保留用户输入原样
+          const cursor = input.selectionStart;
+          const oldLen = input.value.length;
+          const hasTrailingDot = cleaned.endsWith('.');
+          const parts = cleaned.split('.');
+          const intFormatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          let liveFormatted;
+          if (hasTrailingDot) {
+            liveFormatted = intFormatted + '.';
+          } else if (parts.length > 1) {
+            liveFormatted = intFormatted + '.' + parts[1];
+          } else {
+            liveFormatted = intFormatted;
+          }
+          input.value = liveFormatted;
+          const diff = liveFormatted.length - oldLen;
+          try { input.setSelectionRange(cursor + diff, cursor + diff); } catch(e) {}
+
+          propagate(cur.code, num);
+        });
+
+        // blur：算式→替换为结果数字，纯数字→完整6位格式化
+        input.addEventListener('blur', () => {
+          const raw = stripCommas(input.value).trim();
+          input.style.color = '';
+          if (raw === '') return;
+
+          let num = null;
+          if (isExpression(raw)) {
+            num = safeEval(raw);
+          } else {
+            const n = parseFloat(raw.replace(/[^\d.\-]/g, ''));
+            if (!isNaN(n)) num = n;
+          }
+
+          if (num !== null && isFinite(num)) {
+            numericValues[cur.code] = num;
+            input.value = formatWithCommas(num);
+            propagate(cur.code, num);
+          } else {
+            input.value = '';
+            numericValues[cur.code] = null;
+          }
+        });
+      });
+    }
+
+    // ── 拉取汇率 ─────────────────────────────────────────────────
+    async function fetchRates() {
+      const btn  = document.getElementById('fx-refresh-btn');
+      const icon = document.getElementById('fx-refresh-icon');
+      if (btn) btn.disabled = true;
+      if (icon) icon.style.transform = 'rotate(360deg)';
+      fxError.style.display = 'none';
+
+      try {
+        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        if (!res.ok) throw new Error('网络错误');
+        const data = await res.json();
+        rates = { USD: 1 };
+        CURRENCIES.forEach(c => {
+          if (data.rates[c.code] !== undefined) rates[c.code] = data.rates[c.code];
+        });
+        fxUpdateTime.textContent = formatUpdateTime(new Date());
+        updateBadges();
+        // 重新传播
+        const v = numericValues[activeCode];
+        if (v !== null && v !== undefined && !isNaN(v)) propagate(activeCode, v);
+      } catch(e) {
+        fxError.style.display = 'block';
+        fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
+        rates = { USD:1, JPY:157.5, KRW:1380, CNY:7.24, EUR:0.918, GBP:0.787 };
+        fxUpdateTime.textContent = '参考汇率（离线）';
+        updateBadges();
+      } finally {
+        if (btn) btn.disabled = false;
+        setTimeout(() => { if (icon) icon.style.transform = 'rotate(0deg)'; }, 700);
+      }
+    }
+
+    document.getElementById('fx-refresh-btn').addEventListener('click', fetchRates);
+
+    buildRows();
+    fetchRates();
+  })();
+</script>
+
+</div><!-- /fx-container .container -->
 
 <script>
   (function(){
