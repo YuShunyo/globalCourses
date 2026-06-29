@@ -1289,64 +1289,92 @@
       document.addEventListener('click', onDocClick);
 
       // ---- 触摸支持 ----
-      // 记录触摸起点，判断是否在轨道内
-      let touchInTrack = false;
-      let touchStartX = 0;
+      // touchMode: null | 'drag-line' | 'scroll-track'
+      let touchMode = null;
+      let touchStartClientX = 0;
       let touchStartScrollLeft = 0;
+      const HOVER_LINE_HIT = 24; // 悬停线左右各 24px 视为命中
 
       tl.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
-        // clientX - tlRect.left 已是 timeline 内部坐标（含滚动），无需再加 scrollLeft
         const tlRect = tl.getBoundingClientRect();
+        // x 是相对于 timeline 内部的坐标（已含滚动偏移）
         const x = touch.clientX - tlRect.left;
-
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
 
-        if (x >= trackStart && x <= trackEnd) {
-          touchInTrack = true;
-          touchStartX = touch.clientX;
-          touchStartScrollLeft = wrapper.scrollLeft;
+        if (x < trackStart || x > trackEnd) {
+          // 触点在 label 列或轨道外，不干预（让页面正常滚动）
+          touchMode = null;
+          return;
+        }
+
+        touchStartClientX = touch.clientX;
+        touchStartScrollLeft = wrapper.scrollLeft;
+
+        // 判断是否点在悬停线附近
+        if (pinnedX !== null && Math.abs(x - pinnedX) <= HOVER_LINE_HIT) {
+          // 拖动悬停线模式：阻止滚动
+          touchMode = 'drag-line';
           e.preventDefault();
-          if (pinnedX !== null) cancelPin();
-          const px = Math.min(trackEnd, Math.max(trackStart, x));
-          applyPosition(px, true);
         } else {
-          touchInTrack = false;
+          // 滚动时间轴模式：让 wrapper 自然处理横向滚动即可
+          // 但需要 preventDefault 才能控制，所以手动实现滚动
+          touchMode = 'scroll-track';
+          e.preventDefault();
         }
       }, { passive: false });
 
       tl.addEventListener('touchmove', (e) => {
-        if (!touchInTrack) return;
+        if (!touchMode) return;
         e.preventDefault();
 
         const touch = e.touches[0];
-        // 滚动 wrapper
-        const dx = touchStartX - touch.clientX;
-        wrapper.scrollLeft = touchStartScrollLeft + dx;
+        const dx = touch.clientX - touchStartClientX;
 
-        // 悬停线跟随手指的屏幕位置，重新取 tlRect（滚动后已更新）
-        const tlRect = tl.getBoundingClientRect();
-        const x = touch.clientX - tlRect.left;
-        const trackStart = LABEL_WIDTH;
-        const trackEnd = LABEL_WIDTH + TOTAL * HR;
-        const px = Math.min(trackEnd, Math.max(trackStart, x));
-        applyPosition(px, true);
+        if (touchMode === 'drag-line') {
+          // 只移动悬停线，时间轴不滚动
+          // pinnedX 是 timeline 内部坐标，手指在屏幕上移动 dx，
+          // 因为时间轴没有滚动，timeline 内坐标也同样偏移 dx
+          const trackStart = LABEL_WIDTH;
+          const trackEnd = LABEL_WIDTH + TOTAL * HR;
+          const newPx = Math.min(trackEnd, Math.max(trackStart, pinnedX + dx));
+          // 实时更新显示但不固定 pinnedX（松手再固定）
+          applyPosition(newPx, true);
+        } else {
+          // 滚动时间轴，悬停线保持在时间轴上的绝对位置不动
+          wrapper.scrollLeft = touchStartScrollLeft - dx;
+        }
       }, { passive: false });
 
       tl.addEventListener('touchend', (e) => {
-        if (!touchInTrack) return;
-        touchInTrack = false;
+        if (!touchMode) return;
 
         const touch = e.changedTouches[0];
-        const tlRect = tl.getBoundingClientRect();
-        const x = touch.clientX - tlRect.left;
-        const trackStart = LABEL_WIDTH;
-        const trackEnd = LABEL_WIDTH + TOTAL * HR;
-        const px = Math.min(trackEnd, Math.max(trackStart, x));
-        pinnedX = px;
-        hoverLine.classList.add('pinned');
-        applyPosition(px, true);
+        const dx = touch.clientX - touchStartClientX;
+
+        if (touchMode === 'drag-line') {
+          // 松手：固定悬停线到新位置
+          const trackStart = LABEL_WIDTH;
+          const trackEnd = LABEL_WIDTH + TOTAL * HR;
+          pinnedX = Math.min(trackEnd, Math.max(trackStart, pinnedX + dx));
+          hoverLine.classList.add('pinned');
+          applyPosition(pinnedX, true);
+        } else {
+          // 轻触（几乎没有移动）：设置悬停线
+          if (Math.abs(dx) < 6) {
+            const tlRect = tl.getBoundingClientRect();
+            const x = touch.clientX - tlRect.left;
+            const trackStart = LABEL_WIDTH;
+            const trackEnd = LABEL_WIDTH + TOTAL * HR;
+            const px = Math.min(trackEnd, Math.max(trackStart, x));
+            pinnedX = px;
+            hoverLine.classList.add('pinned');
+            applyPosition(px, true);
+          }
+        }
+
+        touchMode = null;
       });
 
       // ---- 当前时间指示线（两条，间隔24小时）----
