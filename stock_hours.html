@@ -759,6 +759,29 @@
       });
     }
 
+    // ── 本地缓存 key ─────────────────────────────────────────────
+    const CACHE_KEY = 'fx_rates_cache';
+    const CACHE_TTL = 6 * 60 * 60 * 1000; // 6小时内复用缓存
+
+    function saveCache(ratesObj) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          rates: ratesObj,
+          ts: Date.now()
+        }));
+      } catch(e) {}
+    }
+
+    function loadCache() {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj || !obj.rates || !obj.ts) return null;
+        return obj; // { rates, ts }
+      } catch(e) { return null; }
+    }
+
     // ── 拉取汇率 ─────────────────────────────────────────────────
     async function fetchRates() {
       const btn  = document.getElementById('fx-refresh-btn');
@@ -766,6 +789,10 @@
       if (btn) btn.disabled = true;
       if (icon) icon.style.transform = 'rotate(360deg)';
       fxError.style.display = 'none';
+
+      // 先尝试从缓存读取（6小时内有效）
+      const cache = loadCache();
+      const cacheValid = cache && (Date.now() - cache.ts) < CACHE_TTL;
 
       try {
         const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
@@ -775,16 +802,34 @@
         CURRENCIES.forEach(c => {
           if (data.rates[c.code] !== undefined) rates[c.code] = data.rates[c.code];
         });
+        saveCache(rates);
         fxUpdateTime.textContent = formatUpdateTime(new Date());
         updateBadges();
         // 重新传播
         const v = numericValues[activeCode];
         if (v !== null && v !== undefined && !isNaN(v)) propagate(activeCode, v);
       } catch(e) {
-        fxError.style.display = 'block';
-        fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
-        rates = { USD:1, JPY:157.5, KRW:1380, CNY:7.24, EUR:0.918, GBP:0.787 };
-        fxUpdateTime.textContent = '参考汇率（离线）';
+        if (cacheValid) {
+          // 网络失败但有有效缓存
+          rates = cache.rates;
+          const cacheDate = new Date(cache.ts);
+          fxUpdateTime.textContent = formatUpdateTime(cacheDate) + '（缓存）';
+          fxError.style.display = 'block';
+          fxError.textContent = '⚠ 网络不可用，显示缓存汇率';
+        } else if (cache) {
+          // 缓存过期但总比没有强
+          rates = cache.rates;
+          const cacheDate = new Date(cache.ts);
+          fxUpdateTime.textContent = formatUpdateTime(cacheDate) + '（过期缓存）';
+          fxError.style.display = 'block';
+          fxError.textContent = '⚠ 网络不可用，显示过期缓存汇率';
+        } else {
+          // 完全没有缓存，用写死的兜底值
+          rates = { USD:1, JPY:157.5, KRW:1380, CNY:7.24, EUR:0.918, GBP:0.787 };
+          fxUpdateTime.textContent = '参考汇率（离线）';
+          fxError.style.display = 'block';
+          fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
+        }
         updateBadges();
       } finally {
         if (btn) btn.disabled = false;
@@ -1242,6 +1287,69 @@
         if (pinnedX !== null) cancelPin();
       }
       document.addEventListener('click', onDocClick);
+
+      // ---- 触摸支持 ----
+      // 记录触摸起点，判断是否在轨道内
+      let touchInTrack = false;
+      let touchStartX = 0;
+      let touchStartScrollLeft = 0;
+
+      tl.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        const tlRect = tl.getBoundingClientRect();
+        const x = touch.clientX - tlRect.left + wrapper.scrollLeft;
+
+        const trackStart = LABEL_WIDTH;
+        const trackEnd = LABEL_WIDTH + TOTAL * HR;
+
+        if (x >= trackStart && x <= trackEnd) {
+          // 触点在轨道内：接管手势，阻止页面滚动
+          touchInTrack = true;
+          touchStartX = touch.clientX;
+          touchStartScrollLeft = wrapper.scrollLeft;
+          e.preventDefault();
+          // 若已固定则先清除，进入拖动模式
+          if (pinnedX !== null) cancelPin();
+          const px = Math.min(trackEnd, Math.max(trackStart, x));
+          applyPosition(px, true);
+        } else {
+          touchInTrack = false;
+        }
+      }, { passive: false });
+
+      tl.addEventListener('touchmove', (e) => {
+        if (!touchInTrack) return;
+        e.preventDefault();
+
+        const touch = e.touches[0];
+        // 手指横向移动 → 同步滚动 wrapper
+        const dx = touchStartX - touch.clientX;
+        wrapper.scrollLeft = touchStartScrollLeft + dx;
+
+        // 同步更新悬停线位置
+        const tlRect = tl.getBoundingClientRect();
+        const x = touch.clientX - tlRect.left + wrapper.scrollLeft;
+        const trackStart = LABEL_WIDTH;
+        const trackEnd = LABEL_WIDTH + TOTAL * HR;
+        const px = Math.min(trackEnd, Math.max(trackStart, x));
+        applyPosition(px, true);
+      }, { passive: false });
+
+      tl.addEventListener('touchend', (e) => {
+        if (!touchInTrack) return;
+        touchInTrack = false;
+
+        // 手指抬起：固定当前位置（与鼠标点击逻辑一致）
+        const touch = e.changedTouches[0];
+        const tlRect = tl.getBoundingClientRect();
+        const x = touch.clientX - tlRect.left + wrapper.scrollLeft;
+        const trackStart = LABEL_WIDTH;
+        const trackEnd = LABEL_WIDTH + TOTAL * HR;
+        const px = Math.min(trackEnd, Math.max(trackStart, x));
+        pinnedX = px;
+        hoverLine.classList.add('pinned');
+        applyPosition(px, true);
+      });
 
       // ---- 当前时间指示线（两条，间隔24小时）----
       function makeNowLine(showLabel) {
