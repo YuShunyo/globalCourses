@@ -655,14 +655,9 @@
           row.classList.add('active-row');
         }
 
-        // 点击整行触发选中（输入框自身的 focus 也会冒泡到 row 的 click，用 pointerdown 更准确）
+        // 点击整行触发选中，但不强制 focus 输入框
         row.addEventListener('pointerdown', (e) => {
           activateRow();
-          // 若点的不是输入框，手动 focus 输入框
-          if (e.target !== input) {
-            e.preventDefault(); // 阻止默认，避免触发 blur/focus 顺序问题
-            input.focus();
-          }
         });
 
         // input：输入中只格式化整数千分位，保留小数输入中间态
