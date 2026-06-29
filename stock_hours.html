@@ -440,8 +440,8 @@
     line-height: 1;
   }
   .fx-left-col {
-    flex: 0 0 140px;
-    width: 140px;
+    flex: 0 0 115px;
+    width: 115px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -516,7 +516,7 @@
   }
 
   @media (max-width: 480px) {
-    .fx-left-col { flex: 0 0 110px; width: 110px; }
+    .fx-left-col { flex: 0 0 90px; width: 90px; }
     .fx-name { font-size: 10.5px; }
     .fx-rate-badge { font-size: 8px; }
     /* font-size 16px 防止 iOS 自动缩放 */
@@ -546,13 +546,16 @@
     const fxBaseLabel  = document.getElementById('fx-base-label');
 
     // ── 数字格式化（带千分位逗号）────────────────────────────────
-    // 统一 6 位小数（输入框和 badge 一致）
+    // 最多 6 位小数，去掉末尾多余的零
     function formatWithCommas(val) {
       if (val === null || val === undefined || isNaN(val)) return '';
-      const fixed = val.toFixed(6);
+      // 最多保留6位有效小数，去掉末尾零
+      let fixed = val.toFixed(6);
+      // 去掉小数末尾的零；如果小数部分全是零则去掉小数点
+      fixed = fixed.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
       const [intPart, decPart] = fixed.split('.');
       const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      return `${intFormatted}.${decPart}`;
+      return decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
     }
 
     // badge 始终显示 6 位小数，统一格式 1 XXX = x.xxxxxx YYY
