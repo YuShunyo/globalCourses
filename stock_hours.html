@@ -655,9 +655,16 @@
           row.classList.add('active-row');
         }
 
-        // 点击整行触发选中，但不强制 focus 输入框
+        // 点击整行触发选中（区分点击和滑动，移动超过 6px 不触发）
+        let rowPointerStartX = 0, rowPointerStartY = 0;
         row.addEventListener('pointerdown', (e) => {
-          activateRow();
+          rowPointerStartX = e.clientX;
+          rowPointerStartY = e.clientY;
+        });
+        row.addEventListener('pointerup', (e) => {
+          const dx = Math.abs(e.clientX - rowPointerStartX);
+          const dy = Math.abs(e.clientY - rowPointerStartY);
+          if (dx < 6 && dy < 6) activateRow();
         });
 
         // input：输入中只格式化整数千分位，保留小数输入中间态
