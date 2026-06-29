@@ -424,7 +424,7 @@
   }
   .fx-row:last-child { border-bottom: none; }
   .fx-row:hover { background: #f7f8fb; border-radius: 8px; }
-  .fx-row.active-row { background: #eef5ff; border-radius: 8px; }
+  .fx-row.active-row { background: #c8e6c9; border-radius: 8px; border: 1px solid #388e3c; margin: -1px -1px; }
 
   /* 上行：flag + 名称 + 输入框 */
   .fx-top-line {
@@ -645,14 +645,24 @@
 
         const input = row.querySelector('.fx-input');
 
-        // focus：每次聚焦都清空所有输入框，并切换主货币
-        input.addEventListener('focus', () => {
+        // 选中行：切换主货币 + 高亮 + 清空
+        function activateRow() {
           activeCode = cur.code;
           clearAll();
           fxBaseLabel.textContent = `基准：${cur.code}`;
           updateBadges();
           document.querySelectorAll('.fx-row').forEach(r => r.classList.remove('active-row'));
           row.classList.add('active-row');
+        }
+
+        // 点击整行触发选中（输入框自身的 focus 也会冒泡到 row 的 click，用 pointerdown 更准确）
+        row.addEventListener('pointerdown', (e) => {
+          activateRow();
+          // 若点的不是输入框，手动 focus 输入框
+          if (e.target !== input) {
+            e.preventDefault(); // 阻止默认，避免触发 blur/focus 顺序问题
+            input.focus();
+          }
         });
 
         // input：输入中只格式化整数千分位，保留小数输入中间态
