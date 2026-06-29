@@ -440,8 +440,8 @@
     line-height: 1;
   }
   .fx-left-col {
-    flex: 0 0 115px;
-    width: 115px;
+    flex: 0 0 128px;
+    width: 128px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -516,7 +516,7 @@
   }
 
   @media (max-width: 480px) {
-    .fx-left-col { flex: 0 0 90px; width: 90px; }
+    .fx-left-col { flex: 0 0 100px; width: 100px; }
     .fx-name { font-size: 10.5px; }
     .fx-rate-badge { font-size: 8px; }
     /* font-size 16px 防止 iOS 自动缩放 */
@@ -649,14 +649,12 @@
 
         const input = row.querySelector('.fx-input');
 
-        // focus：切换主货币 → 清空所有输入框 → 更新 badge & 标签
+        // focus：每次聚焦都清空所有输入框，并切换主货币
         input.addEventListener('focus', () => {
-          if (activeCode !== cur.code) {
-            activeCode = cur.code;
-            clearAll();
-            fxBaseLabel.textContent = `基准：${cur.code}`;
-            updateBadges();
-          }
+          activeCode = cur.code;
+          clearAll();
+          fxBaseLabel.textContent = `基准：${cur.code}`;
+          updateBadges();
           document.querySelectorAll('.fx-row').forEach(r => r.classList.remove('active-row'));
           row.classList.add('active-row');
         });
