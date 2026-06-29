@@ -432,16 +432,24 @@
     gap: 0;
     width: 100%;
   }
-  .fx-flag {
-    font-size: 20px;
-    width: 28px;
-    text-align: center;
-    flex-shrink: 0;
+  .fx-flag-sm {
+    font-size: 16px;
     line-height: 1;
   }
+  .fx-sub {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 1px;
+  }
+  .fx-symbol-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9a9eae;
+  }
   .fx-left-col {
-    flex: 0 0 128px;
-    width: 128px;
+    flex: 0 0 92px;
+    width: 92px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -456,11 +464,11 @@
     gap: 1px;
   }
   .fx-name { font-size: 11px; font-weight: 700; color: #2d2f3a; letter-spacing: 0.3px; }
-  .fx-full { font-size: 9px; color: #9a9eae; font-weight: 400; }
+
 
   /* 下行：badge 独占一行，缩进对齐货币名称 */
   .fx-badge-row {
-    padding-left: 36px; /* flag宽28 + gap8 */
+    padding-left: 0;
     padding-top: 3px;
   }
   .fx-rate-badge {
@@ -487,7 +495,7 @@
     width: 100%;
     border: 1.5px solid #e0e2e8;
     border-radius: 8px;
-    padding: 6px 10px 6px 28px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 600;
     color: #1e1e1e;
@@ -502,25 +510,14 @@
     border-color: #4a8fc1;
     box-shadow: 0 0 0 3px rgba(74,143,193,0.12);
   }
-  .fx-symbol {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px;
-    font-weight: 600;
-    color: #9a9eae;
-    pointer-events: none;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    z-index: 1;
-  }
+
 
   @media (max-width: 480px) {
-    .fx-left-col { flex: 0 0 100px; width: 100px; }
+    .fx-left-col { flex: 0 0 64px; width: 64px; }
     .fx-name { font-size: 10.5px; }
     .fx-rate-badge { font-size: 8px; }
     /* font-size 16px 防止 iOS 自动缩放 */
-    .fx-input { font-size: 16px; padding: 6px 10px 6px 24px; }
+    .fx-input { font-size: 16px; padding: 6px 12px; }
     .fx-input-wrap { margin-left: 6px; }
   }
 </style>
@@ -629,14 +626,12 @@
         row.innerHTML = `
           <div class="fx-top-line">
             <div class="fx-left-col">
-              <div class="fx-flag">${cur.flag}</div>
               <div class="fx-info">
                 <div class="fx-name">${cur.code} ${cur.name}</div>
-                <div class="fx-full">${cur.full}</div>
+                <div class="fx-sub"><span class="fx-flag-sm">${cur.flag}</span><span class="fx-symbol-text">${cur.symbol}</span></div>
               </div>
             </div>
             <div class="fx-input-wrap">
-            <span class="fx-symbol">${cur.symbol}</span>
             <input class="fx-input" id="fx-input-${cur.code}" type="text"
               inputmode="decimal" placeholder="0" autocomplete="off" />
             </div>
