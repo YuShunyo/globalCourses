@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>全球主要股市交易时间</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn5OIPC90ZXh0Pjwvc3ZnPg==">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -1499,13 +1500,23 @@
     render(isWinter ? 'winter' : 'summer');
 
     // 窗口尺寸变化时重新渲染（节流 200ms）
+    // 只响应宽度变化，忽略高度变化（手机地址栏收起导致的 resize）
     let resizeTimer;
+    let lastInnerWidth = window.innerWidth;
     window.addEventListener('resize', () => {
+      const newWidth = window.innerWidth;
+      if (newWidth === lastInnerWidth) return; // 只有高度变化，跳过
+      lastInnerWidth = newWidth;
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
+        // 记住当前滚动位置，重渲染后恢复
+        const wrapperEl = document.querySelector('.timeline-wrapper');
+        const savedScroll = wrapperEl ? wrapperEl.scrollLeft : 0;
         const oldTl = document.getElementById('timeline');
         if (oldTl._cleanup) oldTl._cleanup();
         render(isWinter ? 'winter' : 'summer');
+        // 恢复滚动位置，覆盖 render 内的初始滚动
+        if (wrapperEl) setTimeout(() => { wrapperEl.scrollLeft = savedScroll; }, 90);
       }, 200);
     });
   })();
