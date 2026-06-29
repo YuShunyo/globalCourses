@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>全球主要股市交易时间</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -414,9 +414,9 @@
 <style>
   .fx-row {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     border-bottom: 1px solid #f0f2f5;
-    padding: 7px 6px;
+    padding: 8px 6px;
     gap: 0;
     transition: background 0.12s;
     overflow: hidden;
@@ -425,6 +425,13 @@
   .fx-row:hover { background: #f7f8fb; border-radius: 8px; }
   .fx-row.active-row { background: #eef5ff; border-radius: 8px; }
 
+  /* 上行：flag + 名称 + 输入框 */
+  .fx-top-line {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
   .fx-flag {
     font-size: 20px;
     width: 28px;
@@ -432,13 +439,12 @@
     flex-shrink: 0;
     line-height: 1;
   }
-  /* 左列固定宽度，badge 再长也不撑开，输入框左边缘始终对齐 */
   .fx-left-col {
-    flex: 0 0 200px;
-    width: 200px;
+    flex: 0 0 140px;
+    width: 140px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
     overflow: hidden;
   }
@@ -447,18 +453,23 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    gap: 2px;
+    gap: 1px;
   }
   .fx-name { font-size: 11px; font-weight: 700; color: #2d2f3a; letter-spacing: 0.3px; }
   .fx-full { font-size: 9px; color: #9a9eae; font-weight: 400; }
+
+  /* 下行：badge 独占一行，缩进对齐货币名称 */
+  .fx-badge-row {
+    padding-left: 36px; /* flag宽28 + gap8 */
+    padding-top: 3px;
+  }
   .fx-rate-badge {
     display: inline-block;
-    align-self: flex-start;
     font-size: 8.5px;
     color: #6a9fd8;
     background: #e8f1fb;
     border-radius: 4px;
-    padding: 1px 5px;
+    padding: 1px 6px;
     font-weight: 500;
     white-space: nowrap;
     line-height: 1.5;
@@ -469,7 +480,7 @@
     display: flex;
     align-items: center;
     position: relative;
-    margin-left: 12px;
+    margin-left: 10px;
   }
   /* 使用 text 类型输入框，手动处理逗号格式化 */
   .fx-input {
@@ -504,14 +515,12 @@
     z-index: 1;
   }
 
-  @media (max-width: 600px) {
-    .fx-left-col { flex: 0 0 160px; width: 160px; }
-  }
   @media (max-width: 480px) {
-    .fx-left-col { flex: 0 0 140px; width: 140px; }
-    .fx-name { font-size: 10px; }
+    .fx-left-col { flex: 0 0 110px; width: 110px; }
+    .fx-name { font-size: 10.5px; }
     .fx-rate-badge { font-size: 8px; }
-    .fx-input { font-size: 12px; padding: 5px 8px 5px 22px; }
+    /* font-size 16px 防止 iOS 自动缩放 */
+    .fx-input { font-size: 16px; padding: 6px 10px 6px 24px; }
     .fx-input-wrap { margin-left: 6px; }
   }
 </style>
@@ -615,18 +624,22 @@
         row.id = 'fx-row-' + cur.code;
 
         row.innerHTML = `
-          <div class="fx-left-col">
-            <div class="fx-flag">${cur.flag}</div>
-            <div class="fx-info">
-              <div class="fx-name">${cur.code} ${cur.name}</div>
-              <div class="fx-full">${cur.full}</div>
-              <div class="fx-rate-badge" id="fx-badge-${cur.code}">加载中…</div>
+          <div class="fx-top-line">
+            <div class="fx-left-col">
+              <div class="fx-flag">${cur.flag}</div>
+              <div class="fx-info">
+                <div class="fx-name">${cur.code} ${cur.name}</div>
+                <div class="fx-full">${cur.full}</div>
+              </div>
             </div>
-          </div>
-          <div class="fx-input-wrap">
+            <div class="fx-input-wrap">
             <span class="fx-symbol">${cur.symbol}</span>
             <input class="fx-input" id="fx-input-${cur.code}" type="text"
               inputmode="decimal" placeholder="0" autocomplete="off" />
+            </div>
+          </div>
+          <div class="fx-badge-row">
+            <div class="fx-rate-badge" id="fx-badge-${cur.code}">加载中…</div>
           </div>
         `;
         fxRows.appendChild(row);
