@@ -530,6 +530,7 @@
       { code: 'JPY', name: '日元', full: 'Japanese Yen',   flag: '🇯🇵', symbol: '¥',  decimals: 0 },
       { code: 'KRW', name: '韩元', full: 'Korean Won',     flag: '🇰🇷', symbol: '₩',  decimals: 0 },
       { code: 'CNY', name: '人民币', full: 'Chinese Yuan', flag: '🇨🇳', symbol: '¥',  decimals: 2 },
+      { code: 'HKD', name: '港币', full: 'Hong Kong Dollar', flag: '🇭🇰', symbol: '$',  decimals: 2 },
       { code: 'EUR', name: '欧元', full: 'Euro',           flag: '🇪🇺', symbol: '€',  decimals: 2 },
       { code: 'GBP', name: '英镑', full: 'British Pound',  flag: '🇬🇧', symbol: '£',  decimals: 2 },
     ];
@@ -847,7 +848,7 @@
       const cacheValid = cache && (Date.now() - cache.ts) < CACHE_TTL;
 
       try {
-        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const res = await fetch('https://api.frankfurter.dev/v1/latest?base=USD');
         if (!res.ok) throw new Error('网络错误');
         const data = await res.json();
         rates = { USD: 1 };
@@ -877,7 +878,7 @@
           fxError.textContent = '⚠ 网络不可用，显示过期缓存汇率';
         } else {
           // 完全没有缓存，用写死的兜底值
-          rates = { USD:1, JPY:157.5, KRW:1380, CNY:7.24, EUR:0.918, GBP:0.787 };
+          rates = { USD:1, JPY:161.96, KRW:1547.79, CNY:6.80, HKD:7.84, EUR:0.880, GBP:0.759 };
           fxUpdateTime.textContent = '参考汇率（离线）';
           fxError.style.display = 'block';
           fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
