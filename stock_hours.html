@@ -594,16 +594,6 @@
       });
     }
 
-    // ── 更新时间格式 yyyy/mm/dd hh:mm ────────────────────────────
-    function formatUpdateTime(d) {
-      const y  = d.getFullYear();
-      const mo = String(d.getMonth() + 1).padStart(2, '0');
-      const dy = String(d.getDate()).padStart(2, '0');
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      return `更新于 ${y}/${mo}/${dy} ${hh}:${mm}`;
-    }
-
     // ── 将 activeCode 的当前数值传播到其他行 ─────────────────────
     function propagate(fromCode, fromValue) {
       if (!rates[fromCode]) return;
@@ -812,40 +802,22 @@
       });
     }
 
-    // ── 本地缓存 key ─────────────────────────────────────────────
-    const CACHE_KEY = 'fx_rates_cache';
-    const CACHE_TTL = 6 * 60 * 60 * 1000; // 6小时内复用缓存
-
-    function saveCache(ratesObj) {
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          rates: ratesObj,
-          ts: Date.now()
-        }));
-      } catch(e) {}
-    }
-
-    function loadCache() {
-      try {
-        const raw = localStorage.getItem(CACHE_KEY);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        if (!obj || !obj.rates || !obj.ts) return null;
-        return obj; // { rates, ts }
-      } catch(e) { return null; }
-    }
-
     // ── 拉取汇率 ─────────────────────────────────────────────────
+    // 数据源（frankfurter.dev，基于欧洲央行每日汇率）只精确到"日期"，
+    // 这里显示的是数据源公布该汇率的日期，而不是本页面拉取数据的时间。
+    function formatSourceDate(dateStr) {
+      // dateStr 形如 "2026-06-30"
+      if (!dateStr) return '';
+      const [y, mo, dy] = dateStr.split('-');
+      return `汇率更新于 ${y}/${mo}/${dy}`;
+    }
+
     async function fetchRates() {
       const btn  = document.getElementById('fx-refresh-btn');
       const icon = document.getElementById('fx-refresh-icon');
       if (btn) btn.disabled = true;
       if (icon) icon.style.transform = 'rotate(360deg)';
       fxError.style.display = 'none';
-
-      // 先尝试从缓存读取（6小时内有效）
-      const cache = loadCache();
-      const cacheValid = cache && (Date.now() - cache.ts) < CACHE_TTL;
 
       try {
         const res = await fetch('https://api.frankfurter.dev/v1/latest?base=USD');
@@ -855,34 +827,17 @@
         CURRENCIES.forEach(c => {
           if (data.rates[c.code] !== undefined) rates[c.code] = data.rates[c.code];
         });
-        saveCache(rates);
-        fxUpdateTime.textContent = formatUpdateTime(new Date());
+        fxUpdateTime.textContent = formatSourceDate(data.date);
         updateBadges();
         // 重新传播
         const v = numericValues[activeCode];
         if (v !== null && v !== undefined && !isNaN(v)) propagate(activeCode, v);
       } catch(e) {
-        if (cacheValid) {
-          // 网络失败但有有效缓存
-          rates = cache.rates;
-          const cacheDate = new Date(cache.ts);
-          fxUpdateTime.textContent = formatUpdateTime(cacheDate) + '（缓存）';
-          fxError.style.display = 'block';
-          fxError.textContent = '⚠ 网络不可用，显示缓存汇率';
-        } else if (cache) {
-          // 缓存过期但总比没有强
-          rates = cache.rates;
-          const cacheDate = new Date(cache.ts);
-          fxUpdateTime.textContent = formatUpdateTime(cacheDate) + '（过期缓存）';
-          fxError.style.display = 'block';
-          fxError.textContent = '⚠ 网络不可用，显示过期缓存汇率';
-        } else {
-          // 完全没有缓存，用写死的兜底值
-          rates = { USD:1, JPY:161.96, KRW:1547.79, CNY:6.80, HKD:7.84, EUR:0.880, GBP:0.759 };
-          fxUpdateTime.textContent = '参考汇率（离线）';
-          fxError.style.display = 'block';
-          fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
-        }
+        // 网络不可用，用写死的兜底值
+        rates = { USD:1, JPY:161.96, KRW:1547.79, CNY:6.80, HKD:7.84, EUR:0.880, GBP:0.759 };
+        fxUpdateTime.textContent = '参考汇率（离线）';
+        fxError.style.display = 'block';
+        fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
         updateBadges();
       } finally {
         if (btn) btn.disabled = false;
