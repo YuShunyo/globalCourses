@@ -820,7 +820,9 @@
       fxError.style.display = 'none';
 
       try {
-        const res = await fetch('https://api.frankfurter.dev/v1/latest?base=USD');
+        const res = await fetch('https://api.frankfurter.dev/v1/latest?base=USD&_=' + Date.now(), {
+          cache: 'no-store'
+        });
         if (!res.ok) throw new Error('网络错误');
         const data = await res.json();
         rates = { USD: 1 };
