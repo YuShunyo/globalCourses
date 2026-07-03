@@ -448,6 +448,12 @@
     font-weight: 600;
     color: #9a9eae;
   }
+  .fx-code-text {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #6a6e7c;
+    letter-spacing: 0.2px;
+  }
   .fx-left-col {
     flex: 0 0 92px;
     width: 92px;
@@ -513,6 +519,29 @@
   }
 
 
+  /* 可选货币行：左侧显示"代码 名称"文字（不受select限制），
+     select 做成透明覆盖层盖住整个左列，点哪里都能唤起原生选择器 */
+  .fx-left-extra { position: relative; }
+  .fx-name-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+  }
+  .fx-extra-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .fx-row#fx-row-extra { background: #fbf9f2; }
+  .fx-row#fx-row-extra.active-row { background: #c8e6c9; }
+
   @media (max-width: 480px) {
     .fx-left-col { flex: 0 0 64px; width: 64px; }
     .fx-name { font-size: 10.5px; }
@@ -535,8 +564,38 @@
       { code: 'GBP', name: '英镑', full: 'British Pound',  flag: '🇬🇧', symbol: '£',  decimals: 2 },
     ];
 
+    // 可选货币行的候选列表（下拉选择）
+    // 排序依据：先按大洲分组（欧洲→美洲→亚洲→大洋洲→非洲，不分南北美），
+    // 组内按 BIS《2022年三年期央行调查》全球外汇交易量占比排名（以色列例外，固定放亚洲组最后）
+    const EXTRA_CURRENCIES = [
+      { code: 'CHF', name: '瑞士法郎',     full: 'Swiss Franc',         flag: '🇨🇭', symbol: 'Fr', decimals: 2, continent: '欧洲' },
+      { code: 'SEK', name: '瑞典克朗',     full: 'Swedish Krona',       flag: '🇸🇪', symbol: 'kr', decimals: 2, continent: '欧洲' },
+      { code: 'NOK', name: '挪威克朗',     full: 'Norwegian Krone',     flag: '🇳🇴', symbol: 'kr', decimals: 2, continent: '欧洲' },
+      { code: 'PLN', name: '波兰兹罗提',   full: 'Polish Zloty',        flag: '🇵🇱', symbol: 'zł', decimals: 2, continent: '欧洲' },
+      { code: 'TRY', name: '土耳其里拉',   full: 'Turkish Lira',        flag: '🇹🇷', symbol: '₺', decimals: 2, continent: '欧洲' },
+      { code: 'DKK', name: '丹麦克朗',     full: 'Danish Krone',        flag: '🇩🇰', symbol: 'kr', decimals: 2, continent: '欧洲' },
+      { code: 'HUF', name: '匈牙利福林',   full: 'Hungarian Forint',    flag: '🇭🇺', symbol: 'Ft', decimals: 0, continent: '欧洲' },
+      { code: 'CZK', name: '捷克克朗',     full: 'Czech Koruna',        flag: '🇨🇿', symbol: 'Kč', decimals: 2, continent: '欧洲' },
+      { code: 'RON', name: '罗马尼亚列伊', full: 'Romanian Leu',        flag: '🇷🇴', symbol: 'lei', decimals: 2, continent: '欧洲' },
+      { code: 'ISK', name: '冰岛克朗',     full: 'Icelandic Krona',     flag: '🇮🇸', symbol: 'kr', decimals: 0, continent: '欧洲' },
+      { code: 'CAD', name: '加元',         full: 'Canadian Dollar',     flag: '🇨🇦', symbol: '$', decimals: 2, continent: '美洲' },
+      { code: 'MXN', name: '墨西哥比索',   full: 'Mexican Peso',        flag: '🇲🇽', symbol: '$', decimals: 2, continent: '美洲' },
+      { code: 'BRL', name: '巴西雷亚尔',   full: 'Brazilian Real',      flag: '🇧🇷', symbol: 'R$', decimals: 2, continent: '美洲' },
+      { code: 'SGD', name: '新加坡元',     full: 'Singapore Dollar',    flag: '🇸🇬', symbol: '$', decimals: 2, continent: '亚洲' },
+      { code: 'INR', name: '印度卢比',     full: 'Indian Rupee',        flag: '🇮🇳', symbol: '₹', decimals: 2, continent: '亚洲' },
+      { code: 'THB', name: '泰铢',         full: 'Thai Baht',           flag: '🇹🇭', symbol: '฿', decimals: 2, continent: '亚洲' },
+      { code: 'MYR', name: '马来西亚林吉特', full: 'Malaysian Ringgit', flag: '🇲🇾', symbol: 'RM', decimals: 2, continent: '亚洲' },
+      { code: 'IDR', name: '印尼盾',       full: 'Indonesian Rupiah',   flag: '🇮🇩', symbol: 'Rp', decimals: 0, continent: '亚洲' },
+      { code: 'PHP', name: '菲律宾比索',   full: 'Philippine Peso',     flag: '🇵🇭', symbol: '₱', decimals: 2, continent: '亚洲' },
+      { code: 'ILS', name: '以色列新谢克尔', full: 'Israeli Shekel',    flag: '🇮🇱', symbol: '₪', decimals: 2, continent: '亚洲' },
+      { code: 'AUD', name: '澳元',         full: 'Australian Dollar',   flag: '🇦🇺', symbol: '$', decimals: 2, continent: '大洋洲' },
+      { code: 'NZD', name: '新西兰元',     full: 'New Zealand Dollar',  flag: '🇳🇿', symbol: '$', decimals: 2, continent: '大洋洲' },
+      { code: 'ZAR', name: '南非兰特',     full: 'South African Rand',  flag: '🇿🇦', symbol: 'R', decimals: 2, continent: '非洲' },
+    ];
+
     let rates = {};
     let activeCode = 'USD';
+    let extraCode = 'AUD'; // 可选货币行当前选中的货币，默认澳元
     // 存储每个货币的纯数值（未格式化）
     let numericValues = {}; // code -> number | null
 
@@ -557,10 +616,15 @@
       return decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
     }
 
+    // 在固定列表和可选列表中查找货币元数据
+    function findCurrencyMeta(code) {
+      return CURRENCIES.find(c => c.code === code) || EXTRA_CURRENCIES.find(c => c.code === code);
+    }
+
     // 按币种精度格式化输入框显示值（JPY/KRW 取整，其他2位）
     function formatForCurrency(val, code) {
       if (val === null || val === undefined || isNaN(val)) return '';
-      const cur = CURRENCIES.find(c => c.code === code);
+      const cur = findCurrencyMeta(code);
       const decimals = cur ? cur.decimals : 2;
       const fixed = val.toFixed(decimals);
       const [intPart, decPart] = fixed.split('.');
@@ -582,24 +646,41 @@
       return str.replace(/,/g, '');
     }
 
+    // 'EXTRA' 是可选货币行的内部标识，实际汇率取 extraCode 对应的值
+    function rateCodeFor(id) {
+      return id === 'EXTRA' ? extraCode : id;
+    }
+
     // ── badge 文字（基准货币切换后刷新）──────────────────────────
     function updateBadges() {
+      const baseRateCode = rateCodeFor(activeCode);
+      const baseRate = rates[baseRateCode];
       CURRENCIES.forEach(cur => {
         const badge = document.getElementById('fx-badge-' + cur.code);
         if (!badge) return;
-        if (!rates[cur.code] || !rates[activeCode]) { badge.textContent = '—'; return; }
+        if (!rates[cur.code] || !baseRate) { badge.textContent = '—'; return; }
         // 1 activeCode = ? cur.code
-        const rate = rates[cur.code] / rates[activeCode];
-        badge.textContent = `1 ${activeCode} = ${formatBadge(rate)} ${cur.code}`;
+        const rate = rates[cur.code] / baseRate;
+        badge.textContent = `1 ${baseRateCode} = ${formatBadge(rate)} ${cur.code}`;
       });
+      const badgeExtra = document.getElementById('fx-badge-extra');
+      if (badgeExtra) {
+        if (!rates[extraCode] || !baseRate) { badgeExtra.textContent = '—'; }
+        else {
+          const rate = rates[extraCode] / baseRate;
+          badgeExtra.textContent = `1 ${baseRateCode} = ${formatBadge(rate)} ${extraCode}`;
+        }
+      }
     }
 
     // ── 将 activeCode 的当前数值传播到其他行 ─────────────────────
-    function propagate(fromCode, fromValue) {
+    // fromId 可以是固定货币代码，也可以是 'EXTRA'（代表可选货币行）
+    function propagate(fromId, fromValue) {
+      const fromCode = rateCodeFor(fromId);
       if (!rates[fromCode]) return;
       const usdValue = fromValue / rates[fromCode];
       CURRENCIES.forEach(c => {
-        if (c.code === fromCode) return;
+        if (fromId === c.code) return;
         const el = document.getElementById('fx-input-' + c.code);
         if (!el) return;
         if (!rates[c.code]) { el.value = ''; numericValues[c.code] = null; return; }
@@ -607,6 +688,17 @@
         numericValues[c.code] = converted;
         el.value = formatForCurrency(converted, c.code);
       });
+      if (fromId !== 'EXTRA') {
+        const elExtra = document.getElementById('fx-input-extra');
+        if (elExtra) {
+          if (!rates[extraCode]) { elExtra.value = ''; numericValues['EXTRA'] = null; }
+          else {
+            const converted = usdValue * rates[extraCode];
+            numericValues['EXTRA'] = converted;
+            elExtra.value = formatForCurrency(converted, extraCode);
+          }
+        }
+      }
     }
 
     function clearAll() {
@@ -615,6 +707,9 @@
         const el = document.getElementById('fx-input-' + c.code);
         if (el) el.value = '';
       });
+      numericValues['EXTRA'] = null;
+      const elExtra = document.getElementById('fx-input-extra');
+      if (elExtra) elExtra.value = '';
     }
 
     // ── 构建行 ────────────────────────────────────────────────────
@@ -802,6 +897,222 @@
       });
     }
 
+    // ── 构建可选货币行（下拉选择，默认 extraCode）────────────────
+    function buildExtraRow() {
+      const fxRows = document.getElementById('fx-rows');
+      const row = document.createElement('div');
+      row.className = 'fx-row';
+      row.id = 'fx-row-extra';
+
+      const optionsHtml = (function() {
+        let html = '';
+        let currentContinent = null;
+        EXTRA_CURRENCIES.forEach(c => {
+          if (c.continent !== currentContinent) {
+            if (currentContinent !== null) html += '</optgroup>';
+            html += `<optgroup label="${c.continent}">`;
+            currentContinent = c.continent;
+          }
+          html += `<option value="${c.code}"${c.code === extraCode ? ' selected' : ''}>${c.flag} ${c.code} ${c.name}</option>`;
+        });
+        if (currentContinent !== null) html += '</optgroup>';
+        return html;
+      })();
+
+      row.innerHTML = `
+        <div class="fx-top-line">
+          <div class="fx-left-col fx-left-extra">
+            <div class="fx-info">
+              <div class="fx-name-row">
+                <span class="fx-name" id="fx-extra-name"></span>
+              </div>
+              <div class="fx-sub"><span class="fx-flag-sm" id="fx-extra-flag"></span><span class="fx-code-text" id="fx-extra-code"></span><span class="fx-symbol-text" id="fx-extra-symbol"></span></div>
+            </div>
+            <select class="fx-extra-select" id="fx-extra-select">${optionsHtml}</select>
+          </div>
+          <div class="fx-input-wrap">
+            <input class="fx-input" id="fx-input-extra" type="text"
+              inputmode="decimal" placeholder="" autocomplete="off" />
+          </div>
+        </div>
+        <div class="fx-badge-row">
+          <div class="fx-rate-badge" id="fx-badge-extra">加载中…</div>
+        </div>
+      `;
+      fxRows.appendChild(row);
+
+      const select = row.querySelector('#fx-extra-select');
+      const input = row.querySelector('.fx-input');
+
+      function refreshExtraLabel() {
+        const meta = EXTRA_CURRENCIES.find(c => c.code === extraCode);
+        document.getElementById('fx-extra-name').textContent = meta.name;
+        document.getElementById('fx-extra-flag').textContent = meta.flag;
+        document.getElementById('fx-extra-code').textContent = meta.code;
+        document.getElementById('fx-extra-symbol').textContent = meta.symbol;
+      }
+      refreshExtraLabel();
+
+      // 切换下拉框选中的货币
+      select.addEventListener('change', () => {
+        extraCode = select.value;
+        refreshExtraLabel();
+        updateBadges();
+        if (activeCode === 'EXTRA') {
+          fxBaseLabel.textContent = `基准：${extraCode}`;
+          const v = numericValues['EXTRA'];
+          if (v !== null && v !== undefined && !isNaN(v)) propagate('EXTRA', v);
+        } else {
+          const v = numericValues[activeCode];
+          if (v !== null && v !== undefined && !isNaN(v)) {
+            propagate(activeCode, v);
+          } else {
+            input.value = '';
+            numericValues['EXTRA'] = null;
+          }
+        }
+      });
+      // 点击下拉框本身不应触发整行的选中/清空逻辑
+      select.addEventListener('pointerdown', (e) => e.stopPropagation());
+
+      function activateRow() {
+        activeCode = 'EXTRA';
+        clearAll();
+        fxBaseLabel.textContent = `基准：${extraCode}`;
+        updateBadges();
+        document.querySelectorAll('.fx-row').forEach(r => r.classList.remove('active-row'));
+        row.classList.add('active-row');
+        numericValues['EXTRA'] = 100;
+        input.value = '100';
+        propagate('EXTRA', 100);
+      }
+
+      function activateRowSilent() {
+        activeCode = 'EXTRA';
+        clearAll();
+        fxBaseLabel.textContent = `基准：${extraCode}`;
+        updateBadges();
+        document.querySelectorAll('.fx-row').forEach(r => r.classList.remove('active-row'));
+        row.classList.add('active-row');
+      }
+
+      input.addEventListener('focus', () => {
+        activateRowSilent();
+      });
+
+      let rowPointerStartX = 0, rowPointerStartY = 0;
+      row.addEventListener('pointerdown', (e) => {
+        rowPointerStartX = e.clientX;
+        rowPointerStartY = e.clientY;
+      });
+      row.addEventListener('pointerup', (e) => {
+        if (e.target === input || e.target === select) return;
+        const dx = Math.abs(e.clientX - rowPointerStartX);
+        const dy = Math.abs(e.clientY - rowPointerStartY);
+        if (dx < 6 && dy < 6) {
+          if (row.classList.contains('active-row')) {
+            row.classList.remove('active-row');
+            clearAll();
+          } else {
+            activateRow();
+          }
+        }
+      });
+
+      function isExpression(s) {
+        return /[+*\/()]/.test(s) || /\d\s*-/.test(s);
+      }
+
+      function safeEval(expr) {
+        const sanitized = expr.replace(/[^\d+\-*/().\s]/g, '');
+        try {
+          // eslint-disable-next-line no-new-func
+          const result = Function('"use strict"; return (' + sanitized + ')')();
+          if (typeof result === 'number' && isFinite(result)) return result;
+        } catch(e) {}
+        return null;
+      }
+
+      input.addEventListener('input', () => {
+        const raw = stripCommas(input.value);
+
+        if (raw.trim() === '') {
+          numericValues['EXTRA'] = null;
+          input.style.color = '';
+          CURRENCIES.forEach(c => {
+            const el = document.getElementById('fx-input-' + c.code);
+            if (el) { el.value = ''; numericValues[c.code] = null; }
+          });
+          return;
+        }
+
+        if (isExpression(raw)) {
+          const result = safeEval(raw);
+          if (result !== null && isFinite(result)) {
+            input.style.color = '#4a8fc1';
+            numericValues['EXTRA'] = result;
+            propagate('EXTRA', result);
+          } else {
+            input.style.color = '#4a8fc1';
+          }
+          return;
+        }
+
+        input.style.color = '';
+        const cleaned = raw.replace(/[^\d.\-]/g, '');
+        if (cleaned === '' || cleaned === '-' || cleaned === '.' || cleaned === '-.') {
+          numericValues['EXTRA'] = null;
+          return;
+        }
+
+        const num = parseFloat(cleaned);
+        if (isNaN(num)) return;
+        numericValues['EXTRA'] = num;
+
+        const cursor = input.selectionStart;
+        const oldLen = input.value.length;
+        const hasTrailingDot = cleaned.endsWith('.');
+        const parts = cleaned.split('.');
+        const intFormatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let liveFormatted;
+        if (hasTrailingDot) {
+          liveFormatted = intFormatted + '.';
+        } else if (parts.length > 1) {
+          liveFormatted = intFormatted + '.' + parts[1];
+        } else {
+          liveFormatted = intFormatted;
+        }
+        input.value = liveFormatted;
+        const diff = liveFormatted.length - oldLen;
+        try { input.setSelectionRange(cursor + diff, cursor + diff); } catch(e) {}
+
+        propagate('EXTRA', num);
+      });
+
+      input.addEventListener('blur', () => {
+        const raw = stripCommas(input.value).trim();
+        input.style.color = '';
+        if (raw === '') return;
+
+        let num = null;
+        if (isExpression(raw)) {
+          num = safeEval(raw);
+        } else {
+          const n = parseFloat(raw.replace(/[^\d.\-]/g, ''));
+          if (!isNaN(n)) num = n;
+        }
+
+        if (num !== null && isFinite(num)) {
+          numericValues['EXTRA'] = num;
+          input.value = formatForCurrency(num, extraCode);
+          propagate('EXTRA', num);
+        } else {
+          input.value = '';
+          numericValues['EXTRA'] = null;
+        }
+      });
+    }
+
     // ── 拉取汇率 ─────────────────────────────────────────────────
     // 数据源（frankfurter.dev，基于欧洲央行每日汇率）只精确到"日期"，
     // 这里显示的是数据源公布该汇率的日期，而不是本页面拉取数据的时间。
@@ -825,10 +1136,8 @@
         });
         if (!res.ok) throw new Error('网络错误');
         const data = await res.json();
-        rates = { USD: 1 };
-        CURRENCIES.forEach(c => {
-          if (data.rates[c.code] !== undefined) rates[c.code] = data.rates[c.code];
-        });
+        // frankfurter 默认返回全部支持的货币汇率，直接合并即可覆盖固定行 + 可选行
+        rates = Object.assign({ USD: 1 }, data.rates);
         fxUpdateTime.textContent = formatSourceDate(data.date);
         updateBadges();
         // 重新传播
@@ -836,7 +1145,12 @@
         if (v !== null && v !== undefined && !isNaN(v)) propagate(activeCode, v);
       } catch(e) {
         // 网络不可用，用写死的兜底值
-        rates = { USD:1, JPY:161.96, KRW:1547.79, CNY:6.80, HKD:7.84, EUR:0.880, GBP:0.759 };
+        rates = {
+          USD:1, JPY:161.96, KRW:1547.79, CNY:6.80, HKD:7.84, EUR:0.880, GBP:0.759,
+          CZK:21.5, DKK:6.57, HUF:355, PLN:3.78, RON:4.38, SEK:9.55, CHF:0.80, ISK:123,
+          NOK:10.2, TRY:32.5, AUD:1.52, BRL:5.15, CAD:1.37, IDR:16100, ILS:3.70, INR:83.4,
+          MXN:18.0, MYR:4.47, NZD:1.64, PHP:57.5, SGD:1.34, THB:35.8, ZAR:18.6
+        };
         fxUpdateTime.textContent = '参考汇率（离线）';
         fxError.style.display = 'block';
         fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
@@ -850,6 +1164,7 @@
     document.getElementById('fx-refresh-btn').addEventListener('click', fetchRates);
 
     buildRows();
+    buildExtraRow();
     fetchRates();
   })();
 </script>
