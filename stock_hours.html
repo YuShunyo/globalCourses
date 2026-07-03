@@ -448,12 +448,6 @@
     font-weight: 600;
     color: #9a9eae;
   }
-  .fx-code-text {
-    font-size: 9.5px;
-    font-weight: 700;
-    color: #6a6e7c;
-    letter-spacing: 0.2px;
-  }
   .fx-left-col {
     flex: 0 0 92px;
     width: 92px;
@@ -924,7 +918,7 @@
               <div class="fx-name-row">
                 <span class="fx-name" id="fx-extra-name"></span>
               </div>
-              <div class="fx-sub"><span class="fx-flag-sm" id="fx-extra-flag"></span><span class="fx-code-text" id="fx-extra-code"></span><span class="fx-symbol-text" id="fx-extra-symbol"></span></div>
+              <div class="fx-sub"><span class="fx-flag-sm" id="fx-extra-flag"></span><span class="fx-symbol-text" id="fx-extra-symbol"></span></div>
             </div>
             <select class="fx-extra-select" id="fx-extra-select">${optionsHtml}</select>
           </div>
@@ -974,7 +968,6 @@
         const meta = EXTRA_CURRENCIES.find(c => c.code === extraCode);
         document.getElementById('fx-extra-name').textContent = meta.name;
         document.getElementById('fx-extra-flag').textContent = meta.flag;
-        document.getElementById('fx-extra-code').textContent = meta.code;
         document.getElementById('fx-extra-symbol').textContent = meta.symbol;
         fitExtraNameFontSize();
       }
