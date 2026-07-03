@@ -539,8 +539,6 @@
     margin: 0;
     cursor: pointer;
   }
-  .fx-row#fx-row-extra { background: #fbf9f2; }
-  .fx-row#fx-row-extra.active-row { background: #c8e6c9; }
 
   @media (max-width: 480px) {
     .fx-left-col { flex: 0 0 64px; width: 64px; }
@@ -568,29 +566,29 @@
     // 排序依据：先按大洲分组（欧洲→美洲→亚洲→大洋洲→非洲，不分南北美），
     // 组内按 BIS《2022年三年期央行调查》全球外汇交易量占比排名（以色列例外，固定放亚洲组最后）
     const EXTRA_CURRENCIES = [
-      { code: 'CHF', name: '瑞士法郎',     full: 'Swiss Franc',         flag: '🇨🇭', symbol: 'Fr', decimals: 2, continent: '欧洲' },
-      { code: 'SEK', name: '瑞典克朗',     full: 'Swedish Krona',       flag: '🇸🇪', symbol: 'kr', decimals: 2, continent: '欧洲' },
-      { code: 'NOK', name: '挪威克朗',     full: 'Norwegian Krone',     flag: '🇳🇴', symbol: 'kr', decimals: 2, continent: '欧洲' },
-      { code: 'PLN', name: '波兰兹罗提',   full: 'Polish Zloty',        flag: '🇵🇱', symbol: 'zł', decimals: 2, continent: '欧洲' },
-      { code: 'TRY', name: '土耳其里拉',   full: 'Turkish Lira',        flag: '🇹🇷', symbol: '₺', decimals: 2, continent: '欧洲' },
-      { code: 'DKK', name: '丹麦克朗',     full: 'Danish Krone',        flag: '🇩🇰', symbol: 'kr', decimals: 2, continent: '欧洲' },
-      { code: 'HUF', name: '匈牙利福林',   full: 'Hungarian Forint',    flag: '🇭🇺', symbol: 'Ft', decimals: 0, continent: '欧洲' },
-      { code: 'CZK', name: '捷克克朗',     full: 'Czech Koruna',        flag: '🇨🇿', symbol: 'Kč', decimals: 2, continent: '欧洲' },
-      { code: 'RON', name: '罗马尼亚列伊', full: 'Romanian Leu',        flag: '🇷🇴', symbol: 'lei', decimals: 2, continent: '欧洲' },
-      { code: 'ISK', name: '冰岛克朗',     full: 'Icelandic Krona',     flag: '🇮🇸', symbol: 'kr', decimals: 0, continent: '欧洲' },
-      { code: 'CAD', name: '加元',         full: 'Canadian Dollar',     flag: '🇨🇦', symbol: '$', decimals: 2, continent: '美洲' },
-      { code: 'MXN', name: '墨西哥比索',   full: 'Mexican Peso',        flag: '🇲🇽', symbol: '$', decimals: 2, continent: '美洲' },
-      { code: 'BRL', name: '巴西雷亚尔',   full: 'Brazilian Real',      flag: '🇧🇷', symbol: 'R$', decimals: 2, continent: '美洲' },
-      { code: 'SGD', name: '新加坡元',     full: 'Singapore Dollar',    flag: '🇸🇬', symbol: '$', decimals: 2, continent: '亚洲' },
-      { code: 'INR', name: '印度卢比',     full: 'Indian Rupee',        flag: '🇮🇳', symbol: '₹', decimals: 2, continent: '亚洲' },
-      { code: 'THB', name: '泰铢',         full: 'Thai Baht',           flag: '🇹🇭', symbol: '฿', decimals: 2, continent: '亚洲' },
-      { code: 'MYR', name: '马来西亚林吉特', full: 'Malaysian Ringgit', flag: '🇲🇾', symbol: 'RM', decimals: 2, continent: '亚洲' },
-      { code: 'IDR', name: '印尼盾',       full: 'Indonesian Rupiah',   flag: '🇮🇩', symbol: 'Rp', decimals: 0, continent: '亚洲' },
-      { code: 'PHP', name: '菲律宾比索',   full: 'Philippine Peso',     flag: '🇵🇭', symbol: '₱', decimals: 2, continent: '亚洲' },
-      { code: 'ILS', name: '以色列新谢克尔', full: 'Israeli Shekel',    flag: '🇮🇱', symbol: '₪', decimals: 2, continent: '亚洲' },
-      { code: 'AUD', name: '澳元',         full: 'Australian Dollar',   flag: '🇦🇺', symbol: '$', decimals: 2, continent: '大洋洲' },
-      { code: 'NZD', name: '新西兰元',     full: 'New Zealand Dollar',  flag: '🇳🇿', symbol: '$', decimals: 2, continent: '大洋洲' },
-      { code: 'ZAR', name: '南非兰特',     full: 'South African Rand',  flag: '🇿🇦', symbol: 'R', decimals: 2, continent: '非洲' },
+      { code: 'CHF', name: '瑞士法郎',     full: 'Swiss Franc',         flag: '🇨🇭', symbol: 'Fr', decimals: 2, continent: '欧洲', country: '瑞士' },
+      { code: 'SEK', name: '瑞典克朗',     full: 'Swedish Krona',       flag: '🇸🇪', symbol: 'kr', decimals: 2, continent: '欧洲', country: '瑞典' },
+      { code: 'NOK', name: '挪威克朗',     full: 'Norwegian Krone',     flag: '🇳🇴', symbol: 'kr', decimals: 2, continent: '欧洲', country: '挪威' },
+      { code: 'PLN', name: '波兰兹罗提',   full: 'Polish Zloty',        flag: '🇵🇱', symbol: 'zł', decimals: 2, continent: '欧洲', country: '波兰' },
+      { code: 'TRY', name: '土耳其里拉',   full: 'Turkish Lira',        flag: '🇹🇷', symbol: '₺', decimals: 2, continent: '欧洲', country: '土耳其' },
+      { code: 'DKK', name: '丹麦克朗',     full: 'Danish Krone',        flag: '🇩🇰', symbol: 'kr', decimals: 2, continent: '欧洲', country: '丹麦' },
+      { code: 'HUF', name: '匈牙利福林',   full: 'Hungarian Forint',    flag: '🇭🇺', symbol: 'Ft', decimals: 0, continent: '欧洲', country: '匈牙利' },
+      { code: 'CZK', name: '捷克克朗',     full: 'Czech Koruna',        flag: '🇨🇿', symbol: 'Kč', decimals: 2, continent: '欧洲', country: '捷克' },
+      { code: 'RON', name: '罗马尼亚列伊', full: 'Romanian Leu',        flag: '🇷🇴', symbol: 'lei', decimals: 2, continent: '欧洲', country: '罗马尼亚' },
+      { code: 'ISK', name: '冰岛克朗',     full: 'Icelandic Krona',     flag: '🇮🇸', symbol: 'kr', decimals: 0, continent: '欧洲', country: '冰岛' },
+      { code: 'CAD', name: '加元',         full: 'Canadian Dollar',     flag: '🇨🇦', symbol: '$', decimals: 2, continent: '美洲', country: '加拿大' },
+      { code: 'MXN', name: '墨西哥比索',   full: 'Mexican Peso',        flag: '🇲🇽', symbol: '$', decimals: 2, continent: '美洲', country: '墨西哥' },
+      { code: 'BRL', name: '巴西雷亚尔',   full: 'Brazilian Real',      flag: '🇧🇷', symbol: 'R$', decimals: 2, continent: '美洲', country: '巴西' },
+      { code: 'SGD', name: '新加坡元',     full: 'Singapore Dollar',    flag: '🇸🇬', symbol: '$', decimals: 2, continent: '亚洲', country: '新加坡' },
+      { code: 'INR', name: '印度卢比',     full: 'Indian Rupee',        flag: '🇮🇳', symbol: '₹', decimals: 2, continent: '亚洲', country: '印度' },
+      { code: 'THB', name: '泰铢',         full: 'Thai Baht',           flag: '🇹🇭', symbol: '฿', decimals: 2, continent: '亚洲', country: '泰国' },
+      { code: 'MYR', name: '马来西亚林吉特', full: 'Malaysian Ringgit', flag: '🇲🇾', symbol: 'RM', decimals: 2, continent: '亚洲', country: '马来西亚' },
+      { code: 'IDR', name: '印尼盾',       full: 'Indonesian Rupiah',   flag: '🇮🇩', symbol: 'Rp', decimals: 0, continent: '亚洲', country: '印度尼西亚' },
+      { code: 'PHP', name: '菲律宾比索',   full: 'Philippine Peso',     flag: '🇵🇭', symbol: '₱', decimals: 2, continent: '亚洲', country: '菲律宾' },
+      { code: 'ILS', name: '以色列新谢克尔', full: 'Israeli Shekel',    flag: '🇮🇱', symbol: '₪', decimals: 2, continent: '亚洲', country: '以色列' },
+      { code: 'AUD', name: '澳元',         full: 'Australian Dollar',   flag: '🇦🇺', symbol: '$', decimals: 2, continent: '大洋洲', country: '澳大利亚' },
+      { code: 'NZD', name: '新西兰元',     full: 'New Zealand Dollar',  flag: '🇳🇿', symbol: '$', decimals: 2, continent: '大洋洲', country: '新西兰' },
+      { code: 'ZAR', name: '南非兰特',     full: 'South African Rand',  flag: '🇿🇦', symbol: 'R', decimals: 2, continent: '非洲', country: '南非' },
     ];
 
     let rates = {};
@@ -944,14 +942,49 @@
       const select = row.querySelector('#fx-extra-select');
       const input = row.querySelector('.fx-input');
 
+      // ── 用 canvas 精确测量文字宽度，自动收缩名称字号直到能塞进左列 ──
+      let measureCanvas = null;
+      function measureTextWidth(text, fontSizePx, fontWeight, fontFamily) {
+        if (!measureCanvas) measureCanvas = document.createElement('canvas');
+        const ctx = measureCanvas.getContext('2d');
+        ctx.font = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
+        return ctx.measureText(text).width;
+      }
+
+      function fitExtraNameFontSize() {
+        const nameEl = document.getElementById('fx-extra-name');
+        const leftCol = row.querySelector('.fx-left-extra');
+        if (!nameEl || !leftCol) return;
+        const text = nameEl.textContent;
+        const containerWidth = leftCol.clientWidth - 2; // 留一点余量
+        const isMobile = window.innerWidth <= 480;
+        const maxSize = isMobile ? 10.5 : 11;
+        const minSize = 8;
+        const cs = getComputedStyle(nameEl);
+        let size = maxSize;
+        while (size > minSize) {
+          const w = measureTextWidth(text, size, cs.fontWeight, cs.fontFamily);
+          if (w <= containerWidth) break;
+          size -= 0.5;
+        }
+        nameEl.style.fontSize = size + 'px';
+      }
+
       function refreshExtraLabel() {
         const meta = EXTRA_CURRENCIES.find(c => c.code === extraCode);
         document.getElementById('fx-extra-name').textContent = meta.name;
         document.getElementById('fx-extra-flag').textContent = meta.flag;
         document.getElementById('fx-extra-code').textContent = meta.code;
         document.getElementById('fx-extra-symbol').textContent = meta.symbol;
+        fitExtraNameFontSize();
       }
       refreshExtraLabel();
+      // 窗口尺寸变化（比如切到移动端断点）时，左列宽度会变，需要重新适配字号
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(fitExtraNameFontSize, 150);
+      });
 
       // 切换下拉框选中的货币
       select.addEventListener('change', () => {
