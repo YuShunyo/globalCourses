@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世界时钟 · World Clock</title>
+<style>
+  :root{
+    --bg-page:#F0EEE6;
+    --text-primary:#2B2B28;
+    --text-faint:#8A897F;
+
+    /* 白天 / 夜间 配色（柔和护眼，非纯白纯黑） */
+    --day-bg:#FFFFFF;
+    --day-text:#3A3833;
+    --day-muted:#726F66;
+    --day-border: rgba(43,43,40,0.14);
+
+    --night-bg:#2A2B30;
+    --night-text:#D6D5CE;
+    --night-muted:#93938C;
+
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', 'Liberation Mono', Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html, body{ height:100%; }
+
+  body{
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--sans);
+    padding: 3vh 3vw;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+  }
+
+  .page{ width:100%; max-width:1400px; }
+
+  header{
+    text-align:center;
+    margin-bottom: 3vh;
+  }
+
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:0.35em;
+    color: var(--text-faint);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+
+  h1{
+    font-size: clamp(20px, 2.6vw, 32px);
+    font-weight:700;
+    letter-spacing:0.02em;
+    color: var(--text-primary);
+  }
+
+  .grid{
+    display:flex;
+    flex-wrap: nowrap;
+    gap: 1.2vw;
+    width:100%;
+  }
+
+  .card{
+    flex: 1 1 0;
+    min-width:0;
+    aspect-ratio: 1 / 1;
+    container-type: inline-size;
+    border-radius: 6%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background: var(--card-bg);
+    color: var(--card-text);
+    border: 1px solid var(--card-border, transparent);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transition: background .6s ease, color .6s ease, order .3s ease;
+    overflow:hidden;
+    padding: 2% 1.5%;
+  }
+
+  .city-name-wrap{
+    position: relative;
+    display: inline-block;
+    margin-bottom: 4cqw;
+  }
+
+  .city-name{
+    font-size: 19cqw;
+    font-weight:800;
+    letter-spacing:0.03em;
+    white-space:nowrap;
+    cursor:pointer;
+    border-radius: 10px;
+    padding: 1cqw 2cqw;
+    transition: background .2s ease;
+  }
+
+  .city-name-wrap:hover .city-name{
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  /* 透明覆盖层 select：盖住整块可见文字，点哪里都能唤起原生选择器，
+     但可见的城市名文字完全自定义，不受 select 自带外观限制 */
+  .city-select-overlay{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .time-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:0;
+    font-family: var(--mono);
+    font-weight:700;
+    line-height:1;
+    margin-bottom: 4cqw;
+    white-space:nowrap;
+  }
+
+  .time-part{
+    font-size: 19cqw;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .colon{ padding: 0 0.3cqw; }
+
+  .date-display{
+    font-family: var(--mono);
+    font-size: 9cqw;
+    letter-spacing:0.04em;
+    opacity:0.8;
+    white-space:nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="eyebrow">World Clock</div>
+    <h1>世界时钟</h1>
+  </header>
+
+  <div class="grid" id="clockGrid"></div>
+</div>
+
+<script>
+  const cityOptions = [
+    { city:'纽约', tz:'America/New_York', flag:'🇺🇸' },
+    { city:'洛杉矶', tz:'America/Los_Angeles', flag:'🇺🇸' },
+    { city:'芝加哥', tz:'America/Chicago', flag:'🇺🇸' },
+    { city:'多伦多', tz:'America/Toronto', flag:'🇨🇦' },
+    { city:'墨西哥城', tz:'America/Mexico_City', flag:'🇲🇽' },
+    { city:'圣保罗', tz:'America/Sao_Paulo', flag:'🇧🇷' },
+    { city:'伦敦', tz:'Europe/London', flag:'🇬🇧' },
+    { city:'巴黎', tz:'Europe/Paris', flag:'🇫🇷' },
+    { city:'柏林', tz:'Europe/Berlin', flag:'🇩🇪' },
+    { city:'莫斯科', tz:'Europe/Moscow', flag:'🇷🇺' },
+    { city:'迪拜', tz:'Asia/Dubai', flag:'🇦🇪' },
+    { city:'新德里', tz:'Asia/Kolkata', flag:'🇮🇳' },
+    { city:'新加坡', tz:'Asia/Singapore', flag:'🇸🇬' },
+    { city:'香港', tz:'Asia/Hong_Kong', flag:'🇭🇰' },
+    { city:'上海', tz:'Asia/Shanghai', flag:'🇨🇳' },
+    { city:'北京', tz:'Asia/Shanghai', flag:'🇨🇳' },
+    { city:'东京', tz:'Asia/Tokyo', flag:'🇯🇵' },
+    { city:'首尔', tz:'Asia/Seoul', flag:'🇰🇷' },
+    { city:'悉尼', tz:'Australia/Sydney', flag:'🇦🇺' },
+    { city:'奥克兰', tz:'Pacific/Auckland', flag:'🇳🇿' },
+  ];
+
+  let cities = [
+    { city:'纽约', tz:'America/New_York' },
+    { city:'巴黎', tz:'Europe/Paris'     },
+    { city:'北京', tz:'Asia/Shanghai'    },
+    { city:'东京', tz:'Asia/Tokyo'       },
+  ];
+
+  const grid = document.getElementById('clockGrid');
+
+  function buildOptionsHtml(selectedCity, selectedTz){
+    const now = new Date();
+    // 按 UTC 偏移从小到大排序（时间最早的在最上面，最晚的在最下面）
+    const sortedOptions = [...cityOptions].sort(
+      (a, b) => getOffsetMinutes(a.tz, now) - getOffsetMinutes(b.tz, now)
+    );
+    return sortedOptions.map(opt => {
+      const value = `${opt.city}|${opt.tz}`;
+      const label = `${opt.flag} ${opt.city} ${formatOffset(Math.round(getOffsetMinutes(opt.tz, now)))}`;
+      const isSelected = (opt.city === selectedCity && opt.tz === selectedTz) ? ' selected' : '';
+      return `<option value="${value}"${isSelected}>${label}</option>`;
+    }).join('');
+  }
+
+  function renderCards(){
+    grid.innerHTML = '';
+    cities.forEach((c, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.tz = c.tz;
+      card.dataset.index = i;
+      card.innerHTML = `
+        <div class="city-name-wrap">
+          <div class="city-name" data-role="cityname">${c.city}</div>
+          <select class="city-select-overlay" data-role="cityselect">${buildOptionsHtml(c.city, c.tz)}</select>
+        </div>
+        <div class="time-row">
+          <span class="time-part" data-role="hm">--:--</span><span class="colon time-part" data-role="colon2">:</span><span class="time-part" data-role="ss">--</span>
+        </div>
+        <div class="date-display" data-role="date">----/--/--</div>
+      `;
+      const nameEl = card.querySelector('[data-role="cityname"]');
+      const selectEl = card.querySelector('[data-role="cityselect"]');
+      selectEl.addEventListener('change', (e) => {
+        const [city, tz] = e.target.value.split('|');
+        cities[i] = { city, tz };
+        card.dataset.tz = tz;
+        nameEl.textContent = city;
+        update();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function formatOffset(minutes){
+    const sign = minutes >= 0 ? '+' : '-';
+    const abs = Math.abs(minutes);
+    const h = Math.floor(abs / 60);
+    const m = abs % 60;
+    return `UTC${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''}`;
+  }
+
+  function getOffsetMinutes(tz, date){
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hourCycle:'h23',
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    const parts = {};
+    dtf.formatToParts(date).forEach(p => parts[p.type] = p.value);
+    const asUTC = Date.UTC(
+      parseInt(parts.year), parseInt(parts.month) - 1, parseInt(parts.day),
+      parseInt(parts.hour), parseInt(parts.minute), parseInt(parts.second)
+    );
+    return (asUTC - date.getTime()) / 60000;
+  }
+
+  function update(forceReorder){
+    const now = new Date();
+    const cards = grid.querySelectorAll('.card');
+
+    cards.forEach(card => {
+      const tz = card.dataset.tz;
+
+      const dtf = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, hour12:false,
+        year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit', second:'2-digit'
+      });
+      const parts = {};
+      dtf.formatToParts(now).forEach(p => parts[p.type] = p.value);
+
+      const hour = parts.hour === '24' ? '00' : parts.hour;
+
+      card.querySelector('[data-role="hm"]').textContent = `${hour}:${parts.minute}`;
+      card.querySelector('[data-role="ss"]').textContent = parts.second;
+      card.querySelector('[data-role="date"]').textContent = `${parts.year}/${parts.month}/${parts.day}`;
+
+      const hourNum = parseInt(hour, 10);
+      const minNum = parseInt(parts.minute, 10);
+      const hour24 = hourNum + minNum / 60;
+
+      const isDay = hour24 >= 6 && hour24 < 18;
+
+      card.style.setProperty('--card-bg', isDay ? 'var(--day-bg)' : 'var(--night-bg)');
+      card.style.setProperty('--card-text', isDay ? 'var(--day-text)' : 'var(--night-text)');
+      card.style.setProperty('--card-border', isDay ? 'var(--day-border)' : 'transparent');
+
+      const offset = Math.round(getOffsetMinutes(tz, now));
+      card.style.order = offset;
+    });
+  }
+
+  renderCards();
+  update();
+  setInterval(update, 1000);
+</script>
+
+</body>
+</html>
