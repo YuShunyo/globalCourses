@@ -394,6 +394,256 @@
 
 </div><!-- /main .container close before fx -->
 
+<!-- 世界时钟独立容器 -->
+<div class="container" id="wc-container">
+  <div class="wc-grid" id="wcGrid"></div>
+</div>
+
+<style>
+  #wc-container{
+    --wc-day-bg:#ffffff;
+    --wc-day-text:#2d2f3a;
+    --wc-day-muted:#9a9eae;
+    --wc-day-border: rgba(43,43,40,0.10);
+
+    --wc-night-bg:#2a2b30;
+    --wc-night-text:#d6d5ce;
+    --wc-night-muted:#93938c;
+
+    --wc-mono: "SF Mono", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  }
+
+  .wc-grid{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:10px;
+    width:100%;
+  }
+
+  .wc-card{
+    flex: 1 1 0;
+    min-width:0;
+    aspect-ratio: 1 / 1;
+    container-type: inline-size;
+    border-radius: 6%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background: var(--wc-card-bg, var(--wc-day-bg));
+    color: var(--wc-card-text, var(--wc-day-text));
+    border: 1px solid var(--wc-card-border, var(--wc-day-border));
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    transition: background .5s ease, color .5s ease, border-color .5s ease, order .3s ease;
+    overflow:hidden;
+    padding: 2% 1.5%;
+  }
+
+  .wc-city-name-wrap{
+    position: relative;
+    display: inline-block;
+    margin-bottom: 4cqw;
+  }
+
+  .wc-city-name{
+    font-size: 19cqw;
+    font-weight:700;
+    letter-spacing:0.2px;
+    white-space:nowrap;
+    cursor:pointer;
+    border-radius: 10px;
+    padding: 1cqw 2cqw;
+    transition: background .2s ease;
+  }
+
+  .wc-city-name-wrap:hover .wc-city-name{
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  .wc-city-select-overlay{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .wc-time-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:0;
+    font-family: var(--wc-mono);
+    font-weight:700;
+    line-height:1;
+    margin-bottom: 4cqw;
+    white-space:nowrap;
+  }
+
+  .wc-time-part{
+    font-size: 19cqw;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wc-colon{ padding: 0 0.3cqw; }
+
+  .wc-date-display{
+    font-family: var(--wc-mono);
+    font-size: 9cqw;
+    letter-spacing:0.04em;
+    opacity:0.8;
+    white-space:nowrap;
+  }
+
+</style>
+
+<script>
+  (function(){
+    const wcCityOptions = [
+      { city:'纽约', tz:'America/New_York', flag:'🇺🇸' },
+      { city:'洛杉矶', tz:'America/Los_Angeles', flag:'🇺🇸' },
+      { city:'芝加哥', tz:'America/Chicago', flag:'🇺🇸' },
+      { city:'多伦多', tz:'America/Toronto', flag:'🇨🇦' },
+      { city:'墨西哥城', tz:'America/Mexico_City', flag:'🇲🇽' },
+      { city:'圣保罗', tz:'America/Sao_Paulo', flag:'🇧🇷' },
+      { city:'伦敦', tz:'Europe/London', flag:'🇬🇧' },
+      { city:'巴黎', tz:'Europe/Paris', flag:'🇫🇷' },
+      { city:'柏林', tz:'Europe/Berlin', flag:'🇩🇪' },
+      { city:'莫斯科', tz:'Europe/Moscow', flag:'🇷🇺' },
+      { city:'迪拜', tz:'Asia/Dubai', flag:'🇦🇪' },
+      { city:'新德里', tz:'Asia/Kolkata', flag:'🇮🇳' },
+      { city:'新加坡', tz:'Asia/Singapore', flag:'🇸🇬' },
+      { city:'香港', tz:'Asia/Hong_Kong', flag:'🇭🇰' },
+      { city:'上海', tz:'Asia/Shanghai', flag:'🇨🇳' },
+      { city:'北京', tz:'Asia/Shanghai', flag:'🇨🇳' },
+      { city:'东京', tz:'Asia/Tokyo', flag:'🇯🇵' },
+      { city:'首尔', tz:'Asia/Seoul', flag:'🇰🇷' },
+      { city:'悉尼', tz:'Australia/Sydney', flag:'🇦🇺' },
+      { city:'奥克兰', tz:'Pacific/Auckland', flag:'🇳🇿' },
+    ];
+
+    let wcCities = [
+      { city:'纽约', tz:'America/New_York' },
+      { city:'巴黎', tz:'Europe/Paris'     },
+      { city:'北京', tz:'Asia/Shanghai'    },
+      { city:'东京', tz:'Asia/Tokyo'       },
+    ];
+
+    const wcGrid = document.getElementById('wcGrid');
+
+    function wcFormatOffset(minutes){
+      const sign = minutes >= 0 ? '+' : '-';
+      const abs = Math.abs(minutes);
+      const h = Math.floor(abs / 60);
+      const m = abs % 60;
+      return `UTC${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''}`;
+    }
+
+    function wcGetOffsetMinutes(tz, date){
+      const dtf = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, hourCycle:'h23',
+        year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit', second:'2-digit'
+      });
+      const parts = {};
+      dtf.formatToParts(date).forEach(p => parts[p.type] = p.value);
+      const asUTC = Date.UTC(
+        parseInt(parts.year), parseInt(parts.month) - 1, parseInt(parts.day),
+        parseInt(parts.hour), parseInt(parts.minute), parseInt(parts.second)
+      );
+      return (asUTC - date.getTime()) / 60000;
+    }
+
+    function wcBuildOptionsHtml(selectedCity, selectedTz){
+      const now = new Date();
+      const sortedOptions = [...wcCityOptions].sort(
+        (a, b) => wcGetOffsetMinutes(a.tz, now) - wcGetOffsetMinutes(b.tz, now)
+      );
+      return sortedOptions.map(opt => {
+        const value = `${opt.city}|${opt.tz}`;
+        const label = `${opt.flag} ${opt.city} ${wcFormatOffset(Math.round(wcGetOffsetMinutes(opt.tz, now)))}`;
+        const isSelected = (opt.city === selectedCity && opt.tz === selectedTz) ? ' selected' : '';
+        return `<option value="${value}"${isSelected}>${label}</option>`;
+      }).join('');
+    }
+
+    function wcRenderCards(){
+      wcGrid.innerHTML = '';
+      wcCities.forEach((c, i) => {
+        const card = document.createElement('div');
+        card.className = 'wc-card';
+        card.dataset.tz = c.tz;
+        card.dataset.index = i;
+        card.innerHTML = `
+          <div class="wc-city-name-wrap">
+            <div class="wc-city-name" data-role="cityname">${c.city}</div>
+            <select class="wc-city-select-overlay" data-role="cityselect">${wcBuildOptionsHtml(c.city, c.tz)}</select>
+          </div>
+          <div class="wc-time-row">
+            <span class="wc-time-part" data-role="hm">--:--</span><span class="wc-colon wc-time-part" data-role="colon2">:</span><span class="wc-time-part" data-role="ss">--</span>
+          </div>
+          <div class="wc-date-display" data-role="date">----/--/--</div>
+        `;
+        const nameEl = card.querySelector('[data-role="cityname"]');
+        const selectEl = card.querySelector('[data-role="cityselect"]');
+        selectEl.addEventListener('change', (e) => {
+          const [city, tz] = e.target.value.split('|');
+          wcCities[i] = { city, tz };
+          card.dataset.tz = tz;
+          nameEl.textContent = city;
+          wcUpdate();
+        });
+        wcGrid.appendChild(card);
+      });
+    }
+
+    function wcUpdate(){
+      const now = new Date();
+      const cards = wcGrid.querySelectorAll('.wc-card');
+
+      cards.forEach(card => {
+        const tz = card.dataset.tz;
+
+        const dtf = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz, hour12:false,
+          year:'numeric', month:'2-digit', day:'2-digit',
+          hour:'2-digit', minute:'2-digit', second:'2-digit'
+        });
+        const parts = {};
+        dtf.formatToParts(now).forEach(p => parts[p.type] = p.value);
+
+        const hour = parts.hour === '24' ? '00' : parts.hour;
+
+        card.querySelector('[data-role="hm"]').textContent = `${hour}:${parts.minute}`;
+        card.querySelector('[data-role="ss"]').textContent = parts.second;
+        card.querySelector('[data-role="date"]').textContent = `${parts.year}/${parts.month}/${parts.day}`;
+
+        const hourNum = parseInt(hour, 10);
+        const minNum = parseInt(parts.minute, 10);
+        const hour24 = hourNum + minNum / 60;
+
+        const isDay = hour24 >= 6 && hour24 < 18;
+
+        card.style.setProperty('--wc-card-bg', isDay ? 'var(--wc-day-bg)' : 'var(--wc-night-bg)');
+        card.style.setProperty('--wc-card-text', isDay ? 'var(--wc-day-text)' : 'var(--wc-night-text)');
+        card.style.setProperty('--wc-card-border', isDay ? 'var(--wc-day-border)' : 'transparent');
+
+        const offset = Math.round(wcGetOffsetMinutes(tz, now));
+        card.style.order = offset;
+      });
+    }
+
+    wcRenderCards();
+    wcUpdate();
+    setInterval(wcUpdate, 1000);
+  })();
+</script>
+
 <!-- 汇率换算独立容器 -->
 <div class="container" id="fx-container">
   <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:6px;">
