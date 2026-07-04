@@ -344,6 +344,7 @@
         card.dataset.tz = tz;
         nameEl.textContent = city;
         update();
+        e.target.blur();
       });
       grid.appendChild(card);
     });
@@ -444,6 +445,7 @@
       dialCity = { city, tz };
       nameEl.textContent = city;
       updateDialFace();
+      e.target.blur();
     });
   }
 
