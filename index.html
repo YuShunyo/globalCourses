@@ -100,53 +100,38 @@ tr:hover td { background: #fafaf8; }
 </div>
 <style>
 .nav-grid { display: flex; flex-wrap: nowrap; gap: 8px; margin-bottom: 1.5rem; }
-.nav-item { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; flex: 0 0 auto; background: #fff; border: 1px solid #e5e3dc; border-radius: 8px; text-decoration: none; color: inherit; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
-.nav-item:hover { border-color: var(--nc); box-shadow: 0 2px 10px rgba(0,0,0,0.07); background: #fafaf8; }
-.nav-icon { width: 26px; height: 26px; min-width: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-@media (max-width: 480px) { .nav-item { width: 36px; height: 36px; } .nav-icon { width: 22px; height: 22px; } }
+.nav-item { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; flex: 0 0 auto; border-radius: 8px; text-decoration: none; transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s; }
+.nav-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0.9; }
+@media (max-width: 480px) { .nav-item { width: 36px; height: 36px; } }
 </style>
 <div class="nav-grid">
   <!-- 1. 主流媒体 -->
-  <a class="nav-item" style="--nc:#7F77DD;" href="https://global-majors-core-courses.yychunyang.workers.dev/media_directory" title="主流媒体导航">
-    <div class="nav-icon" style="background:#EEEDFE;color:#3C3489;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    </div>
+  <a class="nav-item" style="background:#EEEDFE;color:#3C3489;" href="https://global-majors-core-courses.yychunyang.workers.dev/media_directory" title="主流媒体导航">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
   </a>
   <!-- 2. 股市时间 -->
-  <a class="nav-item" style="--nc:#378ADD;" href="stock_hours.html" title="全球股市交易时间">
-    <div class="nav-icon" style="background:#E6F1FB;color:#0C447C;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    </div>
+  <a class="nav-item" style="background:#E6F1FB;color:#0C447C;" href="stock_hours.html" title="全球股市交易时间">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
   </a>
   <!-- 3. 世界时钟 -->
-  <a class="nav-item" style="--nc:#97C459;" href="world_clock.html" title="世界时钟">
-    <div class="nav-icon" style="background:#EAF3DE;color:#27500A;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </div>
+  <a class="nav-item" style="background:#EAF3DE;color:#27500A;" href="world_clock.html" title="世界时钟">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
   </a>
   <!-- 4. 经济学流派 -->
-  <a class="nav-item" style="--nc:#EF9F27;" href="economics_schools_complete_timeline_cn.html" title="经济学流派时间轴">
-    <div class="nav-icon" style="background:#FAEEDA;color:#633806;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/><path d="M2 20h20"/></svg>
-    </div>
+  <a class="nav-item" style="background:#FAEEDA;color:#633806;" href="economics_schools_complete_timeline_cn.html" title="经济学流派时间轴">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/><path d="M2 20h20"/></svg>
   </a>
   <!-- 5. 中国历史 -->
-  <a class="nav-item" style="--nc:#D85A30;" href="china_dynasty_history.html" title="中国历史朝代演变">
-    <div class="nav-icon" style="background:#FAECE7;color:#712B13;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </div>
+  <a class="nav-item" style="background:#FAECE7;color:#712B13;" href="china_dynasty_history.html" title="中国历史朝代演变">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
   </a>
   <!-- 6. 世界历史 -->
-  <a class="nav-item" style="--nc:#1D9E75;" href="world_history_parallel_timeline.html" title="世界历史时间轴">
-    <div class="nav-icon" style="background:#E1F5EE;color:#085041;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
-    </div>
+  <a class="nav-item" style="background:#E1F5EE;color:#085041;" href="world_history_parallel_timeline.html" title="世界历史时间轴">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
   </a>
   <!-- 7. 世界语言 -->
-  <a class="nav-item" style="--nc:#D4537E;" href="language_family.html" title="世界语言谱系">
-    <div class="nav-icon" style="background:#FBEAF0;color:#72243E;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    </div>
+  <a class="nav-item" style="background:#FBEAF0;color:#72243E;" href="language_family.html" title="世界语言谱系">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
   </a>
 </div>
 <div class="section">
