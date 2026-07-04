@@ -109,8 +109,10 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .city-name-wrap:hover .city-name{
-    background: color-mix(in srgb, currentColor 10%, transparent);
+  @media (hover: hover) and (pointer: fine){
+    .city-name-wrap:hover .city-name{
+      background: color-mix(in srgb, currentColor 10%, transparent);
+    }
   }
 
   /* 透明覆盖层 select：盖住整块可见文字，点哪里都能唤起原生选择器，
@@ -228,8 +230,10 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .analog-city-wrap:hover .analog-city-name{
-    background: color-mix(in srgb, currentColor 10%, transparent);
+  @media (hover: hover) and (pointer: fine){
+    .analog-city-wrap:hover .analog-city-name{
+      background: color-mix(in srgb, currentColor 10%, transparent);
+    }
   }
 </style>
 </head>
