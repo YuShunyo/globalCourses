@@ -598,6 +598,14 @@
           nameEl.textContent = city;
           wcUpdate();
         });
+        const timeRowEl = card.querySelector('.wc-time-row');
+        const dateEl = card.querySelector('[data-role="date"]');
+        [timeRowEl, dateEl].forEach(el => {
+          el.style.cursor = 'pointer';
+          el.addEventListener('click', () => {
+            window.location.href = 'world_clock.html';
+          });
+        });
         wcGrid.appendChild(card);
       });
     }
