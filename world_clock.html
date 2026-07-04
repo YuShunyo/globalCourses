@@ -8,7 +8,6 @@
   :root{
     --bg-page:#F0EEE6;
     --text-primary:#2B2B28;
-    --text-faint:#8A897F;
 
     /* 白天 / 夜间 配色（柔和护眼，非纯白纯黑） */
     --day-bg:#FFFFFF;
@@ -46,15 +45,6 @@
   header{
     text-align:center;
     margin-bottom: 3vh;
-  }
-
-  .eyebrow{
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing:0.35em;
-    color: var(--text-faint);
-    text-transform:uppercase;
-    margin-bottom:8px;
   }
 
   h1{
@@ -213,28 +203,7 @@
   .minute-hand{ stroke-width:3; opacity:0.85; }
   .center-dot{ fill:currentColor; pointer-events:none; }
 
-  .analog-city-wrap{
-    position: relative;
-    display: inline-block;
-  }
 
-  .analog-city-name{
-    font-size: clamp(17px, 2vw, 25px);
-    font-weight:800;
-    letter-spacing:0.03em;
-    color: var(--text-primary);
-    cursor:pointer;
-    border-radius:10px;
-    padding: 3px 10px;
-    transition: background .2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  @media (hover: hover) and (pointer: fine){
-    .analog-city-wrap:hover .analog-city-name{
-      background: color-mix(in srgb, currentColor 10%, transparent);
-    }
-  }
 </style>
 </head>
 <body>
@@ -256,10 +225,6 @@
         <line class="hand hour-hand" id="hourHand" x1="100" y1="100" x2="100" y2="50"/>
         <circle class="center-dot" cx="100" cy="100" r="4"/>
       </svg>
-    </div>
-    <div class="analog-city-wrap">
-      <div class="analog-city-name" data-role="cityname"></div>
-      <select class="city-select-overlay" data-role="cityselect"></select>
     </div>
   </div>
 </div>
@@ -298,7 +263,8 @@
   const grid = document.getElementById('clockGrid');
 
   // ===== 手动表盘状态 =====
-  let dialCity = { city:'迪拜', tz:'Asia/Dubai' };
+  // 表盘始终显示系统本地时区的时间，不再提供城市选择
+  const dialTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   let timeOffsetMs = 0; // 拖动表盘产生的全局时间偏移，会同时应用到上方4个时钟
 
   function getSimulatedNow(){
@@ -373,7 +339,7 @@
     return (asUTC - date.getTime()) / 60000;
   }
 
-  function update(forceReorder){
+  function update(){
     const realNow = new Date();
     const now = getSimulatedNow(); // 展示用的时间：真实时间 + 表盘拖动产生的偏移
     const cards = grid.querySelectorAll('.card');
@@ -434,26 +400,11 @@
     numsG.innerHTML = numsHtml;
   }
 
-  // ===== 表盘城市选择器（复用与上方时钟一致的透明 select 覆盖层逻辑） =====
-  function renderDialCitySelector(){
-    const nameEl = document.querySelector('#analogSection [data-role="cityname"]');
-    const selectEl = document.querySelector('#analogSection [data-role="cityselect"]');
-    nameEl.textContent = dialCity.city;
-    selectEl.innerHTML = buildOptionsHtml(dialCity.city, dialCity.tz);
-    selectEl.addEventListener('change', (e) => {
-      const [city, tz] = e.target.value.split('|');
-      dialCity = { city, tz };
-      nameEl.textContent = city;
-      updateDialFace();
-      e.target.blur();
-    });
-  }
-
   // ===== 表盘指针与背景色刷新（跟随 getSimulatedNow） =====
   function updateDialFace(){
     const now = getSimulatedNow();
     const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone: dialCity.tz, hour12:false,
+      timeZone: dialTz, hour12:false,
       hour:'2-digit', minute:'2-digit', second:'2-digit'
     });
     const parts = {};
@@ -497,7 +448,7 @@
 
     const now = getSimulatedNow();
     const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone: dialCity.tz, hour12:false,
+      timeZone: dialTz, hour12:false,
       hour:'2-digit', minute:'2-digit', second:'2-digit'
     });
     const parts = {};
@@ -544,7 +495,6 @@
 
   renderCards();
   buildDialTicks();
-  renderDialCitySelector();
   update();
   updateDialFace();
   setInterval(() => { update(); updateDialFace(); }, 1000);
