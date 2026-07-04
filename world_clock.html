@@ -37,6 +37,8 @@
     flex-direction:column;
     align-items:center;
     overflow-x:hidden;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .page{ width:100%; max-width:1400px; }
@@ -150,17 +152,108 @@
     opacity:0.8;
     white-space:nowrap;
   }
+
+  /* ===== 手动拨转的圆形表盘 ===== */
+  .analog-section{
+    margin-top: 4vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 0.8vh;
+  }
+
+  .analog-face-wrap{
+    width: min(38vw, 320px);
+    min-width: 200px;
+    aspect-ratio: 1 / 1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .analog-face-wrap:active{ cursor: grabbing; }
+
+  .analog-face{
+    width:100%; height:100%; display:block;
+    color: var(--card-text, var(--day-text));
+    filter: drop-shadow(0 10px 26px rgba(0,0,0,0.14));
+    transition: color .6s ease;
+  }
+
+  .face-bg{
+    fill: var(--card-bg, var(--day-bg));
+    stroke: var(--day-border);
+    stroke-width: 2;
+    transition: fill .6s ease;
+  }
+
+  .tick{ stroke:currentColor; stroke-width:1.6; opacity:0.45; }
+  .tick.major{ stroke-width:2.6; opacity:0.85; }
+
+  .hour-number{
+    font-family: var(--sans);
+    font-weight:700;
+    font-size: 15px;
+    fill: currentColor;
+    opacity:0.85;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  .hand{ stroke:currentColor; stroke-linecap:round; pointer-events:none; }
+  .hour-hand{ stroke-width:5.5; }
+  .minute-hand{ stroke-width:3; opacity:0.85; }
+  .center-dot{ fill:currentColor; pointer-events:none; }
+
+  .analog-city-wrap{
+    position: relative;
+    display: inline-block;
+  }
+
+  .analog-city-name{
+    font-size: clamp(17px, 2vw, 25px);
+    font-weight:800;
+    letter-spacing:0.03em;
+    color: var(--text-primary);
+    cursor:pointer;
+    border-radius:10px;
+    padding: 3px 10px;
+    transition: background .2s ease;
+  }
+
+  .analog-city-wrap:hover .analog-city-name{
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
 </style>
 </head>
 <body>
 
 <div class="page">
   <header>
-    <div class="eyebrow">World Clock</div>
     <h1>世界时钟</h1>
   </header>
 
   <div class="grid" id="clockGrid"></div>
+
+  <div class="analog-section" id="analogSection">
+    <div class="analog-face-wrap" id="analogFaceWrap">
+      <svg class="analog-face" viewBox="0 0 200 200" id="analogSvg">
+        <circle class="face-bg" cx="100" cy="100" r="98"/>
+        <g id="dialTicks"></g>
+        <g id="dialNumbers"></g>
+        <line class="hand minute-hand" id="minuteHand" x1="100" y1="100" x2="100" y2="28"/>
+        <line class="hand hour-hand" id="hourHand" x1="100" y1="100" x2="100" y2="50"/>
+        <circle class="center-dot" cx="100" cy="100" r="4"/>
+      </svg>
+    </div>
+    <div class="analog-city-wrap">
+      <div class="analog-city-name" data-role="cityname"></div>
+      <select class="city-select-overlay" data-role="cityselect"></select>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -195,6 +288,14 @@
   ];
 
   const grid = document.getElementById('clockGrid');
+
+  // ===== 手动表盘状态 =====
+  let dialCity = { city:'迪拜', tz:'Asia/Dubai' };
+  let timeOffsetMs = 0; // 拖动表盘产生的全局时间偏移，会同时应用到上方4个时钟
+
+  function getSimulatedNow(){
+    return new Date(Date.now() + timeOffsetMs);
+  }
 
   function buildOptionsHtml(selectedCity, selectedTz){
     const now = new Date();
@@ -264,7 +365,8 @@
   }
 
   function update(forceReorder){
-    const now = new Date();
+    const realNow = new Date();
+    const now = getSimulatedNow(); // 展示用的时间：真实时间 + 表盘拖动产生的偏移
     const cards = grid.querySelectorAll('.card');
 
     cards.forEach(card => {
@@ -294,14 +396,148 @@
       card.style.setProperty('--card-text', isDay ? 'var(--day-text)' : 'var(--night-text)');
       card.style.setProperty('--card-border', isDay ? 'var(--day-border)' : 'transparent');
 
-      const offset = Math.round(getOffsetMinutes(tz, now));
+      const offset = Math.round(getOffsetMinutes(tz, realNow));
       card.style.order = offset;
     });
   }
 
+  // ===== 表盘刻度与整时数字绘制 =====
+  function buildDialTicks(){
+    const ticksG = document.getElementById('dialTicks');
+    const numsG = document.getElementById('dialNumbers');
+    let ticksHtml = '';
+    let numsHtml = '';
+    for(let i = 0; i < 12; i++){
+      const angle = i * 30;
+      const major = (i % 3 === 0);
+      const rOuter = 98;
+      const rInner = major ? 82 : 90;
+      ticksHtml += `<line class="tick${major ? ' major' : ''}" x1="100" y1="${100 - rOuter}" x2="100" y2="${100 - rInner}" transform="rotate(${angle} 100 100)"/>`;
+
+      const hourLabel = i === 0 ? 12 : i;
+      const rNum = 68;
+      const rad = (angle - 90) * Math.PI / 180; // 0点方向对齐12点，顺时针
+      const nx = 100 + rNum * Math.cos(rad);
+      const ny = 100 + rNum * Math.sin(rad);
+      numsHtml += `<text class="hour-number" x="${nx.toFixed(1)}" y="${ny.toFixed(1)}">${hourLabel}</text>`;
+    }
+    ticksG.innerHTML = ticksHtml;
+    numsG.innerHTML = numsHtml;
+  }
+
+  // ===== 表盘城市选择器（复用与上方时钟一致的透明 select 覆盖层逻辑） =====
+  function renderDialCitySelector(){
+    const nameEl = document.querySelector('#analogSection [data-role="cityname"]');
+    const selectEl = document.querySelector('#analogSection [data-role="cityselect"]');
+    nameEl.textContent = dialCity.city;
+    selectEl.innerHTML = buildOptionsHtml(dialCity.city, dialCity.tz);
+    selectEl.addEventListener('change', (e) => {
+      const [city, tz] = e.target.value.split('|');
+      dialCity = { city, tz };
+      nameEl.textContent = city;
+      updateDialFace();
+    });
+  }
+
+  // ===== 表盘指针与背景色刷新（跟随 getSimulatedNow） =====
+  function updateDialFace(){
+    const now = getSimulatedNow();
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: dialCity.tz, hour12:false,
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    const parts = {};
+    dtf.formatToParts(now).forEach(p => parts[p.type] = p.value);
+
+    let hour = parseInt(parts.hour, 10);
+    if(hour === 24) hour = 0;
+    const minute = parseInt(parts.minute, 10);
+    const second = parseInt(parts.second, 10);
+
+    const hourDeg = ((hour % 12) + minute / 60 + second / 3600) * 30;
+    const minuteDeg = (minute + second / 60) * 6;
+
+    document.getElementById('hourHand').setAttribute('transform', `rotate(${hourDeg} 100 100)`);
+    document.getElementById('minuteHand').setAttribute('transform', `rotate(${minuteDeg} 100 100)`);
+
+    const hour24 = hour + minute / 60;
+    const isDay = hour24 >= 6 && hour24 < 18;
+    const faceWrap = document.getElementById('analogFaceWrap');
+    faceWrap.style.setProperty('--card-bg', isDay ? 'var(--day-bg)' : 'var(--night-bg)');
+    faceWrap.style.setProperty('--card-text', isDay ? 'var(--day-text)' : 'var(--night-text)');
+  }
+
+  // ===== 拖动表盘：手动拨转指针，反推出全局时间偏移，驱动上方4个时钟同步变化 =====
+  const analogSvg = document.getElementById('analogSvg');
+  let isDraggingDial = false;
+
+  function angleFromPointer(e){
+    const rect = analogSvg.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    let angle = Math.atan2(dx, -dy) * 180 / Math.PI; // 0 = 12点方向，顺时针增加
+    if(angle < 0) angle += 360;
+    return angle;
+  }
+
+  function applyDialAngle(angle){
+    const targetHour12 = angle / 30; // 0 ~ 12，对应指针指向的“12小时制”位置
+
+    const now = getSimulatedNow();
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: dialCity.tz, hour12:false,
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    const parts = {};
+    dtf.formatToParts(now).forEach(p => parts[p.type] = p.value);
+    let hour = parseInt(parts.hour, 10);
+    if(hour === 24) hour = 0;
+    const minute = parseInt(parts.minute, 10);
+    const second = parseInt(parts.second, 10);
+    const current24 = hour + minute / 60 + second / 3600;
+
+    // 12小时表盘存在上午/下午歧义，取离当前时间最近的一种，避免大跳变
+    let bestDiff = null;
+    [targetHour12, targetHour12 + 12].forEach(candidate => {
+      let diff = candidate - current24;
+      while(diff > 12) diff -= 24;
+      while(diff < -12) diff += 24;
+      if(bestDiff === null || Math.abs(diff) < Math.abs(bestDiff)) bestDiff = diff;
+    });
+
+    timeOffsetMs += bestDiff * 3600000;
+    update();
+    updateDialFace();
+  }
+
+  analogSvg.addEventListener('pointerdown', (e) => {
+    isDraggingDial = true;
+    analogSvg.setPointerCapture(e.pointerId);
+    applyDialAngle(angleFromPointer(e));
+  });
+  analogSvg.addEventListener('pointermove', (e) => {
+    if(!isDraggingDial) return;
+    applyDialAngle(angleFromPointer(e));
+  });
+  analogSvg.addEventListener('pointerup', () => { isDraggingDial = false; });
+  analogSvg.addEventListener('pointercancel', () => { isDraggingDial = false; });
+
+  const analogFaceWrap = document.getElementById('analogFaceWrap');
+  document.addEventListener('dblclick', (e) => {
+    if(analogFaceWrap.contains(e.target)) return; // 双击表盘本身不触发重置
+    timeOffsetMs = 0;
+    update();
+    updateDialFace();
+  });
+
   renderCards();
+  buildDialTicks();
+  renderDialCitySelector();
   update();
-  setInterval(update, 1000);
+  updateDialFace();
+  setInterval(() => { update(); updateDialFace(); }, 1000);
 </script>
 
 </body>
