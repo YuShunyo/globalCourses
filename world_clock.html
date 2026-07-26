@@ -438,9 +438,10 @@
     faceWrap.style.setProperty('--card-text', isDay ? 'var(--day-text)' : 'var(--night-text)');
   }
 
-  // ===== 拖动表盘：手动拨转指针，反推出全局时间偏移，驱动上方4个时钟同步变化 =====
+  // ===== 拖动表盘：按下时指针保持原位，手指开始转动后按相对转动量拨动指针 =====
   const analogSvg = document.getElementById('analogSvg');
   let isDraggingDial = false;
+  let dragLastAngle = 0;
 
   function angleFromPointer(e){
     const rect = analogSvg.getBoundingClientRect();
@@ -453,44 +454,92 @@
     return angle;
   }
 
-  function applyDialAngle(angle){
-    const targetHour12 = angle / 30; // 0 ~ 12，对应指针指向的“12小时制”位置
-
-    const now = getSimulatedNow();
-    const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone: dialTz, hour12:false,
-      hour:'2-digit', minute:'2-digit', second:'2-digit'
-    });
-    const parts = {};
-    dtf.formatToParts(now).forEach(p => parts[p.type] = p.value);
-    let hour = parseInt(parts.hour, 10);
-    if(hour === 24) hour = 0;
-    const minute = parseInt(parts.minute, 10);
-    const second = parseInt(parts.second, 10);
-    const current24 = hour + minute / 60 + second / 3600;
-
-    // 12小时表盘存在上午/下午歧义，取离当前时间最近的一种，避免大跳变
-    let bestDiff = null;
-    [targetHour12, targetHour12 + 12].forEach(candidate => {
-      let diff = candidate - current24;
-      while(diff > 12) diff -= 24;
-      while(diff < -12) diff += 24;
-      if(bestDiff === null || Math.abs(diff) < Math.abs(bestDiff)) bestDiff = diff;
-    });
-
-    timeOffsetMs += bestDiff * 3600000;
+  // 将手指转动的角度差换算成小时差，叠加到已有的时间偏移上（相对转动，而不是绝对对齐到手指角度）
+  function applyDialDelta(deltaAngleDeg){
+    timeOffsetMs += (deltaAngleDeg / 30) * 3600000;
     update();
     updateDialFace();
   }
 
+  // ===== 齿轮式的“咔哒”音效 + 震动反馈，每转过一小格触发一次 =====
+  let audioCtx = null;
+  function ensureAudioCtx(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ audioCtx = null; }
+    }
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function playGearTick(){
+    const ctx = ensureAudioCtx();
+    if(!ctx) return;
+    const now = ctx.currentTime;
+
+    // 短促清脆的“咔哒”声：模拟机械钟表擒纵轮转动时的声音
+    const bufferSize = Math.floor(ctx.sampleRate * 0.015);
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for(let i = 0; i < bufferSize; i++){
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = 'bandpass';
+    bandpass.frequency.value = 3200 + Math.random() * 600;
+    bandpass.Q.value = 2.2;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.5, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+    noise.connect(bandpass);
+    bandpass.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + 0.02);
+
+    // 叠加一点高频“咔”打底，让声音更清脆干净
+    const click = ctx.createOscillator();
+    click.type = 'triangle';
+    click.frequency.setValueAtTime(2400 + Math.random() * 300, now);
+    const clickGain = ctx.createGain();
+    clickGain.gain.setValueAtTime(0.15, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.012);
+    click.connect(clickGain);
+    clickGain.connect(ctx.destination);
+    click.start(now);
+    click.stop(now + 0.015);
+  }
+
+  const TICK_STEP_DEG = 6; // 每转动6度触发一次“齿轮咬合”反馈，一圈相当于60个齿
+  let dragAccumDeg = 0;
+  let dragTickCount = 0;
+
   analogSvg.addEventListener('pointerdown', (e) => {
     isDraggingDial = true;
     analogSvg.setPointerCapture(e.pointerId);
-    applyDialAngle(angleFromPointer(e));
+    dragLastAngle = angleFromPointer(e); // 只记录起始角度，指针本身不移动
+    dragAccumDeg = 0;
+    dragTickCount = 0;
+    ensureAudioCtx();
   });
   analogSvg.addEventListener('pointermove', (e) => {
     if(!isDraggingDial) return;
-    applyDialAngle(angleFromPointer(e));
+    const angle = angleFromPointer(e);
+    let diff = angle - dragLastAngle; // 与上一次记录角度的差值（最短路径）
+    while(diff > 180) diff -= 360;
+    while(diff <= -180) diff += 360;
+    dragLastAngle = angle;
+    applyDialDelta(diff);
+
+    dragAccumDeg += Math.abs(diff);
+    const newTickCount = Math.floor(dragAccumDeg / TICK_STEP_DEG);
+    if(newTickCount !== dragTickCount){
+      const ticksPassed = Math.min(newTickCount - dragTickCount, 4); // 转得太快时，最多连响4声，避免炸裂
+      dragTickCount = newTickCount;
+      for(let i = 0; i < ticksPassed; i++) playGearTick();
+      if(navigator.vibrate) navigator.vibrate(4);
+    }
   });
   analogSvg.addEventListener('pointerup', () => { isDraggingDial = false; });
   analogSvg.addEventListener('pointercancel', () => { isDraggingDial = false; });
