@@ -471,45 +471,60 @@
     if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
   }
+  // iOS Safari 对“可以解锁音频”的用户手势判定比较老旧，pointerdown 不一定算数，
+  // 所以额外在最经典的几种手势事件上尝试解锁，并当场播放一个几乎无声的短促音，彻底“预热”音频链路
+  let audioUnlocked = false;
+  function unlockAudioOnce(){
+    if(audioUnlocked) return;
+    const ctx = ensureAudioCtx();
+    if(!ctx) return;
+    const buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(ctx.destination);
+    src.start(0);
+    audioUnlocked = true;
+  }
+  ['touchstart', 'touchend', 'mousedown', 'click', 'keydown'].forEach(evt => {
+    document.addEventListener(evt, unlockAudioOnce, { passive: true });
+  });
   function playGearTick(){
     const ctx = ensureAudioCtx();
     if(!ctx) return;
     const now = ctx.currentTime;
 
-    // 短促清脆的“咔哒”声：模拟机械钟表擒纵轮转动时的声音
-    const bufferSize = Math.floor(ctx.sampleRate * 0.015);
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for(let i = 0; i < bufferSize; i++){
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+    // 一小段带通滤波噪声，模拟棘爪咬住棘轮齿的瞬间摩擦声（偏明亮清脆，贴近常见的上发条声音）
+    function ratchetBurst(startOffset, freq, gainPeak, dur){
+      const bufferSize = Math.floor(ctx.sampleRate * dur);
+      const buf = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for(let i = 0; i < bufferSize; i++){
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = freq;
+      bp.Q.value = 3.2;
+      const g = ctx.createGain();
+      const t0 = now + startOffset;
+      g.gain.setValueAtTime(gainPeak, t0);
+      g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+      src.connect(bp);
+      bp.connect(g);
+      g.connect(ctx.destination);
+      src.start(t0);
+      src.stop(t0 + dur);
     }
-    const noise = ctx.createBufferSource();
-    noise.buffer = noiseBuffer;
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = 'bandpass';
-    bandpass.frequency.value = 3200 + Math.random() * 600;
-    bandpass.Q.value = 2.2;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.5, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
-    noise.connect(bandpass);
-    bandpass.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    noise.start(now);
-    noise.stop(now + 0.02);
 
-    // 叠加一点高频“咔”打底，让声音更清脆干净
-    const click = ctx.createOscillator();
-    click.type = 'triangle';
-    click.frequency.setValueAtTime(2400 + Math.random() * 300, now);
-    const clickGain = ctx.createGain();
-    clickGain.gain.setValueAtTime(0.15, now);
-    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.012);
-    click.connect(clickGain);
-    clickGain.connect(ctx.destination);
-    click.start(now);
-    click.stop(now + 0.015);
+    // 发条棘轮转动时典型的“咔哒-咔”双击感（棘爪先咬住、再轻微回弹）
+    ratchetBurst(0, 3200 + Math.random() * 500, 0.45, 0.011);
+    ratchetBurst(0.009, 3700 + Math.random() * 500, 0.28, 0.009);
   }
+
+
+
 
   const TICK_STEP_DEG = 6; // 每转动6度触发一次“齿轮咬合”反馈，一圈相当于60个齿
   let dragAccumDeg = 0;
