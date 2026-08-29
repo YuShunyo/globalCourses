@@ -1426,6 +1426,8 @@
         rates = Object.assign({ USD: 1 }, data.rates);
         fxUpdateTime.textContent = formatSourceDate(data.date);
         updateBadges();
+        window.__fxRates = rates;
+        window.dispatchEvent(new Event('jp-fx-updated'));
         // 重新传播
         const v = numericValues[activeCode];
         if (v !== null && v !== undefined && !isNaN(v)) propagate(activeCode, v);
@@ -1441,6 +1443,8 @@
         fxError.style.display = 'block';
         fxError.textContent = '⚠ 汇率加载失败，使用离线参考汇率';
         updateBadges();
+        window.__fxRates = rates;
+        window.dispatchEvent(new Event('jp-fx-updated'));
       } finally {
         if (btn) btn.disabled = false;
         setTimeout(() => { if (icon) icon.style.transform = 'rotate(0deg)'; }, 700);
@@ -1456,6 +1460,364 @@
 </script>
 
 </div><!-- /fx-container .container -->
+
+<!-- 日本购物实付金额计算器 -->
+<div class="container" id="jp-calc-container">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+    <span style="font-size:13px; font-weight:700; color:#2d2f3a; letter-spacing:0.2px;">日本购物实付金额计算</span>
+  </div>
+
+  <div class="jp-calc-grid">
+    <div class="jp-field">
+      <label class="jp-label">商品含税价格</label>
+      <div class="jp-input-wrap">
+        <input class="jp-input" id="jp-price" type="text" inputmode="decimal" placeholder="0" value="11,000">
+      </div>
+    </div>
+
+    <div class="jp-field">
+      <label class="jp-label">折扣</label>
+      <div class="jp-input-wrap">
+        <input class="jp-input" id="jp-discount-val" type="text" inputmode="decimal" placeholder="无" value="">
+      </div>
+    </div>
+
+    <div class="jp-field">
+      <label class="jp-label">实际退税</label>
+      <div class="jp-input-wrap">
+        <input class="jp-input" id="jp-refund-pct" type="text" inputmode="decimal" placeholder="0" value="8.45">
+        <span class="jp-suffix">%</span>
+      </div>
+    </div>
+
+    <div class="jp-field">
+      <label class="jp-label">退税手续费</label>
+      <div class="jp-input-wrap">
+        <input class="jp-input" id="jp-refund-fee" type="text" inputmode="decimal" placeholder="0" value="1.55">
+        <span class="jp-suffix">%</span>
+      </div>
+    </div>
+
+    <div class="jp-field">
+      <label class="jp-label">返点</label>
+      <div class="jp-input-wrap">
+        <input class="jp-input" id="jp-cashback-val" type="text" inputmode="decimal" placeholder="0" value="0">
+        <span class="jp-suffix">%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="jp-result">
+    <div class="jp-result-row"><span>折后含税价</span><span id="jp-out-afterdiscount">¥0</span></div>
+    <div class="jp-result-row"><span>折后税前价</span><span id="jp-out-exctax">¥0</span></div>
+    <div class="jp-result-row"><span>退税金额</span><span id="jp-out-refund">¥0</span></div>
+    <div class="jp-result-row"><span>返点金额</span><span id="jp-out-cashback">¥0</span></div>
+    <div class="jp-result-final-box">
+      <div class="jp-result-row jp-result-final"><span>实际支付金额</span><span id="jp-out-final">¥0 − ¥0 = ¥0</span></div>
+      <div class="jp-result-row jp-result-rmb"><span>≈ 人民币</span><span id="jp-out-rmb">—</span></div>
+      <div class="jp-result-row jp-result-note"><span>综合优惠</span><span id="jp-out-saved">¥0 × 0 = ¥0</span></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #jp-calc-container { margin-bottom: 4px; }
+  .jp-calc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 14px;
+  }
+  @media (max-width: 480px) {
+    .jp-calc-grid { grid-template-columns: 1fr; }
+  }
+  .jp-field { display: flex; flex-direction: column; gap: 4px; }
+  .jp-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #4a4d5a;
+    letter-spacing: 0.2px;
+  }
+  .jp-sub-hint {
+    font-size: 9px;
+    font-weight: 400;
+    color: #b0b4bc;
+    margin-left: 4px;
+  }
+  .jp-input-wrap {
+    display: flex;
+    align-items: center;
+    background: #f7f8fb;
+    border: 1px solid #e6e8ec;
+    border-radius: 8px;
+    padding: 0 10px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .jp-input-wrap:focus-within {
+    border-color: #4a8fc1;
+    background: #ffffff;
+  }
+  .jp-prefix, .jp-suffix {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9a9eae;
+    flex-shrink: 0;
+  }
+  .jp-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e1e1e;
+    padding: 8px 6px;
+    font-variant-numeric: tabular-nums;
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  .jp-input-wrap-select .jp-input { padding-left: 0; }
+  .jp-unit-select {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4a8fc1;
+    flex-shrink: 0;
+    padding: 6px 0 6px 4px;
+    cursor: pointer;
+  }
+  .jp-result {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eceef2;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .jp-result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #5a5d6a;
+  }
+  .jp-result-row span:last-child {
+    font-variant-numeric: tabular-nums;
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-weight: 600;
+    color: #2d2f3a;
+  }
+  .jp-result-final-box {
+    margin-top: 4px;
+    padding: 10px 12px;
+    background: #eef7ee;
+    border: 1px solid #a8d5aa;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .jp-result-final {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .jp-result-final span:first-child {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1b5e20;
+  }
+  .jp-result-final span:last-child {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1b5e20;
+    white-space: nowrap;
+  }
+  .jp-result-note span:last-child {
+    color: #b57c2e;
+    font-weight: 600;
+  }
+  .jp-result-rmb span:first-child {
+    font-size: 10.5px;
+    color: #9a9eae;
+  }
+  .jp-result-rmb span:last-child {
+    font-size: 11px;
+    color: #4a8fc1;
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  (function(){
+    const priceEl        = document.getElementById('jp-price');
+    const discValEl       = document.getElementById('jp-discount-val');
+    const refundPctEl    = document.getElementById('jp-refund-pct');
+    const refundFeeEl    = document.getElementById('jp-refund-fee');
+    const cashbackValEl  = document.getElementById('jp-cashback-val');
+
+    const outAfterDiscount = document.getElementById('jp-out-afterdiscount');
+    const outExcTax   = document.getElementById('jp-out-exctax');
+    const outRefund   = document.getElementById('jp-out-refund');
+    const outCashback = document.getElementById('jp-out-cashback');
+    const outFinal    = document.getElementById('jp-out-final');
+    const outRmb      = document.getElementById('jp-out-rmb');
+    const outSaved    = document.getElementById('jp-out-saved');
+
+    const REFUND_TOTAL = 10; // 实际退税 + 退税手续费 = 10%（固定联动）
+
+    function num(el) {
+      const v = parseFloat(String(el.value).replace(/[^0-9.\-]/g, ''));
+      return isNaN(v) ? 0 : v;
+    }
+    function numOrDefault(el, def) {
+      const raw = String(el.value).trim();
+      if (raw === '') return def;
+      const v = parseFloat(raw.replace(/[^0-9.\-]/g, ''));
+      return isNaN(v) ? def : v;
+    }
+
+    // 千分位逗号格式化（商品含税价格输入框，输入时实时格式化并尽量保留光标位置）
+    function formatWithCommas(digits) {
+      let [intPart, decPart] = digits.split('.');
+      if (intPart === '') intPart = '0';
+      intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return decPart !== undefined ? intPart + '.' + decPart : intPart;
+    }
+    function onPriceInput() {
+      const el = priceEl;
+      const oldVal = el.value;
+      const oldPos = el.selectionStart == null ? oldVal.length : el.selectionStart;
+      const digitsBefore = (oldVal.slice(0, oldPos).match(/\d/g) || []).length;
+
+      let raw = oldVal.replace(/[^0-9.]/g, '');
+      const firstDot = raw.indexOf('.');
+      if (firstDot !== -1) {
+        raw = raw.slice(0, firstDot + 1) + raw.slice(firstDot + 1).replace(/\./g, '');
+      }
+      const formatted = raw === '' ? '' : formatWithCommas(raw);
+      el.value = formatted;
+
+      let count = 0, pos = formatted.length;
+      for (let i = 0; i < formatted.length; i++) {
+        if (/\d/.test(formatted[i])) count++;
+        if (count >= digitsBefore) { pos = i + 1; break; }
+      }
+      el.setSelectionRange(pos, pos);
+
+      calc();
+    }
+    function yen(n) {
+      const r = Math.round(n);
+      return '¥' + r.toLocaleString('ja-JP');
+    }
+
+    function calc() {
+      const price = Math.max(0, num(priceEl));
+
+      // 折扣：系数（留空 = 1，即无折扣；9折输入0.9）
+      const coef = Math.max(0, numOrDefault(discValEl, 1));
+      let discAmt = price * (1 - coef);
+      discAmt = Math.max(0, Math.min(discAmt, price));
+      const afterDiscount = price - discAmt; // 折后含税价（收银台实付）
+
+      // 折后税前价 = 折后含税价 / (1 + (实际退税+手续费)/100)
+      const refundNetPct = Math.max(0, num(refundPctEl));
+      const refundFeePct = Math.max(0, num(refundFeeEl));
+      const taxRatePct = refundNetPct + refundFeePct;
+      const excTax = afterDiscount / (1 + taxRatePct / 100);
+
+      // 退税金额 = 折后税前价 × 实际退税比例
+      const refundNet = excTax * (refundNetPct / 100);
+
+      // 返点（百分点，对折后税前价计算）
+      const cashbackAmt = Math.max(0, excTax * (num(cashbackValEl) / 100));
+
+      // 实付金额 = 折后含税价（收银台实付）− 退税金额 − 返点金额
+      const final = Math.max(0, afterDiscount - refundNet - cashbackAmt);
+      const priceR = Math.round(price);
+      const finalR = Math.round(final);
+      const deductR = priceR - finalR;
+
+      // 速算系数 = 实际支付金额 / 商品含税价格
+      const speedCoef = priceR > 0 ? (finalR / priceR) : 0;
+
+      outAfterDiscount.textContent = yen(afterDiscount);
+      outExcTax.textContent = yen(excTax);
+      outRefund.textContent = '−' + yen(refundNet);
+      outCashback.textContent = '−' + yen(cashbackAmt);
+      outFinal.textContent = yen(priceR) + ' − ' + yen(deductR) + ' = ' + yen(finalR);
+      outSaved.textContent = yen(priceR) + ' × ' + speedCoef.toFixed(4) + ' = ' + yen(finalR);
+
+      // 人民币换算，取页面上方汇率换算模块拉取到的实时 JPY/CNY 汇率
+      const r = window.__fxRates;
+      if (r && r.JPY && r.CNY) {
+        const cnyPerJpy = r.CNY / r.JPY;
+        const rmb = final * cnyPerJpy;
+        outRmb.textContent = '≈ ¥' + rmb.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      } else {
+        outRmb.textContent = '汇率加载中…';
+      }
+    }
+
+    // 实际退税 与 退税手续费 二者之和固定为 10%，留空按 0 处理，双向联动
+    let syncing = false;
+    function syncFromPct() {
+      if (syncing) return;
+      syncing = true;
+      const v = Math.max(0, Math.min(REFUND_TOTAL, num(refundPctEl)));
+      refundFeeEl.value = +(REFUND_TOTAL - v).toFixed(2);
+      syncing = false;
+      calc();
+    }
+    function syncFromFee() {
+      if (syncing) return;
+      syncing = true;
+      const v = Math.max(0, Math.min(REFUND_TOTAL, num(refundFeeEl)));
+      refundPctEl.value = +(REFUND_TOTAL - v).toFixed(2);
+      syncing = false;
+      calc();
+    }
+    refundPctEl.addEventListener('input', syncFromPct);
+    refundFeeEl.addEventListener('input', syncFromFee);
+    refundPctEl.addEventListener('blur', function() {
+      if (this.value.trim() === '') this.value = '0';
+      syncFromPct();
+    });
+    refundFeeEl.addEventListener('blur', function() {
+      if (this.value.trim() === '') this.value = '0';
+      syncFromFee();
+    });
+
+    priceEl.addEventListener('input', onPriceInput);
+
+    [discValEl, cashbackValEl].forEach(el => {
+      el.addEventListener('input', calc);
+    });
+
+    // 选中输入框时自动清空原有数据，方便直接输入新值
+    [priceEl, discValEl, refundPctEl, refundFeeEl, cashbackValEl].forEach(el => {
+      el.addEventListener('focus', function() {
+        this.value = '';
+      });
+    });
+    // 失焦时若留空，非折扣/退税字段补 0；折扣字段留空即代表无折扣（系数1），保持空白
+    [priceEl, cashbackValEl].forEach(el => {
+      el.addEventListener('blur', function() {
+        if (this.value.trim() === '') {
+          this.value = '0';
+          calc();
+        }
+      });
+    });
+    discValEl.addEventListener('blur', calc);
+
+    // 汇率模块拉取到最新汇率后，刷新人民币换算
+    window.addEventListener('jp-fx-updated', calc);
+
+    calc();
+  })();
+</script>
 
 <script>
   (function(){
