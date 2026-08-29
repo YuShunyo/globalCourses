@@ -1513,9 +1513,10 @@
     <div class="jp-result-row"><span>退税金额</span><span id="jp-out-refund">¥0</span></div>
     <div class="jp-result-row"><span>返点金额</span><span id="jp-out-cashback">¥0</span></div>
     <div class="jp-result-final-box">
-      <div class="jp-result-row jp-result-final"><span>实际支付金额</span><span id="jp-out-final">¥0 − ¥0 = ¥0</span></div>
-      <div class="jp-result-row jp-result-rmb"><span>≈ 人民币</span><span id="jp-out-rmb">—</span></div>
-      <div class="jp-result-row jp-result-note"><span>综合优惠</span><span id="jp-out-saved">¥0 × 0 = ¥0</span></div>
+      <div class="jp-result-row jp-result-final"><span>实际支付金额</span><span id="jp-out-final">¥0</span></div>
+      <div class="jp-result-row jp-result-rmb"><span id="jp-label-rmb">人民币</span><span id="jp-out-rmb">—</span></div>
+      <div class="jp-result-row jp-result-note"><span>优惠金额</span><span id="jp-out-discount-amt">¥0</span></div>
+      <div class="jp-result-row jp-result-note"><span>综合折扣</span><span id="jp-out-saved">0</span></div>
     </div>
   </div>
 </div>
@@ -1662,6 +1663,8 @@
     const outCashback = document.getElementById('jp-out-cashback');
     const outFinal    = document.getElementById('jp-out-final');
     const outRmb      = document.getElementById('jp-out-rmb');
+    const labelRmb    = document.getElementById('jp-label-rmb');
+    const outDiscountAmt = document.getElementById('jp-out-discount-amt');
     const outSaved    = document.getElementById('jp-out-saved');
 
     const REFUND_TOTAL = 10; // 实际退税 + 退税手续费 = 10%（固定联动）
@@ -1746,16 +1749,19 @@
       outExcTax.textContent = yen(excTax);
       outRefund.textContent = '−' + yen(refundNet);
       outCashback.textContent = '−' + yen(cashbackAmt);
-      outFinal.textContent = yen(priceR) + ' − ' + yen(deductR) + ' = ' + yen(finalR);
-      outSaved.textContent = yen(priceR) + ' × ' + speedCoef.toFixed(4) + ' = ' + yen(finalR);
+      outFinal.textContent = yen(finalR);
+      outDiscountAmt.textContent = yen(deductR);
+      outSaved.textContent = speedCoef.toFixed(4);
 
       // 人民币换算，取页面上方汇率换算模块拉取到的实时 JPY/CNY 汇率
       const r = window.__fxRates;
       if (r && r.JPY && r.CNY) {
         const cnyPerJpy = r.CNY / r.JPY;
         const rmb = final * cnyPerJpy;
+        labelRmb.textContent = '人民币（' + cnyPerJpy.toFixed(4) + '）';
         outRmb.textContent = '≈ ¥' + rmb.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       } else {
+        labelRmb.textContent = '人民币';
         outRmb.textContent = '汇率加载中…';
       }
     }
