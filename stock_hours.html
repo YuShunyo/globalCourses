@@ -2274,7 +2274,30 @@
         });
       }
 
+      // ---- 鼠标：以按下(mousedown)起点判定手势是否命中标题栏死区 ----
+      // 若本次拖动是从标题栏(第一列)按下开始的，则拖动过程中（即使移动到时间轴轨道区域）
+      // 悬浮线一律冻结不动；松开时若终点已经落在轨道区域，本次点击也整体判定无效。
+      let mousePressed = false;
+      let mouseDeadZone = false; // 本次按下是否起始于标题栏
+
+      tl.addEventListener('mousedown', (e) => {
+        const tlRect = tl.getBoundingClientRect();
+        const x = e.clientX - tlRect.left;
+        mousePressed = true;
+        mouseDeadZone = (x < LABEL_WIDTH);
+        if (mouseDeadZone) {
+          // 避免从标题栏拖动时触发文字选中等默认行为
+          e.preventDefault();
+        }
+      });
+      window.addEventListener('mouseup', () => {
+        mousePressed = false;
+      });
+
       tl.addEventListener('mousemove', (e) => {
+        // 起点在标题栏的按压拖动：整个过程冻结，不响应移动
+        if (mousePressed && mouseDeadZone) return;
+
         // 已固定时，鼠标移动不改变任何状态
         if (pinnedX !== null) return;
 
@@ -2314,6 +2337,14 @@
 
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
+
+        // 起点在标题栏、但松手落在了轨道区域：说明是一次从标题栏拖出去的手势，
+        // 整个手势判定为无效，不触发固定/取消固定
+        if (mouseDeadZone && x >= trackStart) {
+          mouseDeadZone = false;
+          return;
+        }
+        mouseDeadZone = false;
 
         if (x < trackStart || x > trackEnd) {
           // 点击了 label 区域，取消固定
