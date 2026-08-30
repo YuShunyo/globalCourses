@@ -2249,6 +2249,15 @@
 
       const wrapper = tl.closest('.timeline-wrapper');
 
+      // 标题栏是 sticky 定位，视觉上始终贴在 wrapper（可视窗口）左边，
+      // 不会随时间轴内容一起滚动。因此判断"是否落在标题栏上"必须用
+      // 相对 wrapper 的视口坐标，而不是相对 tl（随滚动整体偏移的内容容器）的坐标；
+      // 后者只适合用来换算"在内容中的绝对位置"（悬浮线定位、滚动量等）。
+      function isOverLabel(clientX) {
+        const wrapperRect = wrapper.getBoundingClientRect();
+        return (clientX - wrapperRect.left) < LABEL_WIDTH;
+      }
+
       // 固定状态：是否已点击锁定（每次 render 重置）
       let pinnedX = null;
 
@@ -2281,10 +2290,8 @@
       let mouseDeadZone = false; // 本次按下是否起始于标题栏
 
       tl.addEventListener('mousedown', (e) => {
-        const tlRect = tl.getBoundingClientRect();
-        const x = e.clientX - tlRect.left;
         mousePressed = true;
-        mouseDeadZone = (x < LABEL_WIDTH);
+        mouseDeadZone = isOverLabel(e.clientX);
         if (mouseDeadZone) {
           // 避免从标题栏拖动时触发文字选中等默认行为
           e.preventDefault();
@@ -2301,13 +2308,20 @@
         // 已固定时，鼠标移动不改变任何状态
         if (pinnedX !== null) return;
 
+        // 标题栏是 sticky 的，视觉上始终盖在时间轴上方——即使已经横向滚动，
+        // 鼠标悬停在标题栏上时也不应该显示/移动悬浮线
+        if (isOverLabel(e.clientX)) {
+          hoverLine.classList.remove('active');
+          return;
+        }
+
         const tlRect = tl.getBoundingClientRect();
         const x = e.clientX - tlRect.left;
 
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
 
-        if (x < trackStart || x > trackEnd) {
+        if (x > trackEnd) {
           hoverLine.classList.remove('active');
           return;
         }
@@ -2334,19 +2348,20 @@
       tl.addEventListener('click', (e) => {
         const tlRect = tl.getBoundingClientRect();
         const x = e.clientX - tlRect.left;
+        const overLabel = isOverLabel(e.clientX);
 
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
 
-        // 起点在标题栏、但松手落在了轨道区域：说明是一次从标题栏拖出去的手势，
+        // 起点在标题栏、但松手落在了轨道区域（视觉上）：说明是一次从标题栏拖出去的手势，
         // 整个手势判定为无效，不触发固定/取消固定
-        if (mouseDeadZone && x >= trackStart) {
+        if (mouseDeadZone && !overLabel) {
           mouseDeadZone = false;
           return;
         }
         mouseDeadZone = false;
 
-        if (x < trackStart || x > trackEnd) {
+        if (overLabel || x > trackEnd) {
           // 点击了 label 区域，取消固定
           cancelPin();
           return;
@@ -2385,7 +2400,7 @@
       tl.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
         const tlRect = tl.getBoundingClientRect();
-        // x 是相对于 timeline 内部的坐标（已含滚动偏移）
+        // x 是相对于 timeline 内部的坐标（已含滚动偏移，用于内容定位）
         const x = touch.clientX - tlRect.left;
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
@@ -2393,14 +2408,17 @@
         touchStartClientX = touch.clientX;
         touchStartClientY = touch.clientY;
 
-        if (x < trackStart || x > trackEnd) {
-          if (x < trackStart) {
-            // 触点在标题栏：方向未定，等第一次移动再判断是横滑还是竖滑
-            touchMode = 'label-pending';
-          } else {
-            // 轨道以外区域，不干预
-            touchMode = null;
-          }
+        // 标题栏是 sticky 的，视觉上始终盖在时间轴上方，即使已经横向滚动过；
+        // 必须用相对 wrapper 的视口坐标判断，不能用会随滚动偏移的 tl 坐标
+        if (isOverLabel(touch.clientX)) {
+          // 触点在标题栏：方向未定，等第一次移动再判断是横滑还是竖滑
+          touchMode = 'label-pending';
+          return;
+        }
+
+        if (x > trackEnd) {
+          // 轨道以外区域，不干预
+          touchMode = null;
           return;
         }
 
