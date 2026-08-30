@@ -1550,21 +1550,22 @@
     min-width: 0;
   }
   @media (max-width: 480px) {
-    .jp-calc-grid { grid-template-columns: 1fr; }
+    .jp-calc-grid { grid-template-columns: 1fr; gap: 8px 10px; }
     .jp-pair-row { gap: 6px 8px; }
-    .jp-pair-row .jp-input-wrap { padding: 0 6px; }
-    .jp-pair-row .jp-input { font-size: 12.5px; padding: 7px 2px; }
-    .jp-pair-row .jp-label { font-size: 9.5px; }
-    .jp-pair-row .jp-suffix { font-size: 11px; }
+    .jp-calc-grid .jp-input-wrap { padding: 0 6px; }
+    .jp-calc-grid .jp-input { font-size: 12.5px; padding: 7px 2px; }
+    .jp-calc-grid .jp-label { font-size: 9.5px; }
+    .jp-calc-grid .jp-suffix { font-size: 11px; }
   }
   @media (max-width: 340px) {
+    .jp-calc-grid { gap: 6px 8px; }
     .jp-pair-row { gap: 5px 6px; }
-    .jp-pair-row .jp-input-wrap { padding: 0 4px; }
-    .jp-pair-row .jp-input { font-size: 11.5px; padding: 6px 0; }
-    .jp-pair-row .jp-label { font-size: 9px; }
-    .jp-pair-row .jp-suffix { font-size: 10px; }
+    .jp-calc-grid .jp-input-wrap { padding: 0 4px; }
+    .jp-calc-grid .jp-input { font-size: 11.5px; padding: 6px 0; }
+    .jp-calc-grid .jp-label { font-size: 9px; }
+    .jp-calc-grid .jp-suffix { font-size: 10px; }
   }
-  .jp-field { display: flex; flex-direction: column; gap: 4px; }
+  .jp-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .jp-label {
     font-size: 10.5px;
     font-weight: 600;
