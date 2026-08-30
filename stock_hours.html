@@ -2374,11 +2374,13 @@
       document.addEventListener('click', onDocClick);
 
       // ---- 触摸支持 ----
-      // touchMode: null | 'drag-line' | 'scroll-track'
+      // touchMode: null | 'drag-line' | 'scroll-track' | 'label-pending' | 'label-block'
       let touchMode = null;
       let touchStartClientX = 0;
+      let touchStartClientY = 0;
       let touchStartScrollLeft = 0;
       const HOVER_LINE_HIT = 24; // 悬停线左右各 24px 视为命中
+      const DIR_THRESHOLD = 6; // 移动超过该像素后再判断横/竖滑方向
 
       tl.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
@@ -2388,13 +2390,20 @@
         const trackStart = LABEL_WIDTH;
         const trackEnd = LABEL_WIDTH + TOTAL * HR;
 
+        touchStartClientX = touch.clientX;
+        touchStartClientY = touch.clientY;
+
         if (x < trackStart || x > trackEnd) {
-          // 触点在 label 列或轨道外，不干预（让页面正常滚动）
-          touchMode = null;
+          if (x < trackStart) {
+            // 触点在标题栏：方向未定，等第一次移动再判断是横滑还是竖滑
+            touchMode = 'label-pending';
+          } else {
+            // 轨道以外区域，不干预
+            touchMode = null;
+          }
           return;
         }
 
-        touchStartClientX = touch.clientX;
         touchStartScrollLeft = wrapper.scrollLeft;
 
         // 判断是否点在悬停线附近
@@ -2412,10 +2421,34 @@
 
       tl.addEventListener('touchmove', (e) => {
         if (!touchMode) return;
-        e.preventDefault();
 
         const touch = e.touches[0];
         const dx = touch.clientX - touchStartClientX;
+
+        // 标题栏区域：首次移动时判断方向
+        if (touchMode === 'label-pending') {
+          const dy = touch.clientY - touchStartClientY;
+          if (Math.abs(dx) < DIR_THRESHOLD && Math.abs(dy) < DIR_THRESHOLD) {
+            // 移动幅度太小，方向仍未定，继续等待
+            return;
+          }
+          if (Math.abs(dx) > Math.abs(dy)) {
+            // 横滑：视为对时间轴的拖动，冻结时间轴（悬浮线与滚动均不响应）
+            touchMode = 'label-block';
+          } else {
+            // 竖滑：视为页面滚动意图，交还给浏览器默认行为
+            touchMode = null;
+            return;
+          }
+        }
+
+        if (touchMode === 'label-block') {
+          // 起点在标题栏且判定为横滑：整个手势期间冻结，页面/时间轴都不动
+          e.preventDefault();
+          return;
+        }
+
+        e.preventDefault();
 
         if (touchMode === 'drag-line') {
           // 只移动悬停线，时间轴不滚动
@@ -2426,7 +2459,7 @@
           const newPx = Math.min(trackEnd, Math.max(trackStart, pinnedX + dx));
           // 实时更新显示但不固定 pinnedX（松手再固定）
           applyPosition(newPx, true);
-        } else {
+        } else if (touchMode === 'scroll-track') {
           // 滚动时间轴，悬停线保持在时间轴上的绝对位置不动
           wrapper.scrollLeft = touchStartScrollLeft - dx;
         }
@@ -2434,6 +2467,12 @@
 
       tl.addEventListener('touchend', (e) => {
         if (!touchMode) return;
+
+        if (touchMode === 'label-pending' || touchMode === 'label-block') {
+          // 标题栏区域的手势（不论横滑冻结还是竖滑交还浏览器）不触发悬浮线逻辑
+          touchMode = null;
+          return;
+        }
 
         const touch = e.changedTouches[0];
         const dx = touch.clientX - touchStartClientX;
