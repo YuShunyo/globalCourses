@@ -1468,10 +1468,19 @@
   </div>
 
   <div class="jp-calc-grid">
-    <div class="jp-field">
-      <label class="jp-label">商品含税价格</label>
-      <div class="jp-input-wrap">
-        <input class="jp-input" id="jp-price" type="text" inputmode="decimal" placeholder="0" value="11,000">
+    <div class="jp-pair-row">
+      <div class="jp-field">
+        <label class="jp-label">商品含税价</label>
+        <div class="jp-input-wrap">
+          <input class="jp-input" id="jp-price" type="text" inputmode="decimal" placeholder="0" value="11,000">
+        </div>
+      </div>
+
+      <div class="jp-field">
+        <label class="jp-label">商品税前价</label>
+        <div class="jp-input-wrap">
+          <input class="jp-input" id="jp-price-pretax" type="text" inputmode="decimal" placeholder="0" value="10,000">
+        </div>
       </div>
     </div>
 
@@ -1482,19 +1491,21 @@
       </div>
     </div>
 
-    <div class="jp-field">
-      <label class="jp-label">实际退税</label>
-      <div class="jp-input-wrap">
-        <input class="jp-input" id="jp-refund-pct" type="text" inputmode="decimal" placeholder="0" value="8.45">
-        <span class="jp-suffix">%</span>
+    <div class="jp-pair-row">
+      <div class="jp-field">
+        <label class="jp-label">实际退税</label>
+        <div class="jp-input-wrap">
+          <input class="jp-input" id="jp-refund-pct" type="text" inputmode="decimal" placeholder="0" value="8.45">
+          <span class="jp-suffix">%</span>
+        </div>
       </div>
-    </div>
 
-    <div class="jp-field">
-      <label class="jp-label">退税手续费</label>
-      <div class="jp-input-wrap">
-        <input class="jp-input" id="jp-refund-fee" type="text" inputmode="decimal" placeholder="0" value="1.55">
-        <span class="jp-suffix">%</span>
+      <div class="jp-field">
+        <label class="jp-label">退税手续费</label>
+        <div class="jp-input-wrap">
+          <input class="jp-input" id="jp-refund-fee" type="text" inputmode="decimal" placeholder="0" value="1.55">
+          <span class="jp-suffix">%</span>
+        </div>
       </div>
     </div>
 
@@ -1508,14 +1519,14 @@
   </div>
 
   <div class="jp-result">
-    <div class="jp-result-row"><span>折后含税价</span><span id="jp-out-afterdiscount">¥0</span></div>
-    <div class="jp-result-row"><span>折后税前价</span><span id="jp-out-exctax">¥0</span></div>
-    <div class="jp-result-row"><span>退税金额</span><span id="jp-out-refund">¥0</span></div>
-    <div class="jp-result-row"><span>返点金额</span><span id="jp-out-cashback">¥0</span></div>
+    <div class="jp-result-row"><span>折后含税价</span><span id="jp-out-afterdiscount">0</span></div>
+    <div class="jp-result-row"><span>折后税前价</span><span id="jp-out-exctax">0</span></div>
+    <div class="jp-result-row"><span>退税金额</span><span id="jp-out-refund">0</span></div>
+    <div class="jp-result-row"><span>返点金额</span><span id="jp-out-cashback">0</span></div>
     <div class="jp-result-final-box">
-      <div class="jp-result-row jp-result-final"><span>实际支付金额</span><span id="jp-out-final">¥0</span></div>
+      <div class="jp-result-row jp-result-final"><span>实际支付金额</span><span id="jp-out-final">0</span></div>
       <div class="jp-result-row jp-result-rmb"><span id="jp-label-rmb">人民币</span><span id="jp-out-rmb">—</span></div>
-      <div class="jp-result-row jp-result-note"><span>优惠金额</span><span id="jp-out-discount-amt">¥0</span></div>
+      <div class="jp-result-row jp-result-note"><span>优惠金额</span><span id="jp-out-discount-amt">0</span></div>
       <div class="jp-result-row jp-result-note"><span>综合折扣</span><span id="jp-out-saved">0</span></div>
     </div>
   </div>
@@ -1528,8 +1539,30 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px 14px;
   }
+  .jp-pair-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+    min-width: 0;
+  }
+  .jp-pair-row .jp-field {
+    min-width: 0;
+  }
   @media (max-width: 480px) {
     .jp-calc-grid { grid-template-columns: 1fr; }
+    .jp-pair-row { gap: 6px 8px; }
+    .jp-pair-row .jp-input-wrap { padding: 0 6px; }
+    .jp-pair-row .jp-input { font-size: 12.5px; padding: 7px 2px; }
+    .jp-pair-row .jp-label { font-size: 9.5px; }
+    .jp-pair-row .jp-suffix { font-size: 11px; }
+  }
+  @media (max-width: 340px) {
+    .jp-pair-row { gap: 5px 6px; }
+    .jp-pair-row .jp-input-wrap { padding: 0 4px; }
+    .jp-pair-row .jp-input { font-size: 11.5px; padding: 6px 0; }
+    .jp-pair-row .jp-label { font-size: 9px; }
+    .jp-pair-row .jp-suffix { font-size: 10px; }
   }
   .jp-field { display: flex; flex-direction: column; gap: 4px; }
   .jp-label {
@@ -1551,6 +1584,7 @@
     border: 1px solid #e6e8ec;
     border-radius: 8px;
     padding: 0 10px;
+    min-width: 0;
     transition: border-color 0.15s, background 0.15s;
   }
   .jp-input-wrap:focus-within {
@@ -1652,6 +1686,7 @@
 <script>
   (function(){
     const priceEl        = document.getElementById('jp-price');
+    const priceExTaxEl   = document.getElementById('jp-price-pretax');
     const discValEl       = document.getElementById('jp-discount-val');
     const refundPctEl    = document.getElementById('jp-refund-pct');
     const refundFeeEl    = document.getElementById('jp-refund-fee');
@@ -1668,6 +1703,7 @@
     const outSaved    = document.getElementById('jp-out-saved');
 
     const REFUND_TOTAL = 10; // 实际退税 + 退税手续费 = 10%（固定联动）
+    const JCT_RATE = 0.10; // 日本消费税标准税率 10%，用于含税价/税前价互算
 
     function num(el) {
       const v = parseFloat(String(el.value).replace(/[^0-9.\-]/g, ''));
@@ -1688,7 +1724,17 @@
       return decPart !== undefined ? intPart + '.' + decPart : intPart;
     }
     function onPriceInput() {
-      const el = priceEl;
+      formatCommaField(priceEl);
+      syncPretaxFromPrice();
+      calc();
+    }
+    function onPretaxInput() {
+      formatCommaField(priceExTaxEl);
+      syncPriceFromPretax();
+      calc();
+    }
+    // 通用：千分位实时格式化并保留光标位置
+    function formatCommaField(el) {
       const oldVal = el.value;
       const oldPos = el.selectionStart == null ? oldVal.length : el.selectionStart;
       const digitsBefore = (oldVal.slice(0, oldPos).match(/\d/g) || []).length;
@@ -1707,12 +1753,24 @@
         if (count >= digitsBefore) { pos = i + 1; break; }
       }
       el.setSelectionRange(pos, pos);
-
-      calc();
+    }
+    // 商品含税价 -> 商品税前价（税前 = 含税 / 1.1）
+    function syncPretaxFromPrice() {
+      if (priceEl.value.trim() === '') { priceExTaxEl.value = ''; return; }
+      const incl = num(priceEl);
+      const pretax = incl / (1 + JCT_RATE);
+      priceExTaxEl.value = formatWithCommas(String(Math.round(pretax)));
+    }
+    // 商品税前价 -> 商品含税价（含税 = 税前 × 1.1）
+    function syncPriceFromPretax() {
+      if (priceExTaxEl.value.trim() === '') { priceEl.value = ''; return; }
+      const pretax = num(priceExTaxEl);
+      const incl = pretax * (1 + JCT_RATE);
+      priceEl.value = formatWithCommas(String(Math.round(incl)));
     }
     function yen(n) {
       const r = Math.round(n);
-      return '¥' + r.toLocaleString('ja-JP');
+      return r.toLocaleString('ja-JP');
     }
 
     function calc() {
@@ -1759,7 +1817,7 @@
         const cnyPerJpy = r.CNY / r.JPY;
         const rmb = final * cnyPerJpy;
         labelRmb.textContent = '人民币（' + cnyPerJpy.toFixed(4) + '）';
-        outRmb.textContent = '≈ ¥' + rmb.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        outRmb.textContent = '≈ ' + rmb.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       } else {
         labelRmb.textContent = '人民币';
         outRmb.textContent = '汇率加载中…';
@@ -1796,25 +1854,38 @@
     });
 
     priceEl.addEventListener('input', onPriceInput);
+    priceExTaxEl.addEventListener('input', onPretaxInput);
 
     [discValEl, cashbackValEl].forEach(el => {
       el.addEventListener('input', calc);
     });
 
     // 选中输入框时自动清空原有数据，方便直接输入新值
-    [priceEl, discValEl, refundPctEl, refundFeeEl, cashbackValEl].forEach(el => {
+    [priceEl, priceExTaxEl, discValEl, refundPctEl, refundFeeEl, cashbackValEl].forEach(el => {
       el.addEventListener('focus', function() {
         this.value = '';
       });
     });
     // 失焦时若留空，非折扣/退税字段补 0；折扣字段留空即代表无折扣（系数1），保持空白
-    [priceEl, cashbackValEl].forEach(el => {
-      el.addEventListener('blur', function() {
-        if (this.value.trim() === '') {
-          this.value = '0';
-          calc();
-        }
-      });
+    priceEl.addEventListener('blur', function() {
+      if (this.value.trim() === '') {
+        this.value = '0';
+        syncPretaxFromPrice();
+        calc();
+      }
+    });
+    priceExTaxEl.addEventListener('blur', function() {
+      if (this.value.trim() === '') {
+        this.value = '0';
+        syncPriceFromPretax();
+        calc();
+      }
+    });
+    cashbackValEl.addEventListener('blur', function() {
+      if (this.value.trim() === '') {
+        this.value = '0';
+        calc();
+      }
     });
     discValEl.addEventListener('blur', calc);
 
