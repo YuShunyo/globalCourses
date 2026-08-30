@@ -374,26 +374,6 @@
 </head>
 <body>
 
-<div class="container">
-  <div class="timeline-wrapper">
-    <div class="timeline" id="timeline"></div>
-  </div>
-
-  <div class="legend-row">
-    <div class="leg-item"><div class="leg-swatch before"></div>盘前</div>
-    <div class="leg-item"><div class="leg-swatch open"></div>盘中</div>
-    <div class="leg-item"><div class="leg-swatch after"></div>盘后</div>
-    <div class="leg-item"><div class="leg-swatch night"></div>夜盘</div>
-    <div class="leg-item"><div class="leg-swatch break"></div>午休</div>
-    <div class="season-toggle">
-      <span class="date-display" id="dateDisplay">2026/06/26</span>
-      <button id="seasonBtn" class="">夏</button>
-      <span class="season-label" id="seasonLabel">令时</span>
-    </div>
-  </div>
-
-</div><!-- /main .container close before fx -->
-
 <!-- 世界时钟独立容器 -->
 <div class="container" id="wc-container">
   <div class="wc-grid" id="wcGrid"></div>
@@ -1896,6 +1876,27 @@
     calc();
   })();
 </script>
+
+<!-- 股票市场交易时间模块（移至底部） -->
+<div class="container">
+  <div class="timeline-wrapper">
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="legend-row">
+    <div class="leg-item"><div class="leg-swatch before"></div>盘前</div>
+    <div class="leg-item"><div class="leg-swatch open"></div>盘中</div>
+    <div class="leg-item"><div class="leg-swatch after"></div>盘后</div>
+    <div class="leg-item"><div class="leg-swatch night"></div>夜盘</div>
+    <div class="leg-item"><div class="leg-swatch break"></div>午休</div>
+    <div class="season-toggle">
+      <span class="date-display" id="dateDisplay">2026/06/26</span>
+      <button id="seasonBtn" class="">夏</button>
+      <span class="season-label" id="seasonLabel">令时</span>
+    </div>
+  </div>
+
+</div><!-- /market timeline .container -->
 
 <script>
   (function(){
