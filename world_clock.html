@@ -77,10 +77,24 @@
     color: var(--card-text);
     border: 1px solid var(--card-border, transparent);
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    transition: background .6s ease, color .6s ease, order .3s ease;
+    transition: background .6s ease, color .6s ease, order .3s ease, transform .25s ease, box-shadow .25s ease;
     overflow:hidden;
     padding: 2% 1.5%;
+    cursor: pointer;
+    outline: 0 solid transparent;
+    outline-offset: 3px;
+    -webkit-tap-highlight-color: transparent;
   }
+
+  /* 选中的城市卡片：淡淡的橙色光晕，与表盘外圈的橙色光晕呼应 */
+  .card.selected{
+    box-shadow:
+      0 0 0 1.5px rgba(255,159,10,0.55),
+      0 0 26px 4px rgba(255,159,10,0.42),
+      0 8px 24px rgba(0,0,0,0.12);
+  }
+  .card:focus{ outline: none; }
+  .card:focus-visible{ box-shadow: 0 0 0 2px rgba(255,159,10,0.6), 0 8px 24px rgba(0,0,0,0.12); }
 
   .city-name-wrap{
     position: relative;
@@ -175,14 +189,14 @@
   .analog-face{
     width:100%; height:100%; display:block;
     color: var(--card-text, var(--day-text));
-    filter: drop-shadow(0 10px 26px rgba(0,0,0,0.14));
+    filter: drop-shadow(0 0 12px rgba(255,159,10,0.5)) drop-shadow(0 10px 26px rgba(0,0,0,0.14));
     transition: color .6s ease;
   }
 
   .face-bg{
     fill: var(--card-bg, var(--day-bg));
-    stroke: var(--day-border);
-    stroke-width: 2;
+    stroke: rgba(255,159,10,0.75);
+    stroke-width: 2.5;
     transition: fill .6s ease;
   }
 
@@ -282,8 +296,21 @@
   const grid = document.getElementById('clockGrid');
 
   // ===== 手动表盘状态 =====
-  // 表盘始终显示系统本地时区的时间，不再提供城市选择
-  const dialTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // 表盘显示“被选中的城市卡片”的时间；默认选中与本机时区一致的卡片，没有则选第一张
+  const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let selectedIndex = Math.max(0, cities.findIndex(c => c.tz === localTz));
+  let dialTz = cities[selectedIndex].tz;
+
+  function setSelected(i){
+    selectedIndex = i;
+    dialTz = cities[i].tz;
+    grid.querySelectorAll('.card').forEach((card, idx) => {
+      const on = idx === i;
+      card.classList.toggle('selected', on);
+      card.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    updateDialFace();
+  }
   let timeOffsetMs = 0; // 拖动表盘产生的全局时间偏移，会同时应用到上方4个时钟
 
   function getSimulatedNow(){
@@ -311,6 +338,10 @@
       card.className = 'card';
       card.dataset.tz = c.tz;
       card.dataset.index = i;
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-pressed', i === selectedIndex ? 'true' : 'false');
+      if(i === selectedIndex) card.classList.add('selected');
       card.innerHTML = `
         <div class="city-name-wrap">
           <div class="city-name" data-role="cityname">${c.city}</div>
@@ -328,8 +359,19 @@
         cities[i] = { city, tz };
         card.dataset.tz = tz;
         nameEl.textContent = city;
+        if(i === selectedIndex) dialTz = tz; // 选中的卡片换了城市，表盘跟着换
         update();
+        updateDialFace();
         e.target.blur();
+      });
+      // 点击卡片空白处选中；点城市名仍然是弹出下拉框换城市
+      card.addEventListener('click', (e) => {
+        if(e.target.closest('.city-name-wrap')) return;
+        setSelected(i);
+      });
+      card.addEventListener('keydown', (e) => {
+        if(e.target !== card) return;
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setSelected(i); }
       });
       grid.appendChild(card);
     });
@@ -587,6 +629,7 @@
   const analogFaceWrap = document.getElementById('analogFaceWrap');
   document.addEventListener('dblclick', (e) => {
     if(analogFaceWrap.contains(e.target)) return; // 双击表盘本身不触发重置
+    if(e.target.closest('.card')) return; // 连续点卡片切换城市时不误触重置
     timeOffsetMs = 0;
     update();
     updateDialFace();
