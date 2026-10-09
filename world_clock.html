@@ -637,13 +637,13 @@
   });
 
   // ===== 秒针走动声音：每秒一声“嗒”，每到整分（秒针转满60秒）单独“叮”一声 =====
-  // 每秒一声木鱼“嗒”。15 / 30 / 45 秒（quarter = 1 / 2 / 3）在“嗒”之后叠加同一只“玻璃杯”的叮声，
-  // 只改变三件事，且方向一致地递进：音高 do → mi → sol 逐级升高、尾音逐级变长、泛音逐级变亮。
+  // 每秒一声木鱼“嗒”。15 / 30 / 45 秒用同一个玻璃杯“叮”（quarter = 1）：15 秒一声，30 秒快速两声，45 秒快速三声。
+  // delaySec 用来把连续的几声精确排在音频时间轴上。
   // 整分的“叮”是更低、更长的铃铛音（E6，金属泛音），与玻璃杯音色不同。
-  function playSecondTick(quarter){
+  function playSecondTick(quarter, delaySec){
     const ctx = ensureAudioCtx();
     if(!ctx) return;
-    const t0 = ctx.currentTime;
+    const t0 = ctx.currentTime + (delaySec || 0);
     quarter = quarter || 0;
 
     // 短促的“咔”（带通噪声）+ 极短的低频共鸣：15/30/45 秒的玻璃杯叮声底下垫的就是它
@@ -764,7 +764,13 @@
     if(!tickSoundOn || isDraggingDial || delta !== 1 || document.hidden) return;
     const s60 = ((sec % 60) + 60) % 60;
     if(s60 === 0) playMinuteDing();
-    else playSecondTick(s60 % 15 === 0 ? s60 / 15 : 0); // 15 / 30 / 45 秒 → quarter 1 / 2 / 3，换不同音色
+    else if(s60 % 15 === 0){
+      // 15 秒：一声玻璃杯“叮”；30 秒：快速两声；45 秒：快速三声（都用 15 秒的同一个声音）
+      // 连响的每两声之间固定间隔 0.1 秒
+      const n = s60 / 15;
+      for(let k = 0; k < n; k++) playSecondTick(1, k * 0.1);
+    }
+    else playSecondTick(0);
   }
 
   renderCards();
