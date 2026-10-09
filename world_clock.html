@@ -180,6 +180,8 @@
     align-items:center;
     justify-content:center;
     touch-action: none;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px rgba(255,159,10,0.55), 0 0 26px 4px rgba(255,159,10,0.42); /* 与选中卡片同款：细橙边 + 光晕 */
     cursor: grab;
     user-select: none;
   }
@@ -189,14 +191,13 @@
   .analog-face{
     width:100%; height:100%; display:block;
     color: var(--card-text, var(--day-text));
-    filter: drop-shadow(0 0 12px rgba(255,159,10,0.5)) drop-shadow(0 10px 26px rgba(0,0,0,0.14));
+    filter: drop-shadow(0 10px 26px rgba(0,0,0,0.14));
     transition: color .6s ease;
   }
 
   .face-bg{
     fill: var(--card-bg, var(--day-bg));
-    stroke: rgba(255,159,10,0.75);
-    stroke-width: 2.5;
+    stroke: none;
     transition: fill .6s ease;
   }
 
@@ -244,7 +245,7 @@
 
   <div class="analog-section" id="analogSection">
     <div class="analog-face-wrap" id="analogFaceWrap">
-      <svg class="analog-face" viewBox="0 0 200 200" id="analogSvg">
+      <svg class="analog-face" viewBox="2 2 196 196" id="analogSvg">
         <circle class="face-bg" cx="100" cy="100" r="98"/>
         <g id="dialTicks"></g>
         <g id="dialNumbers"></g>
