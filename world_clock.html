@@ -611,14 +611,17 @@
   });
 
   // ===== 秒针走动声音：每秒一声“嗒”，每到整分（秒针转满60秒）单独“叮”一声 =====
-  // 同一种“嗒”的起音；accent=true（15 / 30 / 45 秒）时在“嗒”之后多带一小段清亮的木质共鸣尾音，只靠音色区分、仍只响一下
-  function playSecondTick(accent){
+  // 每秒一声“嗒”。15 / 30 / 45 秒（quarter = 1 / 2 / 3）在“嗒”之后叠加同一只“玻璃杯”的叮声，
+  // 只改变三件事，且方向一致地递进：音高 do → mi → sol 逐级升高、尾音逐级变长、泛音逐级变亮。
+  // 整分的“叮”是更低、更长的铃铛音（E6，金属泛音），与玻璃杯音色不同。
+  function playSecondTick(quarter){
     const ctx = ensureAudioCtx();
     if(!ctx) return;
     const t0 = ctx.currentTime;
+    quarter = quarter || 0;
 
-    function click(offset, freq, bodyFreq, level, ring){
-      const t = t0 + offset;
+    // 通用的短促棘轮“咔”（带通噪声）+ 极短的低频木质共鸣，所有秒数都有
+    function baseClick(level){
       const dur = 0.022;
       const size = Math.floor(ctx.sampleRate * dur);
       const buf = ctx.createBuffer(1, size, ctx.sampleRate);
@@ -626,46 +629,63 @@
       for(let i = 0; i < size; i++){
         data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / size, 2.5);
       }
-      // 短促的带通噪声：棘轮擒纵的“咔”
       const noise = ctx.createBufferSource();
       noise.buffer = buf;
       const bp = ctx.createBiquadFilter();
       bp.type = 'bandpass';
-      bp.frequency.value = freq;
+      bp.frequency.value = 2100;
       bp.Q.value = 3.5;
       const ng = ctx.createGain();
-      ng.gain.setValueAtTime(0.55 * level, t);
-      ng.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      ng.gain.setValueAtTime(0.55 * level, t0);
+      ng.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
       noise.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
-      noise.start(t); noise.stop(t + dur);
+      noise.start(t0); noise.stop(t0 + dur);
 
-      // 一点点很短的“木质”共鸣，让声音不那么单薄
       const osc = ctx.createOscillator();
       osc.type = 'sine';
-      osc.frequency.value = bodyFreq;
+      osc.frequency.value = 820;
       const og = ctx.createGain();
-      og.gain.setValueAtTime(0.12 * level, t);
-      og.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+      og.gain.setValueAtTime(0.12 * level, t0);
+      og.gain.exponentialRampToValueAtTime(0.001, t0 + 0.035);
       osc.connect(og); og.connect(ctx.destination);
-      osc.start(t); osc.stop(t + 0.04);
-
-      // 共鸣尾音：两个成五度关系的正弦（1500 / 2250 Hz），短促衰减，像敲在木鱼/木块上的清脆余音
-      if(ring){
-        [[1500, 0.30, 0.13], [2250, 0.12, 0.08]].forEach(([f, peak, decay]) => {
-          const r = ctx.createOscillator();
-          r.type = 'sine';
-          r.frequency.value = f;
-          const rg = ctx.createGain();
-          rg.gain.setValueAtTime(0.0001, t);
-          rg.gain.exponentialRampToValueAtTime(peak, t + 0.002);
-          rg.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-          r.connect(rg); rg.connect(ctx.destination);
-          r.start(t); r.stop(t + decay + 0.02);
-        });
-      }
+      osc.start(t0); osc.stop(t0 + 0.04);
     }
 
-    click(0, 2100, 820, accent ? 1.15 : 1, accent);
+    // 加一个正弦分音：freq 频率，peak 峰值，attack 起音，decay 衰减；可选 glide（起始频率倍数，做快速下滑）
+    function partial(freq, peak, attack, decay, glide){
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      if(glide){
+        o.frequency.setValueAtTime(freq * glide, t0);
+        o.frequency.exponentialRampToValueAtTime(freq, t0 + 0.02);
+      } else {
+        o.frequency.value = freq;
+      }
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(peak, t0 + attack);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + decay);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0 + decay + 0.03);
+    }
+
+    if(quarter === 0){
+      baseClick(1);
+      return;
+    }
+
+    // 同一只玻璃杯：基频 + 玻璃特有的非整数泛音（2.32x / 4.25x），柔和起音 4ms
+    // 三档参数：[基频 Hz, 基频音量, 尾音秒数, 泛音亮度系数]
+    const GLASS = {
+      1: [2093.0, 0.26, 0.22, 0.8],  // do (C7)  最短最暗
+      2: [2637.0, 0.25, 0.38, 1.0],  // mi (E7)  中等
+      3: [3136.0, 0.22, 0.62, 1.3]   // sol (G7) 最长最亮
+    };
+    const [f0, peak, decay, bright] = GLASS[quarter];
+    baseClick(0.75);
+    partial(f0,        peak,                0.004, decay);
+    partial(f0 * 2.32, 0.065 * bright,      0.004, decay * 0.55);
+    partial(f0 * 4.25, 0.022 * bright,      0.004, decay * 0.25);
   }
 
   function playMinuteDing(){
@@ -710,7 +730,7 @@
     if(!tickSoundOn || isDraggingDial || delta !== 1 || document.hidden) return;
     const s60 = ((sec % 60) + 60) % 60;
     if(s60 === 0) playMinuteDing();
-    else playSecondTick(s60 % 15 === 0); // 15 / 30 / 45 秒换音
+    else playSecondTick(s60 % 15 === 0 ? s60 / 15 : 0); // 15 / 30 / 45 秒 → quarter 1 / 2 / 3，换不同音色
   }
 
   renderCards();
