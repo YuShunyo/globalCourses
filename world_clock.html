@@ -207,6 +207,43 @@
   .center-dot{ fill:currentColor; pointer-events:none; }
   .center-dot-second{ fill:#FF9F0A; pointer-events:none; }
 
+  /* ===== 秒针声音开关 ===== */
+  .tick-toggle{
+    position: relative;
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    margin-top: 1.6vh;
+    font-size:14px;
+    color: var(--day-muted);
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tick-toggle input{ position:absolute; opacity:0; width:0; height:0; }
+  .tick-toggle-track{
+    position:relative;
+    width:42px; height:24px;
+    border-radius:12px;
+    background: rgba(43,43,40,0.22);
+    transition: background .2s ease;
+  }
+  .tick-toggle-thumb{
+    position:absolute;
+    top:2px; left:2px;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform .2s ease;
+  }
+  .tick-toggle input:checked + .tick-toggle-track{ background:#FF9F0A; }
+  .tick-toggle input:checked + .tick-toggle-track .tick-toggle-thumb{ transform: translateX(18px); }
+  .tick-toggle input:focus-visible + .tick-toggle-track{ outline:2px solid #FF9F0A; outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){
+    .tick-toggle-track, .tick-toggle-thumb{ transition:none; }
+  }
+
 
 </style>
 </head>
@@ -235,6 +272,11 @@
         <circle class="center-dot-second" cx="100" cy="100" r="2"/>
       </svg>
     </div>
+    <label class="tick-toggle" for="tickSoundToggle">
+      <span class="tick-toggle-text">秒针声音</span>
+      <input type="checkbox" id="tickSoundToggle" role="switch">
+      <span class="tick-toggle-track"><span class="tick-toggle-thumb"></span></span>
+    </label>
   </div>
 </div>
 
@@ -568,11 +610,114 @@
     updateDialFace();
   });
 
+  // ===== 秒针走动声音：每秒一声“嗒”，每到整分（秒针转满60秒）单独“叮”一声 =====
+  // 同一种“嗒”的起音；accent=true（15 / 30 / 45 秒）时在“嗒”之后多带一小段清亮的木质共鸣尾音，只靠音色区分、仍只响一下
+  function playSecondTick(accent){
+    const ctx = ensureAudioCtx();
+    if(!ctx) return;
+    const t0 = ctx.currentTime;
+
+    function click(offset, freq, bodyFreq, level, ring){
+      const t = t0 + offset;
+      const dur = 0.022;
+      const size = Math.floor(ctx.sampleRate * dur);
+      const buf = ctx.createBuffer(1, size, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for(let i = 0; i < size; i++){
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / size, 2.5);
+      }
+      // 短促的带通噪声：棘轮擒纵的“咔”
+      const noise = ctx.createBufferSource();
+      noise.buffer = buf;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = freq;
+      bp.Q.value = 3.5;
+      const ng = ctx.createGain();
+      ng.gain.setValueAtTime(0.55 * level, t);
+      ng.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      noise.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
+      noise.start(t); noise.stop(t + dur);
+
+      // 一点点很短的“木质”共鸣，让声音不那么单薄
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = bodyFreq;
+      const og = ctx.createGain();
+      og.gain.setValueAtTime(0.12 * level, t);
+      og.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+      osc.connect(og); og.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.04);
+
+      // 共鸣尾音：两个成五度关系的正弦（1500 / 2250 Hz），短促衰减，像敲在木鱼/木块上的清脆余音
+      if(ring){
+        [[1500, 0.30, 0.13], [2250, 0.12, 0.08]].forEach(([f, peak, decay]) => {
+          const r = ctx.createOscillator();
+          r.type = 'sine';
+          r.frequency.value = f;
+          const rg = ctx.createGain();
+          rg.gain.setValueAtTime(0.0001, t);
+          rg.gain.exponentialRampToValueAtTime(peak, t + 0.002);
+          rg.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+          r.connect(rg); rg.connect(ctx.destination);
+          r.start(t); r.stop(t + decay + 0.02);
+        });
+      }
+    }
+
+    click(0, 2100, 820, accent ? 1.15 : 1, accent);
+  }
+
+  function playMinuteDing(){
+    const ctx = ensureAudioCtx();
+    if(!ctx) return;
+    const t0 = ctx.currentTime;
+    const base = 1318.5; // E6
+    // 类似小铃铛：基频 + 两个非整数倍泛音，衰减各不相同
+    [[1, 0.28, 1.6], [2.76, 0.10, 0.9], [5.4, 0.04, 0.45]].forEach(([ratio, peak, decay]) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = base * ratio;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(peak, t0 + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + decay);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t0); osc.stop(t0 + decay + 0.05);
+    });
+  }
+
+  const tickToggle = document.getElementById('tickSoundToggle');
+  let tickSoundOn = false;
+  tickToggle.addEventListener('change', () => {
+    tickSoundOn = tickToggle.checked;
+    if(tickSoundOn){
+      ensureAudioCtx(); // 点开关本身就是用户手势，顺便解锁音频
+      playSecondTick(); // 打开时先响一声作为反馈
+    }
+  });
+
+  // 以“模拟时间”的整秒跳变为准：画面刷新和声音同步触发。
+  // 拖动表盘、双击重置造成的时间跳变不会发声（只有自然前进恰好1秒才发声）。
+  let lastSoundSec = Math.floor(getSimulatedNow().getTime() / 1000);
+  function secondLoop(){
+    const sec = Math.floor(getSimulatedNow().getTime() / 1000);
+    if(sec === lastSoundSec) return;
+    const delta = sec - lastSoundSec;
+    lastSoundSec = sec;
+    update();
+    updateDialFace();
+    if(!tickSoundOn || isDraggingDial || delta !== 1 || document.hidden) return;
+    const s60 = ((sec % 60) + 60) % 60;
+    if(s60 === 0) playMinuteDing();
+    else playSecondTick(s60 % 15 === 0); // 15 / 30 / 45 秒换音
+  }
+
   renderCards();
   buildDialTicks();
   update();
   updateDialFace();
-  setInterval(() => { update(); updateDialFace(); }, 1000);
+  setInterval(secondLoop, 50);
 </script>
 
 </body>
