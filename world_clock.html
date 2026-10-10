@@ -766,9 +766,9 @@
     if(s60 === 0) playMinuteDing();
     else if(s60 % 15 === 0){
       // 15 秒：一声玻璃杯“叮”；30 秒：快速两声；45 秒：快速三声（都用 15 秒的同一个声音）
-      // 连响的每两声之间固定间隔 0.1 秒
+      // 连响的每两声之间固定间隔 0.14 秒
       const n = s60 / 15;
-      for(let k = 0; k < n; k++) playSecondTick(1, k * 0.1);
+      for(let k = 0; k < n; k++) playSecondTick(1, k * 0.14);
     }
     else playSecondTick(0);
   }
