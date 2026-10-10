@@ -19,6 +19,7 @@
     --night-bg:#2A2B30;
     --night-text:#D6D5CE;
     --night-muted:#93938C;
+    --shift:#2E9BD6; /* 时间被拨动过时的专属强调色（与“选中”的橙色区分） */
 
     --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', 'Liberation Mono', Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -216,7 +217,7 @@
 
   .hand{ stroke:currentColor; stroke-linecap:round; pointer-events:none; }
   .hour-hand{ stroke-width:5.5; }
-  .minute-hand{ stroke-width:3; opacity:0.85; }
+  .minute-hand{ stroke-width:3; }
   /* 声音关闭：秒针与时针同色；声音开启（svg 带 .sound-on）：秒针为橙色 */
   .second-hand{ stroke:currentColor; stroke-width:1.4; stroke-linecap:round; pointer-events:none; transition: stroke .2s ease; }
   .second-hand-tail{ stroke:currentColor; stroke-width:1.4; stroke-linecap:round; pointer-events:none; transition: stroke .2s ease; }
@@ -232,6 +233,21 @@
     .second-hand, .second-hand-tail, .center-dot-second{ transition:none; }
   }
 
+  /* ===== 时间被拨动后的视觉状态（body.time-shifted）===== */
+  /* 拨动后：未选中的卡片亮起蓝色光晕（强度与选中卡片的橙色光晕相同）；选中卡片保持原来的橙色光晕不变 */
+  body.time-shifted .card:not(.selected){
+    box-shadow:
+      0 0 0 1.5px rgba(46,155,214,0.55),
+      0 0 26px 4px rgba(46,155,214,0.42),
+      0 8px 24px rgba(0,0,0,0.12);
+  }
+  /* 方案一：真实时间的“影子指针” */
+  .ghost-hands{ opacity:0; transition: opacity .35s ease; pointer-events:none; }
+  body.time-shifted .ghost-hands{ opacity:1; }
+  /* 淡灰色，粗细与真实指针一致（画在真实指针下面） */
+  .ghost-hands line{ stroke: #A9A8A1; stroke-linecap: round; opacity:.22; }
+  .ghost-hour{ stroke-width:5.5; }
+  .ghost-minute{ stroke-width:3; }
 </style>
 </head>
 <body>
@@ -249,6 +265,10 @@
         <circle class="face-bg" cx="100" cy="100" r="98"/>
         <g id="dialTicks"></g>
         <g id="dialNumbers"></g>
+        <g class="ghost-hands" id="ghostHands">
+          <line class="ghost-minute" id="ghostMinute" x1="100" y1="100" x2="100" y2="28"/>
+          <line class="ghost-hour" id="ghostHour" x1="100" y1="100" x2="100" y2="50"/>
+        </g>
         <line class="hand minute-hand" id="minuteHand" x1="100" y1="100" x2="100" y2="28"/>
         <line class="hand hour-hand" id="hourHand" x1="100" y1="100" x2="100" y2="50"/>
         <g id="secondHand">
@@ -462,6 +482,27 @@
     numsG.innerHTML = numsHtml;
   }
 
+  // ===== 偏移状态：真实时间的指针角度 =====
+  const dialFmtCache = {};
+  function dialAnglesAt(date){
+    let f = dialFmtCache[dialTz];
+    if(!f) f = dialFmtCache[dialTz] = new Intl.DateTimeFormat('en-US', { timeZone: dialTz, hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    const p = {};
+    f.formatToParts(date).forEach(x => p[x.type] = x.value);
+    let h = parseInt(p.hour, 10); if(h === 24) h = 0;
+    const m = parseInt(p.minute, 10), sec = parseInt(p.second, 10);
+    return { hourDeg: ((h % 12) + m / 60 + sec / 3600) * 30, minuteDeg: (m + sec / 60) * 6 };
+  }
+
+  function renderShiftState(){
+    const shifted = Math.abs(timeOffsetMs) >= 1000;
+    document.body.classList.toggle('time-shifted', shifted);
+    if(!shifted) return;
+    const real = dialAnglesAt(new Date());
+    document.getElementById('ghostHour').setAttribute('transform', `rotate(${real.hourDeg} 100 100)`);
+    document.getElementById('ghostMinute').setAttribute('transform', `rotate(${real.minuteDeg} 100 100)`);
+  }
+
   // ===== 表盘指针与背景色刷新（跟随 getSimulatedNow） =====
   function updateDialFace(){
     const now = getSimulatedNow();
@@ -484,6 +525,7 @@
     document.getElementById('hourHand').setAttribute('transform', `rotate(${hourDeg} 100 100)`);
     document.getElementById('minuteHand').setAttribute('transform', `rotate(${minuteDeg} 100 100)`);
     document.getElementById('secondHand').setAttribute('transform', `rotate(${secondDeg} 100 100)`);
+    renderShiftState();
 
     const hour24 = hour + minute / 60;
     const isDay = hour24 >= 6 && hour24 < 18;
@@ -591,13 +633,37 @@
       hubPress = { id: e.pointerId, x: e.clientX, y: e.clientY };
       return;
     }
+    cancelSweep();
     isDraggingDial = true;
     analogSvg.setPointerCapture(e.pointerId);
     dragLastAngle = angleFromPointer(e); // 只记录起始角度，指针本身不移动
     dragAccumDeg = 0;
     dragTickCount = 0;
+    dragAccumMin = 0;
+    dragSpeedEma = 0;          // 按下时速度记为 0：一开始是最细的灵敏度，随着手指加速再逐渐放大
+    dragLastTs = e.timeStamp;
     ensureAudioCtx();
   });
+  // ===== 慢拨精细：手指转得越慢，表盘走得越少（精细定位）；转得越快越接近 1:1（粗调） =====
+  // 灵敏度曲线：在“手指角速度(°/秒) → 灵敏度”的锚点之间做对数插值。
+  //   ≤ 50°/s  → 0.04（最慢：手指转 1° 表盘只走 0.04°，约 5 秒）
+  //   120°/s   → 0.2
+  //   ≥ 300°/s → 1（粗调，1:1）
+  const GAIN_POINTS = [[50, 0.04], [120, 0.2], [300, 1]];
+  let dragSpeedEma = 0, dragLastTs = 0, dragAccumMin = 0;
+  function gainForSpeed(dps){
+    const P = GAIN_POINTS;
+    if(dps <= P[0][0]) return P[0][1];
+    if(dps >= P[P.length - 1][0]) return 1;
+    for(let i = 1; i < P.length; i++){
+      if(dps <= P[i][0]){
+        const [v0, g0] = P[i - 1], [v1, g1] = P[i];
+        const t = Math.log(dps / v0) / Math.log(v1 / v0);
+        return g0 * Math.pow(g1 / g0, t);
+      }
+    }
+    return 1;
+  }
   analogSvg.addEventListener('pointermove', (e) => {
     if(!isDraggingDial) return;
     const angle = angleFromPointer(e);
@@ -605,13 +671,22 @@
     while(diff > 180) diff -= 360;
     while(diff <= -180) diff += 360;
     dragLastAngle = angle;
-    applyDialDelta(diff);
 
-    dragAccumDeg += Math.abs(diff);
-    const newTickCount = Math.floor(dragAccumDeg / TICK_STEP_DEG);
-    if(newTickCount !== dragTickCount){
-      const ticksPassed = Math.min(newTickCount - dragTickCount, 4); // 转得太快时，最多连响4声，避免炸裂
-      dragTickCount = newTickCount;
+    // 手指角速度（°/秒），做平滑，避免事件间隔抖动造成忽快忽慢
+    const dt = Math.max(1, e.timeStamp - dragLastTs);
+    dragLastTs = e.timeStamp;
+    dragSpeedEma = dragSpeedEma * 0.65 + (Math.abs(diff) / dt * 1000) * 0.35;
+    const gain = gainForSpeed(dragSpeedEma);
+
+    const eff = diff * gain; // 实际作用到表盘的角度
+    applyDialDelta(eff);
+
+    // 咔哒反馈跟着“实际走过的时间”走：粗调每 10 分钟一格，精调（灵敏度低）每 1 分钟一格
+    const gridMin = gain < 0.4 ? 1 : 10;
+    dragAccumMin += Math.abs(eff) / 30 * 60; // 度 -> 分钟（30° = 1 小时）
+    const ticksPassed = Math.min(Math.floor(dragAccumMin / gridMin), 4); // 最多连响 4 声，避免炸裂
+    if(dragAccumMin >= gridMin){
+      dragAccumMin = dragAccumMin % gridMin;
       for(let i = 0; i < ticksPassed; i++) playGearTick();
       if(navigator.vibrate) navigator.vibrate(4);
     }
@@ -631,10 +706,40 @@
   document.addEventListener('dblclick', (e) => {
     if(analogFaceWrap.contains(e.target)) return; // 双击表盘本身不触发重置
     if(e.target.closest('.card')) return; // 连续点卡片切换城市时不误触重置
-    timeOffsetMs = 0;
-    update();
-    updateDialFace();
+    sweepOffsetToZero();
   });
+
+  // 双击重置：不是瞬间跳回，而是约 0.5 秒缓动扫回真实时间（扫回期间不发秒针声）
+  let sweepRaf = 0, isSweeping = false;
+  function cancelSweep(){
+    if(sweepRaf){ cancelAnimationFrame(sweepRaf); sweepRaf = 0; }
+    isSweeping = false;
+  }
+  function sweepOffsetToZero(){
+    cancelSweep();
+    const from = timeOffsetMs;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(from === 0 || reduce){
+      timeOffsetMs = 0; update(); updateDialFace();
+      lastSoundSec = Math.floor(getSimulatedNow().getTime() / 1000);
+      return;
+    }
+    isSweeping = true;
+    const t0 = performance.now(), DUR = 520;
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / DUR);
+      const e = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      timeOffsetMs = from * (1 - e);
+      update(); updateDialFace();
+      if(p < 1){ sweepRaf = requestAnimationFrame(step); }
+      else {
+        timeOffsetMs = 0; update(); updateDialFace();
+        lastSoundSec = Math.floor(getSimulatedNow().getTime() / 1000);
+        isSweeping = false; sweepRaf = 0;
+      }
+    };
+    sweepRaf = requestAnimationFrame(step);
+  }
 
   // ===== 秒针走动声音：每秒一声“嗒”，每到整分（秒针转满60秒）单独“叮”一声 =====
   // 每秒一声木鱼“嗒”。15 / 30 / 45 秒用同一个玻璃杯“叮”（quarter = 1）：15 秒一声，30 秒快速两声，45 秒快速三声。
@@ -696,10 +801,34 @@
     }
 
     if(quarter === 0){
-      // 普通秒：木鱼声——中低频、起音带一点下滑、衰减很快（约 0.08s），干脆；再加一个很弱的非谐波分音增加“空腔”感
-      baseClick(1.05);
-      partial(950, 0.34, 0.002, 0.085, 1.25);
-      partial(950 * 1.58, 0.10, 0.002, 0.045);
+      // 普通秒：见下方各方案。click = 带通/高通噪声“咔”，tone = 短促正弦共鸣
+      const click = (at, dur, freq, Q, level, type) => {
+        const size = Math.max(1, Math.floor(ctx.sampleRate * dur));
+        const buf = ctx.createBuffer(1, size, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for(let i = 0; i < size; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / size, 2);
+        const src = ctx.createBufferSource(); src.buffer = buf;
+        const f = ctx.createBiquadFilter(); f.type = type || 'bandpass'; f.frequency.value = freq; f.Q.value = Q;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(level, t0 + at);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + at + dur);
+        src.connect(f); f.connect(g); g.connect(ctx.destination);
+        src.start(t0 + at); src.stop(t0 + at + dur);
+      };
+      const tone = (at, freq, peak, decay) => {
+        const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t0 + at);
+        g.gain.exponentialRampToValueAtTime(peak, t0 + at + 0.001);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + decay);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0 + at); o.stop(t0 + at + decay + 0.02);
+      };
+      // C 机械手表：很轻很细的“滴”，擒纵机构特有的一前一后两个微小的咔（间隔约 0.03 秒）
+      click(0, 0.007, 4800, 2.5, 0.55 * 2.2);
+      tone(0, 3600, 0.07 * 2.2, 0.014);
+      click(0.032, 0.006, 4200, 2.5, 0.30 * 2.2);
+      tone(0.032, 3300, 0.04 * 2.2, 0.012);
       return;
     }
 
@@ -761,7 +890,7 @@
     lastSoundSec = sec;
     update();
     updateDialFace();
-    if(!tickSoundOn || isDraggingDial || delta !== 1 || document.hidden) return;
+    if(!tickSoundOn || isDraggingDial || isSweeping || delta !== 1 || document.hidden) return;
     const s60 = ((sec % 60) + 60) % 60;
     if(s60 === 0) playMinuteDing();
     else if(s60 % 15 === 0){
