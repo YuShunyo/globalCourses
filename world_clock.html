@@ -687,7 +687,7 @@
     const ticksPassed = Math.min(Math.floor(dragAccumMin / gridMin), 4); // 最多连响 4 声，避免炸裂
     if(dragAccumMin >= gridMin){
       dragAccumMin = dragAccumMin % gridMin;
-      for(let i = 0; i < ticksPassed; i++) playGearTick();
+      if(tickSoundOn){ for(let i = 0; i < ticksPassed; i++) playGearTick(); } // 拨动的咔哒声也受圆心开关控制
       if(navigator.vibrate) navigator.vibrate(4);
     }
   });
