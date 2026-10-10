@@ -741,8 +741,44 @@
     sweepRaf = requestAnimationFrame(step);
   }
 
+  // ===== 15 / 30 / 45 秒的提示音：木鱼 / 响棒 / 手鼓 =====
+  // f 基频；r 各分音频率比；a 各分音音量；d 各分音衰减秒；at 起音；glide 起始频率倍数；gt 下滑时长；c 噪声“咔” [频率, Q, 音量]；g 响度系数
+  const CHIME_DEFS = [
+    { f:620,  r:[1,2.4,4.1],     a:[.5,.17,.07], d:[.09,.05,.03], at:.002,  glide:1.25, c:[1800,2,.3],   g:0.6 }, // 15 秒 木鱼
+    { f:2400, r:[1,2.6],         a:[.5,.15],     d:[.04,.02],     at:.0008,             c:[3500,3,.5],   g:0.68 }, // 30 秒 响棒
+    { f:300,  r:[1,1.59,2.14],   a:[.6,.2,.1],   d:[.14,.08,.05], at:.002,  glide:1.5, gt:.03, c:[1500,1,.5], g:0.47 }  // 45 秒 手鼓
+  ];
+  function playChime(ctx, def, t0){
+    const at = def.at || .003;
+    def.r.forEach((r, i) => {
+      const o = ctx.createOscillator(); o.type = 'sine';
+      if(def.glide){
+        o.frequency.setValueAtTime(def.f * r * def.glide, t0);
+        o.frequency.exponentialRampToValueAtTime(def.f * r, t0 + (def.gt || .025));
+      } else o.frequency.value = def.f * r;
+      const g = ctx.createGain(), pk = def.a[i] * def.g, d = def.d[i];
+      g.gain.setValueAtTime(.0001, t0);
+      g.gain.exponentialRampToValueAtTime(pk, t0 + at);
+      g.gain.exponentialRampToValueAtTime(.0001, t0 + at + d);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t0); o.stop(t0 + at + d + .05);
+    });
+    if(def.c){
+      const dur = .02, n = Math.floor(ctx.sampleRate * dur);
+      const buf = ctx.createBuffer(1, n, ctx.sampleRate), x = buf.getChannelData(0);
+      for(let i = 0; i < n; i++) x[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.5);
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = def.c[0]; f.Q.value = def.c[1];
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(def.c[2] * def.g, t0);
+      g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
+      src.connect(f); f.connect(g); g.connect(ctx.destination);
+      src.start(t0); src.stop(t0 + dur);
+    }
+  }
+
   // ===== 秒针走动声音：每秒一声“嗒”，每到整分（秒针转满60秒）单独“叮”一声 =====
-  // 每秒一声木鱼“嗒”。15 / 30 / 45 秒用同一个玻璃杯“叮”（quarter = 1）：15 秒一声，30 秒快速两声，45 秒快速三声。
+  // 普通秒用机械手表的“滴”；15 / 30 / 45 秒（quarter = 1 / 2 / 3）分别是木鱼 / 响棒 / 手鼓各一声。
   // delaySec 用来把连续的几声精确排在音频时间轴上。
   // 整分的“叮”是更低、更长的铃铛音（E6，金属泛音），与玻璃杯音色不同。
   function playSecondTick(quarter, delaySec){
@@ -750,55 +786,6 @@
     if(!ctx) return;
     const t0 = ctx.currentTime + (delaySec || 0);
     quarter = quarter || 0;
-
-    // 短促的“咔”（带通噪声）+ 极短的低频共鸣：15/30/45 秒的玻璃杯叮声底下垫的就是它
-    function baseClick(level){
-      const dur = 0.022;
-      const size = Math.floor(ctx.sampleRate * dur);
-      const buf = ctx.createBuffer(1, size, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for(let i = 0; i < size; i++){
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / size, 2.5);
-      }
-      const noise = ctx.createBufferSource();
-      noise.buffer = buf;
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.value = 2100;
-      bp.Q.value = 3.5;
-      const ng = ctx.createGain();
-      ng.gain.setValueAtTime(0.55 * level, t0);
-      ng.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
-      noise.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
-      noise.start(t0); noise.stop(t0 + dur);
-
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = 820;
-      const og = ctx.createGain();
-      og.gain.setValueAtTime(0.12 * level, t0);
-      og.gain.exponentialRampToValueAtTime(0.001, t0 + 0.035);
-      osc.connect(og); og.connect(ctx.destination);
-      osc.start(t0); osc.stop(t0 + 0.04);
-    }
-
-    // 加一个正弦分音：freq 频率，peak 峰值，attack 起音，decay 衰减；可选 glide（起始频率倍数，做快速下滑）
-    function partial(freq, peak, attack, decay, glide){
-      const o = ctx.createOscillator();
-      o.type = 'sine';
-      if(glide){
-        o.frequency.setValueAtTime(freq * glide, t0);
-        o.frequency.exponentialRampToValueAtTime(freq, t0 + 0.02);
-      } else {
-        o.frequency.value = freq;
-      }
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(peak, t0 + attack);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + decay);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(t0); o.stop(t0 + decay + 0.03);
-    }
 
     if(quarter === 0){
       // 普通秒：见下方各方案。click = 带通/高通噪声“咔”，tone = 短促正弦共鸣
@@ -832,18 +819,8 @@
       return;
     }
 
-    // 同一只玻璃杯：基频 + 玻璃特有的非整数泛音（2.32x / 4.25x），柔和起音 4ms
-    // 三档参数：[基频 Hz, 基频音量, 尾音秒数, 泛音亮度系数]
-    const GLASS = {
-      1: [2093.0, 0.26, 0.22, 0.8],  // do (C7)  最短最暗
-      2: [2637.0, 0.25, 0.38, 1.0],  // mi (E7)  中等
-      3: [3136.0, 0.22, 0.62, 1.3]   // sol (G7) 最长最亮
-    };
-    const [f0, peak, decay, bright] = GLASS[quarter];
-    baseClick(0.75);
-    partial(f0,        peak,                0.004, decay);
-    partial(f0 * 2.32, 0.065 * bright,      0.004, decay * 0.55);
-    partial(f0 * 4.25, 0.022 * bright,      0.004, decay * 0.25);
+    // 15 秒木鱼、30 秒响棒、45 秒手鼓（各一声，短促）
+    playChime(ctx, CHIME_DEFS[quarter - 1], t0);
   }
 
   function playMinuteDing(){
@@ -894,10 +871,8 @@
     const s60 = ((sec % 60) + 60) % 60;
     if(s60 === 0) playMinuteDing();
     else if(s60 % 15 === 0){
-      // 15 秒：一声玻璃杯“叮”；30 秒：快速两声；45 秒：快速三声（都用 15 秒的同一个声音）
-      // 连响的每两声之间固定间隔 0.14 秒
-      const n = s60 / 15;
-      for(let k = 0; k < n; k++) playSecondTick(1, k * 0.14);
+      // 15 / 30 / 45 秒：木鱼 / 响棒 / 手鼓各一声
+      playSecondTick(s60 / 15);
     }
     else playSecondTick(0);
   }
