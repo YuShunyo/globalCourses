@@ -160,11 +160,25 @@
   .colon{ padding: 0 0.3cqw; }
 
   .date-display{
+    position: relative;
     font-family: var(--mono);
     font-size: 9cqw;
     letter-spacing:0.04em;
     opacity:0.8;
     white-space:nowrap;
+  }
+  /* 透明的原生日期选择框，盖在日期文字上（点击范围比文字略大，手机上更好点） */
+  .date-input{
+    position:absolute;
+    left:-14px; right:-14px; top:-14px; bottom:-14px;
+    width:calc(100% + 28px); height:calc(100% + 28px);
+    opacity:0; border:none; padding:0; margin:0;
+    font-size:16px; /* 避免 iOS 聚焦时自动放大页面 */
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (hover:hover){
+    .date-display:hover [data-role="datetext"]{ text-decoration: underline dotted; text-underline-offset: 0.2em; }
   }
 
   /* 与选中城市的时差（选中的卡片不显示，只保留占位高度） */
@@ -391,7 +405,7 @@
         <div class="time-row">
           <span class="time-part" data-role="hm">--:--</span><span class="colon time-part" data-role="colon2">:</span><span class="time-part" data-role="ss">--</span>
         </div>
-        <div class="date-display" data-role="date">----/--/--</div>
+        <div class="date-display" data-role="date"><span data-role="datetext">----/--/--</span><input type="date" class="date-input" min="1970-01-01" max="2100-12-31" aria-label="选择日期"></div>
         <div class="diff-display" data-role="diff"></div>
       `;
       const nameEl = card.querySelector('[data-role="cityname"]');
@@ -408,15 +422,44 @@
       });
       // 点击卡片空白处选中；点城市名仍然是弹出下拉框换城市
       card.addEventListener('click', (e) => {
-        if(e.target.closest('.city-name-wrap')) return;
+        if(e.target.closest('.city-name-wrap, .date-display')) return;
         setSelected(i);
       });
+      // 点日期：弹出原生日期选择器；选定后该城市保持当前钟点，其余城市跟着变
+      const dateInput = card.querySelector('.date-input');
+      dateInput.addEventListener('click', () => { try{ dateInput.showPicker(); }catch(_){} });
+      dateInput.addEventListener('change', () => { if(dateInput.value) setCityDate(i, dateInput.value); dateInput.blur(); });
       card.addEventListener('keydown', (e) => {
         if(e.target !== card) return;
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setSelected(i); }
       });
       grid.appendChild(card);
     });
+  }
+
+  // 把某时区的本地时间换算成 UTC 毫秒（做两遍，处理夏令时切换附近的偏差）
+  function zonedToUtc(y, mo, d, h, mi, s, tz){
+    const guess = Date.UTC(y, mo - 1, d, h, mi, s);
+    const off = getOffsetMinutes(tz, new Date(guess));
+    let utc = guess - off * 60000;
+    const off2 = getOffsetMinutes(tz, new Date(utc));
+    if(off2 !== off) utc = guess - off2 * 60000;
+    return utc;
+  }
+  function setCityDate(i, ymd){
+    const [y, mo, d] = ymd.split('-').map(Number);
+    if(!y || y < 1970 || y > 2100) return;
+    const tz = cities[i].tz, simNow = getSimulatedNow();
+    const parts = {};
+    getFmt('card', tz).formatToParts(simNow).forEach(p => parts[p.type] = p.value);
+    const h = parts.hour === '24' ? 0 : parseInt(parts.hour, 10);
+    const utc = zonedToUtc(y, mo, d, h, parseInt(parts.minute, 10), parseInt(parts.second, 10), tz) + (simNow.getTime() % 1000);
+    cancelSweep();
+    timeOffsetMs = utc - Date.now();
+    update();
+    updateDialFace();
+    lastSoundSec = Math.floor(getSimulatedNow().getTime() / 1000);
+    scheduleSecondLoop();
   }
 
   function formatOffset(minutes){
@@ -575,7 +618,12 @@
 
       card.querySelector('[data-role="hm"]').textContent = `${hour}:${parts.minute}`;
       card.querySelector('[data-role="ss"]').textContent = parts.second;
-      card.querySelector('[data-role="date"]').textContent = `${parts.year}/${parts.month}/${parts.day}`;
+      const dateStr = `${parts.year}-${parts.month}-${parts.day}`;
+      if(card.__dateStr !== dateStr){
+        card.__dateStr = dateStr;
+        card.querySelector('[data-role="datetext"]').textContent = `${parts.year}/${parts.month}/${parts.day}`;
+        card.querySelector('.date-input').value = dateStr;
+      }
 
       const hourNum = parseInt(hour, 10);
       const minNum = parseInt(parts.minute, 10);
