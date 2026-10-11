@@ -167,11 +167,11 @@
     opacity:0.8;
     white-space:nowrap;
   }
-  /* 透明的原生日期选择框，盖在日期文字上（点击范围比文字略大，手机上更好点） */
+  /* 透明的原生日期选择框，盖在日期文字上（点击范围只比文字大一点点，避免手机上误触选卡片） */
   .date-input{
     position:absolute;
-    left:-14px; right:-14px; top:-14px; bottom:-14px;
-    width:calc(100% + 28px); height:calc(100% + 28px);
+    left:-4px; right:-4px; top:-2px; bottom:-2px;
+    width:calc(100% + 8px); height:calc(100% + 4px);
     opacity:0; border:none; padding:0; margin:0;
     font-size:16px; /* 避免 iOS 聚焦时自动放大页面 */
     cursor:pointer;
