@@ -462,6 +462,23 @@
     scheduleSecondLoop();
   }
 
+  // ===== 扩大“选中卡片”的点击范围：卡片上方和下方各延伸一小段，点在这个范围内也能选中该卡片 =====
+  // （卡片本身有 overflow:hidden，所以不用 CSS 伪元素，而是按点击位置判断落在哪张卡片的上下延伸带里）
+  const HIT_EXTRA_TOP = 32, HIT_EXTRA_BOTTOM = 30; // px
+  function cardIndexAtExtended(x, y){
+    const list = grid.querySelectorAll('.card');
+    for(let idx = 0; idx < list.length; idx++){
+      const r = list[idx].getBoundingClientRect();
+      if(x >= r.left && x <= r.right && y >= r.top - HIT_EXTRA_TOP && y <= r.bottom + HIT_EXTRA_BOTTOM) return idx;
+    }
+    return -1;
+  }
+  document.addEventListener('click', (e) => {
+    if(e.target.closest('.card, #analogFaceWrap, select, input, button, a')) return; // 卡片 / 表盘自己的点击照旧
+    const idx = cardIndexAtExtended(e.clientX, e.clientY);
+    if(idx >= 0) setSelected(idx);
+  });
+
   function formatOffset(minutes){
     const sign = minutes >= 0 ? '+' : '-';
     const abs = Math.abs(minutes);
@@ -882,6 +899,7 @@
   document.addEventListener('dblclick', (e) => {
     if(analogFaceWrap.contains(e.target)) return; // 双击表盘本身不触发重置
     if(e.target.closest('.card')) return; // 连续点卡片切换城市时不误触重置
+    if(cardIndexAtExtended(e.clientX, e.clientY) >= 0) return; // 连续点卡片上下的延伸带也不重置
     sweepOffsetToZero();
   });
 
