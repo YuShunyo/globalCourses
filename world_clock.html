@@ -19,6 +19,7 @@
     --night-bg:#2A2B30;
     --night-text:#D6D5CE;
     --night-muted:#93938C;
+    --sky-top:#FFFFFF; --sky-bottom:#FFFFFF; /* 天色渐变：由 JS 按太阳高度实时写入 */
     --shift:#2E9BD6; /* 时间被拨动过时的专属强调色（与“选中”的橙色区分） */
 
     --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', 'Liberation Mono', Menlo, Consolas, monospace;
@@ -74,8 +75,10 @@
     justify-content:center;
     align-items:center;
     text-align:center;
-    background: var(--card-bg);
+    background-color: var(--card-bg);
+    background-image: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
     color: var(--card-text);
+    text-shadow: var(--text-shadow, none);
     border: 1px solid var(--card-border, transparent);
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     transition: background .6s ease, color .6s ease, order .3s ease, transform .25s ease, box-shadow .25s ease;
@@ -208,8 +211,11 @@
     transition: color .6s ease;
   }
 
+  .sky-stop-top{ stop-color: var(--sky-top); }
+  .sky-stop-bottom{ stop-color: var(--sky-bottom); }
+
   .face-bg{
-    fill: var(--card-bg, var(--day-bg));
+    fill: url(#skyGrad);
     stroke: none;
     transition: fill .6s ease;
   }
@@ -274,6 +280,7 @@
   <div class="analog-section" id="analogSection">
     <div class="analog-face-wrap" id="analogFaceWrap">
       <svg class="analog-face" viewBox="2 2 196 196" id="analogSvg">
+        <defs><linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky-stop-top"/><stop offset="1" class="sky-stop-bottom"/></linearGradient></defs>
         <circle class="face-bg" cx="100" cy="100" r="98"/>
         <g id="dialTicks"></g>
         <g id="dialNumbers"></g>
@@ -297,26 +304,26 @@
 
 <script>
   const cityOptions = [
-    { city:'纽约', tz:'America/New_York', flag:'🇺🇸' },
-    { city:'洛杉矶', tz:'America/Los_Angeles', flag:'🇺🇸' },
-    { city:'芝加哥', tz:'America/Chicago', flag:'🇺🇸' },
-    { city:'多伦多', tz:'America/Toronto', flag:'🇨🇦' },
-    { city:'墨西哥城', tz:'America/Mexico_City', flag:'🇲🇽' },
-    { city:'圣保罗', tz:'America/Sao_Paulo', flag:'🇧🇷' },
-    { city:'伦敦', tz:'Europe/London', flag:'🇬🇧' },
-    { city:'巴黎', tz:'Europe/Paris', flag:'🇫🇷' },
-    { city:'柏林', tz:'Europe/Berlin', flag:'🇩🇪' },
-    { city:'莫斯科', tz:'Europe/Moscow', flag:'🇷🇺' },
-    { city:'迪拜', tz:'Asia/Dubai', flag:'🇦🇪' },
-    { city:'新德里', tz:'Asia/Kolkata', flag:'🇮🇳' },
-    { city:'新加坡', tz:'Asia/Singapore', flag:'🇸🇬' },
-    { city:'香港', tz:'Asia/Hong_Kong', flag:'🇭🇰' },
-    { city:'上海', tz:'Asia/Shanghai', flag:'🇨🇳' },
-    { city:'北京', tz:'Asia/Shanghai', flag:'🇨🇳' },
-    { city:'东京', tz:'Asia/Tokyo', flag:'🇯🇵' },
-    { city:'首尔', tz:'Asia/Seoul', flag:'🇰🇷' },
-    { city:'悉尼', tz:'Australia/Sydney', flag:'🇦🇺' },
-    { city:'奥克兰', tz:'Pacific/Auckland', flag:'🇳🇿' },
+    { city:'纽约', tz:'America/New_York', flag:'🇺🇸', lat:40.71, lon:-74.01 },
+    { city:'洛杉矶', tz:'America/Los_Angeles', flag:'🇺🇸', lat:34.05, lon:-118.24 },
+    { city:'芝加哥', tz:'America/Chicago', flag:'🇺🇸', lat:41.88, lon:-87.63 },
+    { city:'多伦多', tz:'America/Toronto', flag:'🇨🇦', lat:43.65, lon:-79.38 },
+    { city:'墨西哥城', tz:'America/Mexico_City', flag:'🇲🇽', lat:19.43, lon:-99.13 },
+    { city:'圣保罗', tz:'America/Sao_Paulo', flag:'🇧🇷', lat:-23.55, lon:-46.63 },
+    { city:'伦敦', tz:'Europe/London', flag:'🇬🇧', lat:51.51, lon:-0.13 },
+    { city:'巴黎', tz:'Europe/Paris', flag:'🇫🇷', lat:48.86, lon:2.35 },
+    { city:'柏林', tz:'Europe/Berlin', flag:'🇩🇪', lat:52.52, lon:13.41 },
+    { city:'莫斯科', tz:'Europe/Moscow', flag:'🇷🇺', lat:55.76, lon:37.62 },
+    { city:'迪拜', tz:'Asia/Dubai', flag:'🇦🇪', lat:25.2, lon:55.27 },
+    { city:'新德里', tz:'Asia/Kolkata', flag:'🇮🇳', lat:28.61, lon:77.21 },
+    { city:'新加坡', tz:'Asia/Singapore', flag:'🇸🇬', lat:1.35, lon:103.82 },
+    { city:'香港', tz:'Asia/Hong_Kong', flag:'🇭🇰', lat:22.32, lon:114.17 },
+    { city:'上海', tz:'Asia/Shanghai', flag:'🇨🇳', lat:31.23, lon:121.47 },
+    { city:'北京', tz:'Asia/Shanghai', flag:'🇨🇳', lat:39.9, lon:116.41 },
+    { city:'东京', tz:'Asia/Tokyo', flag:'🇯🇵', lat:35.68, lon:139.69 },
+    { city:'首尔', tz:'Asia/Seoul', flag:'🇰🇷', lat:37.57, lon:126.98 },
+    { city:'悉尼', tz:'Australia/Sydney', flag:'🇦🇺', lat:-33.87, lon:151.21 },
+    { city:'奥克兰', tz:'Pacific/Auckland', flag:'🇳🇿', lat:-36.85, lon:174.76 },
   ];
 
   let cities = [
@@ -429,11 +436,7 @@
   }
 
   function getOffsetMinutes(tz, date){
-    const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz, hourCycle:'h23',
-      year:'numeric', month:'2-digit', day:'2-digit',
-      hour:'2-digit', minute:'2-digit', second:'2-digit'
-    });
+    const dtf = getFmt('off', tz);
     const parts = {};
     dtf.formatToParts(date).forEach(p => parts[p.type] = p.value);
     const asUTC = Date.UTC(
@@ -441,6 +444,118 @@
       parseInt(parts.hour), parseInt(parts.minute), parseInt(parts.second)
     );
     return (asUTC - date.getTime()) / 60000;
+  }
+
+  // ===== 时间格式化器缓存：每个时区每种格式只创建一次（Intl.DateTimeFormat 构造很重，原来每秒都在重复创建）=====
+  const FMT_OPTS = {
+    card: { hour12:false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' },
+    off:  { hourCycle:'h23', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' },
+    dial: { hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit' }
+  };
+  const fmtCache = {};
+  function getFmt(kind, tz){
+    const k = kind + '|' + tz;
+    return fmtCache[k] || (fmtCache[k] = new Intl.DateTimeFormat('en-US', Object.assign({ timeZone: tz }, FMT_OPTS[kind])));
+  }
+
+  // ===== 天色：按太阳真实高度算出卡片的“天顶色 / 地平线色” =====
+  // 太阳高度角（简化天文公式，只用经纬度和 UTC 时间，不受夏令时、统一时区影响）
+  function sunInfo(lat, lon, ms){
+    const d = ms / 86400000 + 2440587.5 - 2451545.0, rad = Math.PI / 180;
+    const L = (280.46 + 0.9856474 * d) % 360, g = ((357.528 + 0.9856003 * d) % 360) * rad;
+    const lam = (L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * rad, eps = 23.439 * rad;
+    const dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+    const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam));
+    const ha = ((280.46061837 + 360.98564736629 * d + lon) * rad) - ra;
+    const elev = Math.asin(Math.sin(lat * rad) * Math.sin(dec) + Math.cos(lat * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
+    return { elev, morning: Math.atan2(Math.sin(ha), Math.cos(ha)) < 0 };
+  }
+  // 天色渐变（Apple 天气路线）：每个时刻有“天顶色 / 地平线色”两个颜色，随太阳高度连续过渡。
+  // 上午：深夜藏青 → 蓝调 → 日出（冷蓝到浅粉）→ 越来越饱和的晴空蓝
+  // 下午：晴空蓝 → 金色时刻（蓝到金黄）→ 日落（靛蓝到橙）→ 晚霞（深紫到洋红）→ 夜晚
+  const SKY_MORNING = [
+    [-18, '#070D22', '#18224A'],
+    [-10, '#16244F', '#3F5A9C'],
+    [ -4, '#29408A', '#7A82BE'],
+    [  0, '#3F66B0', '#F1B7A6'],
+    [2.5, '#3F72C6', '#D2BFD8'],
+    [  6, '#3A78D2', '#8EC0EF'],
+    [ 20, '#3079D8', '#78B6F2'],
+    [ 45, '#2A74D9', '#6BB0F2']
+  ];
+  const SKY_EVENING = [
+    [-18, '#070D22', '#18224A'],
+    [-12, '#10173F', '#4A3A7C'],
+    [ -6, '#1F2860', '#C14E78'],
+    [ -2, '#2A3482', '#DC5F66'],
+    [  1, '#3B4A98', '#F28A4C'],
+    [  6, '#4E68BE', '#F5A860'],
+    [ 12, '#4B7FCB', '#F1C98E'],
+    [ 20, '#3F7FD4', '#C4D8EE'],
+    [ 30, '#3079D8', '#78B6F2'],
+    [ 45, '#2A74D9', '#6BB0F2']
+  ];
+  function hexToRgb(h){ return [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); }
+  function rgbToHex(c){ return '#' + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
+  // 在 OKLab（感知均匀）空间里混色，避免在 RGB 里把蓝和金黄混成灰米色
+  const toLin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const fromLin = v => 255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055);
+  function rgbToLab(c){
+    const r = toLin(c[0]), g = toLin(c[1]), b = toLin(c[2]);
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+            1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+            0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+  }
+  function labToRgb(c){
+    const l = Math.pow(c[0] + 0.3963377774 * c[1] + 0.2158037573 * c[2], 3);
+    const m = Math.pow(c[0] - 0.1055613458 * c[1] - 0.0638541728 * c[2], 3);
+    const s = Math.pow(c[0] - 0.0894841775 * c[1] - 1.2914855480 * c[2], 3);
+    return [fromLin(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+            fromLin(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+            fromLin(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s)];
+  }
+  function mixLab(a, b, t){ const x = rgbToLab(a), y = rgbToLab(b); return labToRgb(x.map((v, i) => v + (y[i] - v) * t)); }
+  function lum(c){ return 0.2126 * toLin(c[0]) + 0.7152 * toLin(c[1]) + 0.0722 * toLin(c[2]); }
+  const SKY_PARSED = { m: SKY_MORNING, e: SKY_EVENING };
+  for(const k in SKY_PARSED) SKY_PARSED[k] = SKY_PARSED[k].map(r => [r[0], hexToRgb(r[1]), hexToRgb(r[2])]);
+  function skyColors(elev, morning){
+    const S = SKY_PARSED[morning ? 'm' : 'e'];
+    let top, bottom;
+    if(elev <= S[0][0]){ top = S[0][1]; bottom = S[0][2]; }
+    else if(elev >= S[S.length - 1][0]){ top = S[S.length - 1][1]; bottom = S[S.length - 1][2]; }
+    else {
+      let i = 1; while(elev > S[i][0]) i++;
+      const t = (elev - S[i - 1][0]) / (S[i][0] - S[i - 1][0]);
+      top = mixLab(S[i - 1][1], S[i][1], t); bottom = mixLab(S[i - 1][2], S[i][2], t);
+    }
+    // 文字：和 Apple 天气一样，尽量用白字（带一点投影）；只有背景很亮、白字读不清时才换深色字
+    const L = lum(mixLab(top, bottom, 0.5));
+    const white = (1.05) / (L + 0.05) >= 2.3;
+    return { top: rgbToHex(top), bottom: rgbToHex(bottom), light: white };
+  }
+  function cityCoord(c){
+    const o = cityOptions.find(x => x.city === c.city) || cityOptions.find(x => x.tz === c.tz);
+    return o && o.lat !== undefined ? o : null;
+  }
+  // 没有经纬度时退回按当地钟点估算的天色
+  function skyFor(c, date, hour24){
+    const p = cityCoord(c);
+    if(p){ const s = sunInfo(p.lat, p.lon, date.getTime()); return skyColors(s.elev, s.morning); }
+    return skyColors(Math.sin((hour24 - 6) / 24 * 2 * Math.PI) * 60, hour24 < 12);
+  }
+  function applySky(el, sky){
+    const key = sky.top + sky.bottom + (sky.light ? 'w' : 'd');
+    if(el.__sky === key) return;
+    el.__sky = key;
+    el.style.setProperty('--sky-top', sky.top);
+    el.style.setProperty('--sky-bottom', sky.bottom);
+    el.style.setProperty('--card-bg', sky.bottom);
+    el.style.setProperty('--card-text', sky.light ? '#FFFFFF' : 'var(--day-text)');
+    el.style.setProperty('--card-border', sky.light ? 'transparent' : 'var(--day-border)');
+    el.style.setProperty('--text-shadow', sky.light ? '0 1px 3px rgba(0,0,0,0.28)' : 'none');
   }
 
   function update(){
@@ -452,11 +567,7 @@
     cards.forEach((card, idx) => {
       const tz = card.dataset.tz;
 
-      const dtf = new Intl.DateTimeFormat('en-US', {
-        timeZone: tz, hour12:false,
-        year:'numeric', month:'2-digit', day:'2-digit',
-        hour:'2-digit', minute:'2-digit', second:'2-digit'
-      });
+      const dtf = getFmt('card', tz);
       const parts = {};
       dtf.formatToParts(now).forEach(p => parts[p.type] = p.value);
 
@@ -470,11 +581,7 @@
       const minNum = parseInt(parts.minute, 10);
       const hour24 = hourNum + minNum / 60;
 
-      const isDay = hour24 >= 6 && hour24 < 18;
-
-      card.style.setProperty('--card-bg', isDay ? 'var(--day-bg)' : 'var(--night-bg)');
-      card.style.setProperty('--card-text', isDay ? 'var(--day-text)' : 'var(--night-text)');
-      card.style.setProperty('--card-border', isDay ? 'var(--day-border)' : 'transparent');
+      applySky(card, skyFor(cities[idx], now, hour24));
 
       const offset = Math.round(getOffsetMinutes(tz, realNow));
       card.style.order = offset;
@@ -532,10 +639,7 @@
   // ===== 表盘指针与背景色刷新（跟随 getSimulatedNow） =====
   function updateDialFace(){
     const now = getSimulatedNow();
-    const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone: dialTz, hour12:false,
-      hour:'2-digit', minute:'2-digit', second:'2-digit'
-    });
+    const dtf = getFmt('dial', dialTz);
     const parts = {};
     dtf.formatToParts(now).forEach(p => parts[p.type] = p.value);
 
@@ -554,10 +658,7 @@
     renderShiftState();
 
     const hour24 = hour + minute / 60;
-    const isDay = hour24 >= 6 && hour24 < 18;
-    const faceWrap = document.getElementById('analogFaceWrap');
-    faceWrap.style.setProperty('--card-bg', isDay ? 'var(--day-bg)' : 'var(--night-bg)');
-    faceWrap.style.setProperty('--card-text', isDay ? 'var(--day-text)' : 'var(--night-text)');
+    applySky(document.getElementById('analogFaceWrap'), skyFor(cities[selectedIndex], now, hour24));
   }
 
   // ===== 拖动表盘：按下时指针保持原位，手指开始转动后按相对转动量拨动指针 =====
@@ -725,8 +826,9 @@
       return;
     }
     isDraggingDial = false;
+    scheduleSecondLoop();
   });
-  analogSvg.addEventListener('pointercancel', () => { hubPress = null; isDraggingDial = false; });
+  analogSvg.addEventListener('pointercancel', () => { hubPress = null; isDraggingDial = false; scheduleSecondLoop(); });
 
   const analogFaceWrap = document.getElementById('analogFaceWrap');
   document.addEventListener('dblclick', (e) => {
@@ -748,6 +850,7 @@
     if(from === 0 || reduce){
       timeOffsetMs = 0; update(); updateDialFace();
       lastSoundSec = Math.floor(getSimulatedNow().getTime() / 1000);
+      scheduleSecondLoop();
       return;
     }
     isSweeping = true;
@@ -761,6 +864,7 @@
       else {
         timeOffsetMs = 0; update(); updateDialFace();
         lastSoundSec = Math.floor(getSimulatedNow().getTime() / 1000);
+        scheduleSecondLoop();
         isSweeping = false; sweepRaf = 0;
       }
     };
@@ -907,7 +1011,15 @@
   buildDialTicks();
   update();
   updateDialFace();
-  setInterval(secondLoop, 50);
+  // 对齐到“模拟时间”的下一个整秒再触发（原来每 50 毫秒轮询一次，每秒唤醒 20 次）
+  let secondTimer = 0;
+  function scheduleSecondLoop(){
+    clearTimeout(secondTimer);
+    const ms = 1000 - (getSimulatedNow().getTime() % 1000);
+    secondTimer = setTimeout(() => { secondLoop(); scheduleSecondLoop(); }, ms + 4);
+  }
+  scheduleSecondLoop();
+  document.addEventListener('visibilitychange', () => { if(!document.hidden){ secondLoop(); scheduleSecondLoop(); } });
 </script>
 
 </body>
