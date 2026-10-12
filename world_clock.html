@@ -337,7 +337,7 @@
 
   let cities = [
     { city:'纽约', tz:'America/New_York' },
-    { city:'伦敦', tz:'Europe/London'     },
+    { city:'伦敦', tz:'Europe/London'    },
     { city:'北京', tz:'Asia/Shanghai'    },
     { city:'东京', tz:'Asia/Tokyo'       },
   ];
@@ -924,6 +924,8 @@
   // ===== 15 / 30 / 45 秒的提示音：三个时刻都用同一个“响棒”声（短促的“嗒”）=====
   // f 基频；r 各分音频率比；a 各分音音量；d 各分音衰减秒；at 起音秒数；c 起音处的噪声“咔” [频率, Q, 音量]；g 响度系数
   const CHIME_DEF = { f:2400, r:[1,2.6], a:[.5,.15], d:[.04,.02], at:.0008, c:[3500,3,.5], g:0.68 };
+  // 整分（秒针转满 60 秒）：玉石声——温润、纯净的高音，带一小段回响（约 0.1 秒）
+  const JADE_DEF = { f:3300, r:[1,2.4,4.6], a:[.3,.1,.04], d:[.16,.08,.04], at:.0008, c:[5000,2.5,.3], g:0.92 };
   function playChime(ctx, def, t0){
     const at = def.at || .003;
     def.r.forEach((r, i) => {
@@ -951,7 +953,7 @@
 
   // ===== 秒针走动声音 =====
   // 普通秒：机械手表的“滴”；15 / 30 / 45 秒（quarter = 1 / 2 / 3）：同一个响棒声，各一声；
-  // 整分：铃铛“叮”（见 playMinuteDing，更低、更长的 E6 金属泛音）。
+  // 整分：玉石声（见 playMinuteDing）。
   function playSecondTick(quarter){
     const ctx = ensureAudioCtx();
     if(!ctx) return;
@@ -995,20 +997,7 @@
   function playMinuteDing(){
     const ctx = ensureAudioCtx();
     if(!ctx) return;
-    const t0 = ctx.currentTime;
-    const base = 1318.5; // E6
-    // 类似小铃铛：基频 + 两个非整数倍泛音，衰减各不相同
-    [[1, 0.28, 1.6], [2.76, 0.10, 0.9], [5.4, 0.04, 0.45]].forEach(([ratio, peak, decay]) => {
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = base * ratio;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(peak, t0 + 0.004);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + decay);
-      osc.connect(g); g.connect(ctx.destination);
-      osc.start(t0); osc.stop(t0 + decay + 0.05);
-    });
+    playChime(ctx, JADE_DEF, ctx.currentTime);
   }
 
   // 圆心开关：点一下开启声音（秒针变橙色），再点一下关闭（秒针与时针同色）。默认关闭。
