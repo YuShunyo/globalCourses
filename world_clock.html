@@ -161,10 +161,10 @@
     opacity:0.8;
     white-space:nowrap;
   }
-  /* 透明的原生日期选择框，盖在日期文字上（点击范围只比文字大一点点，避免手机上误触选卡片） */
+  /* 透明的原生日期选择框，盖在日期文字上：点击范围只比文字大一点点（上方 4px，下方 0，左右各 4px），避免选卡片时误触 */
   .date-input{
     position:absolute;
-    left:-4px; right:-4px; top:-2px; bottom:-2px;
+    left:-4px; right:-4px; top:-4px; bottom:0;
     width:calc(100% + 8px); height:calc(100% + 4px);
     opacity:0; border:none; padding:0; margin:0;
     font-size:16px; /* 避免 iOS 聚焦时自动放大页面 */
@@ -415,7 +415,7 @@
         updateDialFace();
         e.target.blur();
       });
-      // 点击卡片空白处选中；点城市名仍然是弹出下拉框换城市
+      // 点击卡片空白处选中；点城市名仍然是弹出下拉框换城市；点日期是弹出日期选择器
       card.addEventListener('click', (e) => {
         if(e.target.closest('.city-name-wrap, .date-display')) return;
         setSelected(i);
